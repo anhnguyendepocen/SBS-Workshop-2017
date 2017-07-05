@@ -1,0 +1,196 @@
+
+
+\documentclass[12pt,a4paper]{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage[cm]{fullpage}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+\setlength\parindent{0cm}
+%\setlength{\oddsidemargin}{0.25cm}
+%\setlength{\evensidemargin}{0.25cm}
+\title{\Large{\textbf{Introduction to \texttt{R}}}\\
+\textit{Session 3 exercises}}
+\author{Statistical Consulting Centre}
+\date{1 March, 2017}
+\maketitle
+ 
+
+\section{Missing values}
+\label{sec:missing}
+
+\begin{enumerate}[(i)]
+\item \label{itm:q1} In question 3(ii) of exercise 2 you identified the ``Can't choose'' cases in \texttt{q1a}. Now, replace these cases by
+  \texttt{NA}.
+\item Repeat \ref{sec:missing}(\ref{itm:q1}) for \texttt{q1b} -- \texttt{q1e}, so that all cases of ``Can't choose'' are replaced by \texttt{NA}.
+\item \label{it:1way-ethnicity} Produce a one-way frequency table of \texttt{ethnicity}.
+\item Repeat {\bf \ref{sec:missing}}(\ref{it:1way-ethnicity}) after replacing all cases of ``NA, dont know'' with \texttt{NA}.
+\item There are only two possible values for \texttt{partner}:
+  \texttt{Yes} and \texttt{No}. Replace any values which are \underline{not} \texttt{Yes} or \texttt{No} with \texttt{NA}.
+
+\end{enumerate}
+
+\section{Factor}
+\label{sec:fac}
+\begin{enumerate}[(i)] 
+\item Produce a two-way frequency table of \texttt{q1a} versus \texttt{gender}.
+\item Table \ref{tab:level} shows the appropriate ordering of the levels of the values in \texttt{q1a} -- \texttt{q1e}. \\
+\begin{table}[!h]
+  \centering
+  \caption{The right levels for \texttt{q1a} to \texttt{q1e}}
+  \begin{tabular}[h]{lr}
+    q1a & Factor(q1a)\\
+\hline
+Daily & 1\\
+Several times a week & 2\\
+Several times a month & 3\\
+Several times a year or less often & 4
+  \end{tabular}
+  \label{tab:level}
+\end{table} \\
+Convert \texttt{q1a} -- \texttt{q1e} into factors with their levels ordered as shown in Table \ref{tab:level}. Then generate two-way frequency tables between \texttt{q1a} to
+\texttt{q1e}, respectively, versus \texttt{gender} to check that you've appropriately ordered these factors' levels.
+
+\item \label{itm:group} Create a new variable which categorises all
+  participants into one of three age groups: ``Under 40'', ``41 to 60'' and ``Over 61''.
+
+\item Convert the variable created in {\bf \ref{sec:fac}}(\ref{itm:group})
+  into factors with appropriate levels.
+
+\item Add the factor into \texttt{sports.df} and name it \texttt{age.group}
+
+\end{enumerate}
+%\newpage
+\section{Challenge}
+\label{sec:cha}
+We mentioned in Exercise 2 that the function \texttt{mystder} calculates
+the standard error of the mean (SEM), i.e. 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{mystder} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)\{}
+       \hlstd{mysd} \hlkwb{<-} \hlkwd{sd}\hlstd{(x,} \hlkwc{na.rm} \hlstd{= T)}
+       \hlstd{n} \hlkwb{<-} \hlkwd{length}\hlstd{(x)}
+       \hlstd{mysd}\hlopt{/}\hlkwd{sqrt}\hlstd{(n)}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+This function only calculates the standard error correctly if the input does NOT contain missing values. This is because the \texttt{length()} function counts the number of elements in the variable, including missing values. For example:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{test} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,} \hlnum{2}\hlstd{,} \hlnum{3}\hlstd{,} \hlnum{4}\hlstd{,} \hlnum{NA}\hlstd{)}
+\hlkwd{length}\hlstd{(test)}
+\end{alltt}
+\begin{verbatim}
+[1] 5
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+So, \texttt{length(test)} returns 5 instead of 4. Suppose you repeat an experiment 5 times, resulting in one missing value; your real/valid sample size is 4. Thus, when you calclate your standard error, use $n = 4$ instead of 5. For example,
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{mysd} \hlkwb{<-} \hlkwd{sd}\hlstd{(test,} \hlkwc{na.rm} \hlstd{= T)}
+\hlstd{mysd}
+\end{alltt}
+\begin{verbatim}
+[1] 1.290994
+\end{verbatim}
+\begin{alltt}
+\hlstd{n} \hlkwb{<-} \hlnum{4}
+\hlstd{n}
+\end{alltt}
+\begin{verbatim}
+[1] 4
+\end{verbatim}
+\begin{alltt}
+\hlstd{mysd}\hlopt{/}\hlkwd{sqrt}\hlstd{(n)}
+\end{alltt}
+\begin{verbatim}
+[1] 0.6454972
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+The real SEM for \texttt{test} should be 0.6454972; however, if we use \texttt{mystder()} to calculate it we get:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{mystder}\hlstd{(test)}
+\end{alltt}
+\begin{verbatim}
+[1] 0.5773503
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+Thus, calculating the sample size using \texttt{length()} will lead to an incorrect solution when there are missing values in the data. 
+\begin{enumerate}[(i)] 
+\item Now that you know what is wrong with \texttt{mystder()}, modify it so it gives the correct SEM even if the input contains missing values.  
+ 
+\item Apply your modified \texttt{mystder} function to \texttt{test} to see whether it returns the correct answer, i.e. 0.6454972.
+ 
+\item Create \texttt{test2}, as shown below, and test your function on this new variable.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{test2} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{1}\hlopt{:}\hlnum{100}\hlstd{,} \hlkwd{rep}\hlstd{(}\hlnum{NA}\hlstd{,} \hlnum{30}\hlstd{))}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+The correct value for the SEM should be 2.9011492.
+
+\end{enumerate}
+\end{document}

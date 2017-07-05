@@ -1,0 +1,52 @@
+\documentclass[serif]{beamer}
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{Sweave}
+\SweaveOpts{keep.source=TRUE}
+\usetheme{Warsaw}
+\setbeamertemplate{navigation symbols}{}
+\logo{\includegraphics[width=0.1\textwidth,keepaspectratio]{..//UOACrest.png}}
+\author[SCC]{Statistical Consulting Center}%\\
+\institute{\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}\\
+%Statistical Consulting Centre\\
+The Department of Statistics\\
+The University of Auckland}
+\title[\hspace{2em}\insertframenumber/\inserttotalframenumber]{Introduction
+to \texttt{R}}
+%\subtitle{Stats 780}
+\begin{document}
+\maketitle
+
+\begin{frame}
+  \frametitle{Outline for the course}
+<<echo = F>>=
+options(continue=" ")
+@
+  \begin{table}[h]
+    \centering
+    \begin{tabular}[h]{lll}
+      Time              & Session            \\
+     Monday & 09:00am - 10:30am  & R Basics            \\
+     &10:30am - 10:45am  & Morning Break       \\
+     &10:45am - 12:15pm  & Data Manipulation   \\
+     Tuesday & 09:00am - 10:30am  & R graphics          \\
+     & 10:30an - 10:45an  & Morning Break     \\
+     & 10:45pm - 12:15pm  & Analysis           \\
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+
+\end{document}

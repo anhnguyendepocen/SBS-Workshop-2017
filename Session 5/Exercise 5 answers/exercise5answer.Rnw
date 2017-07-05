@@ -1,0 +1,92 @@
+
+
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage[cm]{fullpage}
+\usepackage{graphicx}
+\begin{document}
+\setlength\parindent{0cm}
+%\setlength{\oddsidemargin}{0.25cm}
+%\setlength{\evensidemargin}{0.25cm}
+\title{\Large{\textbf{Introduction to \texttt{R}}}\\
+\textit{Answers to Session 5 exercises}}
+\author{Statistical Consulting Centre}
+\date{2 March, 2017}
+\maketitle
+ 
+<<echo = FALSE>>=
+options(continue = " ")
+opts_chunk$set(comment=NA)
+sports.df <- read.csv("../../Data/sports.csv")
+exclude.q1a <- which(sports.df$q1a ==  "Can?t choose")
+sports.df$q1a[exclude.q1a] = NA
+exclude.q1b <- which(sports.df$q1b ==  "Can?t choose")
+sports.df$q1b[exclude.q1b] = NA
+exclude.q1c <- which(sports.df$q1c ==  "Can?t choose")
+sports.df$q1c[exclude.q1c] = NA
+exclude.q1d <- which(sports.df$q1d ==  "Can?t choose")
+sports.df$q1d[exclude.q1d] = NA
+exclude.q1e <- which(sports.df$q1e ==  "Can?t choose")
+sports.df$q1e[exclude.q1e] = NA
+exclude.ethnicity <- which(sports.df$ethnicity == "NA, dont know")
+sports.df$ethnicity[exclude.ethnicity] = NA
+exclude.partner <- with(sports.df, which(partner != "Yes" & partner !="No"))
+sports.df$partner[exclude.partner] = NA
+sports.df$q1a <- factor(sports.df$q1a, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1b <- factor(sports.df$q1b, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1c <- factor(sports.df$q1c, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1d <- factor(sports.df$q1d, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1e <- factor(sports.df$q1e, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+age.group <- with(sports.df, ifelse(age <= 40, "Under 40", 
+                             ifelse(age > 40 & age <=60, "41 to 60", "Over 61")))
+age.group <- factor(age.group, levels = c("Under 40", "41 to 60", "Over 61"))
+sports.df$age.group <- age.group
+q1a.sc <- as.numeric(sports.df$q1a)
+q1b.sc <- as.numeric(sports.df$q1b)
+q1c.sc <- as.numeric(sports.df$q1c)
+q1d.sc <- as.numeric(sports.df$q1d)
+q1e.sc <- as.numeric(sports.df$q1e)
+mean.df <- data.frame(cbind(q1a.sc, q1b.sc, q1c.sc, q1d.sc, q1e.sc))
+nerdy.sc <- apply(mean.df, 1, mean, na.rm = T)
+mean.df$nerdy.sc <- nerdy.sc
+sports.df$nerdy.sc <- nerdy.sc
+sports.df$income = factor(sports.df$income, levels = c("5 000$", "10 000$-15 000$", "15 000$-20 000$",
+                                             "20 000$-25 000$", "25 000$-30 000$", "30 000$-40 000$",
+                                             "40 000$-50 000$", "50 000$-70 000$", "70 000$-100 000$",
+                                             "> 100 000$"))
+@
+\section{Boxplots}
+\label{sec:box}
+Produce a boxplot showing the distribution of nerdy scores for each age group as shown in Figure \ref{fig:box1}.
+\begin{figure}[h]   
+ \centering
+<<box1, out.width = "0.7\\textwidth", echo = TRUE>>=
+with(sports.df, plot(age.group, nerdy.sc, xlab = "Age Group", 
+                     ylab = "Mean nerdy score",
+                     main = "Nerdy scores across age groups", 
+                     cex.lab = 1.5))
+@
+\caption{Boxplot in \ref{sec:box}}
+  \label{fig:box1}
+\end{figure}\\
+
+\section{Barplots}
+\label{sec:bar}
+Produce the barplot, shown in Figure \ref{fig:bar1}, based on the information contained in the following table.
+<<>>=
+q1c.gender.tab <- with(sports.df, round(prop.table(table(q1c, gender), 2)*100, 1))
+q1c.gender.tab
+@
+\begin{figure}[h]   
+ \centering
+<<bar1, out.width = "0.7\\textwidth", echo = TRUE>>=
+barplot(q1c.gender.tab, beside = TRUE, ylab = "Percentage", 
+        ylim = c(0, 70), legend.text = TRUE, 
+        args.legend = list(bty = "n"))
+@
+\caption{Barplot in \ref{sec:bar}}
+  \label{fig:bar1}
+\end{figure}
+\end{itemize}
+\end{document}

@@ -1,0 +1,336 @@
+
+
+\documentclass[12pt,a4paper]{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage[cm]{fullpage}
+\usepackage{graphicx}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+\setlength\parindent{0cm}
+%\setlength{\oddsidemargin}{0.25cm}
+%\setlength{\evensidemargin}{0.25cm}
+\title{\Large{\textbf{Introduction to \texttt{R}}}\\
+\textit{Answers to Session 7 exercises}}
+\author{Statistical Consulting Centre}
+\date{2 March, 2017}
+\maketitle
+ 
+ 
+
+\section{$t$-tests} 
+\label{sec:ttest}
+Carry out a two-sample $t$-test to determine whether:
+\begin{enumerate}[(i)]
+\item males and females have different mean nerdy scores.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{with}\hlstd{(sports.df,} \hlkwd{t.test}\hlstd{(nerdy.sc}\hlopt{~}\hlstd{gender))}
+\end{alltt}
+\begin{verbatim}
+
+	Welch Two Sample t-test
+
+data:  nerdy.sc by gender
+t = -3.8204, df = 965.27, p-value = 0.0001418
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.18630715 -0.05985835
+sample estimates:
+mean in group Female   mean in group Male 
+            2.949468             3.072551 
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+\item the mean nerdy score of respondents living with their partners differs from that of respondents who do not live with their partners.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{with}\hlstd{(sports.df,} \hlkwd{t.test}\hlstd{(nerdy.sc}\hlopt{~}\hlstd{partner))}
+\end{alltt}
+\begin{verbatim}
+
+	Welch Two Sample t-test
+
+data:  nerdy.sc by partner
+t = -1.0193, df = 211.86, p-value = 0.3092
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.18490690  0.05886231
+sample estimates:
+ mean in group No mean in group Yes 
+         2.884848          2.947871 
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+\end{enumerate}
+
+
+\section{ANOVA} 
+\label{sec:anova}
+\begin{enumerate}[(i)]
+\item Perform a one-way anova to test mean nerdy score differs between the three age groups we have been considering.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{oneway} \hlkwb{<-} \hlkwd{with}\hlstd{(sports.df,} \hlkwd{aov}\hlstd{(nerdy.sc}\hlopt{~}\hlstd{age.group))}
+\hlkwd{summary}\hlstd{(oneway)}
+\end{alltt}
+\begin{verbatim}
+             Df Sum Sq Mean Sq F value Pr(>F)  
+age.group     2   2.22  1.1081    4.31 0.0137 *
+Residuals   986 253.52  0.2571                 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+7 observations deleted due to missingness
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+\item What are your conclusions from the one-way anova?
+\item[] {\em At least one age group's mean nerdy score differs from that of the others.}
+\item Find the estimated mean nerdy score over all age groups and for individual age groups.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{model.tables}\hlstd{(oneway,} \hlstr{"means"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+Tables of means
+Grand mean
+         
+3.006218 
+
+ age.group 
+    Under 40 41 to 60 Over 61
+       3.009    3.059   2.946
+rep  293.000  364.000 332.000
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+\item Perform pair-wise comparisons of mean nerdy scores between all age groups using Tukey's Honest Significance Difference method to compute $p$-values adjusted for multiple comparisons.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{TukeyHSD}\hlstd{(oneway)}
+\end{alltt}
+\begin{verbatim}
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = nerdy.sc ~ age.group)
+
+$age.group
+                         diff         lwr         upr     p adj
+41 to 60-Under 40  0.04925709 -0.04415998  0.14267415 0.4312230
+Over 61-Under 40  -0.06360922 -0.15901291  0.03179448 0.2613921
+Over 61-41 to 60  -0.11286630 -0.20319233 -0.02254027 0.0096125
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+\item Which pairs of age groups differ in mean nerdy score?
+\item[] {\em ``41--60'' and ``Over 61''}
+\item Perform a two-way anova of nerdy score on age group and gender.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{twoway} \hlkwb{<-} \hlkwd{with}\hlstd{(sports.df,} \hlkwd{aov}\hlstd{(nerdy.sc}\hlopt{~}\hlstd{age.group}\hlopt{*}\hlstd{gender))}
+\hlkwd{summary}\hlstd{(twoway)}
+\end{alltt}
+\begin{verbatim}
+                  Df Sum Sq Mean Sq F value   Pr(>F)    
+age.group          2   2.22   1.108   4.384   0.0127 *  
+gender             1   4.19   4.193  16.588 5.02e-05 ***
+age.group:gender   2   0.86   0.428   1.693   0.1845    
+Residuals        983 248.47   0.253                     
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+7 observations deleted due to missingness
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+\item Which rows of the two-way ANOVA table are statistically significant? \item[] {\em Those corresponding to} \texttt{age.group} {\em and} \texttt{gender}. {\em The interaction between} \texttt{age.group} {\em and} \texttt{gender} {\em is \underline{not} statistically significant at the 5\% level since} Pr($>$F)$>$0.05.
+
+\item Calculate the estimated means for each \texttt{age.group}, \texttt{gender} and \texttt{age.group-gender} combination. Perform {\em appropriate} pair-wise comparisons of means.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{model.tables}\hlstd{(twoway,} \hlstr{"means"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+Tables of means
+Grand mean
+         
+3.006218 
+
+ age.group 
+    Under 40 41 to 60 Over 61
+       3.009    3.059   2.946
+rep  293.000  364.000 332.000
+
+ gender 
+     Female    Male
+      2.946   3.076
+rep 533.000 456.000
+
+ age.group:gender 
+          gender
+age.group  Female Male  
+  Under 40   2.99   3.03
+  rep      171.00 122.00
+  41 to 60   2.98   3.16
+  rep      204.00 160.00
+  Over 61    2.86   3.02
+  rep      158.00 174.00
+\end{verbatim}
+\begin{alltt}
+\hlkwd{TukeyHSD}\hlstd{(twoway)}
+\end{alltt}
+\begin{verbatim}
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = nerdy.sc ~ age.group * gender)
+
+$age.group
+                         diff         lwr         upr     p adj
+41 to 60-Under 40  0.04925709 -0.04336658  0.14188075 0.4250499
+Over 61-Under 40  -0.06360922 -0.15820264  0.03098421 0.2554626
+Over 61-41 to 60  -0.11286630 -0.20242518 -0.02330742 0.0088880
+
+$gender
+                 diff        lwr       upr   p adj
+Male-Female 0.1300681 0.06713236 0.1930038 5.4e-05
+
+$`age.group:gender`
+                                       diff          lwr        upr
+41 to 60:Female-Under 40:Female -0.01193670 -0.160777938 0.13690453
+Over 61:Female-Under 40:Female  -0.13137908 -0.289792553 0.02703439
+Under 40:Male-Under 40:Female    0.03953121 -0.130597111 0.20965952
+41 to 60:Male-Under 40:Female    0.16472588  0.006827846 0.32262391
+Over 61:Male-Under 40:Female     0.02933555 -0.125245990 0.18391709
+Over 61:Female-41 to 60:Female  -0.11944238 -0.271578176 0.03269342
+Under 40:Male-41 to 60:Female    0.05146791 -0.112830956 0.21576678
+41 to 60:Male-41 to 60:Female    0.17666258  0.025063566 0.32826160
+Over 61:Male-41 to 60:Female     0.04127226 -0.106869319 0.18941383
+Under 40:Male-Over 61:Female     0.17091029 -0.002107728 0.34392830
+41 to 60:Male-Over 61:Female     0.29610496  0.135097575 0.45711234
+Over 61:Male-Over 61:Female      0.16071463  0.002958359 0.31847091
+41 to 60:Male-Under 40:Male      0.12519467 -0.047351533 0.29774088
+Over 61:Male-Under 40:Male      -0.01019565 -0.179712194 0.15932089
+Over 61:Male-41 to 60:Male      -0.13539033 -0.292629003 0.02184835
+                                    p adj
+41 to 60:Female-Under 40:Female 0.9999140
+Over 61:Female-Under 40:Female  0.1685811
+Under 40:Male-Under 40:Female   0.9858132
+41 to 60:Male-Under 40:Female   0.0350612
+Over 61:Male-Under 40:Female    0.9944170
+Over 61:Female-41 to 60:Female  0.2196437
+Under 40:Male-41 to 60:Female   0.9478634
+41 to 60:Male-41 to 60:Female   0.0116853
+Over 61:Male-41 to 60:Female    0.9683015
+Under 40:Male-Over 61:Female    0.0550741
+41 to 60:Male-Over 61:Female    0.0000028
+Over 61:Male-Over 61:Female     0.0429638
+41 to 60:Male-Under 40:Male     0.3030179
+Over 61:Male-Under 40:Male      0.9999793
+Over 61:Male-41 to 60:Male      0.1376475
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+\end{enumerate}
+
+
+\section{Tests of Independence} 
+\label{sec:ind}
+\begin{enumerate}[(i)]
+\item Produce a two-way frequency table of counts between \texttt{income} and \texttt{gender}.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{with}\hlstd{(sports.df,} \hlkwd{table}\hlstd{(income, gender))}
+\end{alltt}
+\begin{verbatim}
+                  gender
+income             Female Male
+  5 000$               59   27
+  10 000$-15 000$      61   59
+  15 000$-20 000$      57   41
+  20 000$-25 000$      38   38
+  25 000$-30 000$      40   33
+  30 000$-40 000$      67   63
+  40 000$-50 000$      55   51
+  50 000$-70 000$      66   62
+  70 000$-100 000$     31   34
+  > 100 000$           30   33
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+\item Do you think that income level depends on gender? Perform an appropriate test to find out.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{chisq.test}\hlstd{(}\hlkwd{with}\hlstd{(sports.df,} \hlkwd{table}\hlstd{(income, gender)))}
+\end{alltt}
+\begin{verbatim}
+
+	Pearson's Chi-squared test
+
+data:  with(sports.df, table(income, gender))
+X-squared = 11.756, df = 9, p-value = 0.2274
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\end{enumerate}
+\end{document}

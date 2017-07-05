@@ -1,0 +1,426 @@
+\documentclass{beamer}
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{fancyvrb}
+\usepackage{url}
+\usetheme{Madrid}
+\usecolortheme{beaver}
+\setbeamertemplate{navigation symbols}{}
+\titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+%\logo{\includegraphics[width=0.1\textwidth,keepaspectratio]{..//..//UOACrest.png}}
+\author[SCC]{Statistical Consulting Centre}%\\
+\institute[\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}\\
+%Statistical Consulting Centre\\
+The Department of Statistics\\
+The University of Auckland}
+\title[Session 3 -- Data Manipulation]{NZSSN Courses: Introduction to \texttt{R}}
+\subtitle{Session 3 --Data Manipulation}
+\date{1 March, 2017}
+\begin{document}
+%\SweaveOpts{concordance=TRUE}
+\maketitle
+ 
+\begin{frame}[fragile]
+  \frametitle{Data types}
+<<echo = FALSE>>=
+options(continue = " ")
+thm = knit_theme$get("moe")  # parse the theme to a list
+knit_theme$set(thm)
+opts_chunk$set(comment=NA)
+issp.df = read.csv("../../Data/issp.csv", stringsAsFactors = FALSE)
+@
+
+  Everything in \texttt{R} is a vector (but some have only one
+  element).
+  \begin{enumerate}
+  \item Numeric (same as double), or integer\\
+    E.g. \texttt{Age}
+  \item String (same as character), or categorical\\
+    E.g. \texttt{Ethnicity}, \texttt{Gender}, \texttt{Q1 - Q8}.
+\item Logical: \texttt{TRUE} or \texttt{FALSE}, e.g.
+<<>>=
+1 == 1
+2 <= 0
+3 != 2
+@
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Missing values}
+<<>>=
+table(issp.df$Gender)
+@ 
+"\Sexpr{names(table(issp.df$Gender))[3]}" means the information is unavailable. \texttt{R}'s \texttt{is.na()} tests for missing values. Let's try this for the 9th participant who had the value "\Sexpr{names(table(issp.df$Gender))[3]}" Gender.
+<<>>=
+issp.df[9, "Gender"]
+is.na(issp.df[9, "Gender"])
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Missing values}
+  \begin{itemize}
+    \item \texttt{R} reserves the object \texttt{NA} (\texttt{N}ot \texttt{A}vailable) for elements of a vector that are missing or unavailable. 
+    \item Use of \texttt{is.na()} to search for missing values requires that they are recorded as \texttt{NA}. 
+    \item \texttt{na} will not do because \texttt{R} is case sensitive!
+  \end{itemize}
+<<echo = FALSE>>=
+options(width = 50)
+@
+<<>>=
+gender.na <- which(issp.df$Gender == "NA, refused")
+gender.na
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Missing values}
+<<>>=
+issp.df$Gender[gender.na]
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Missing values}
+Fix this:
+<<>>=
+issp.df$Gender[gender.na] <- NA
+issp.df$Gender[gender.na]
+gender.missing <- is.na(issp.df$Gender[gender.na])
+gender.missing 
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Missing values}
+How many cases of Gender are missing?
+<<>>=
+# How many are missing?
+sum(gender.missing)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Missing values}
+  The default option of \texttt{table()} ignores \texttt{NA}s when constructing frequency tables. Now that all occurrences of \texttt{"NA, refused"} have been replaced with \texttt{NA}, missing values will no longer be shown in frequency tables constructed using \texttt{table()}. If you still want to see how many \texttt{NA}s in the frequency tables, you can change the \texttt{useNA} arguement to \texttt{"always"} in \texttt{table()}.
+<<size  = "small">>=
+table(issp.df$Gender)
+
+table(issp.df$Gender, useNA = "always")
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Missing values}
+<<>>=
+with(issp.df, table(Q6, Gender))
+@ 
+``\Sexpr{names(table(issp.df$Q6))[4]}'' should be treated as missing values.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Missing values}
+<<>>=
+# Case (row) numbers for which Q6 contains "na, refused"
+Q6.na <- which(issp.df$Q6 == "na, refused")
+Q6.na
+issp.df$Q6[Q6.na]
+@ 
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Missing values}
+<<>>=
+# Set cases with "na, refused" in Q6 to NA
+issp.df$Q6[Q6.na] <- NA
+
+# Re-print the table
+with(issp.df, table(Q6, Gender))
+@ 
+\end{frame}
+
+\begin{frame}
+  \frametitle{\texttt{factor}}
+  \begin{block}{What is a factor?}
+    \textit{A variable which takes either qualitative values, ordinal values or a discrete set of quantitative values. The values of a factor are called its {\em levels}.}
+  \end{block}
+Examples of factors:  
+\begin{itemize}
+  \item \texttt{Gender} with 2 {\em qualitative} levels: \texttt{Male} and \texttt{Female}.
+  \item \texttt{Education} with 6 {\em ordinal} levels: \texttt{None} $<$ \texttt{"Primary compl} $<$ \texttt{Incpl secondary} $<$ \texttt{Secondary compl} $<$ \texttt{Incpl university} $<$ \texttt{University degree}.
+  \item \texttt{Income} has 9 {\em quantitative} levels when the mid-values of the income ranges are used: \texttt{5000}, \texttt{12500}, \texttt{17500}, \texttt{22500}, \texttt{27500}, \texttt{35000}, \texttt{45000}, \texttt{60000} and \texttt{85000}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+<<>>=
+levels(factor(issp.df$Q6))
+@
+\end{frame}
+
+\begin{frame}
+  \frametitle{Factor}
+\begin{itemize}
+  \item \texttt{R} stores two {\em additional} pieces of information for each factor: (1) the unique set of levels and (2) an integer value, assigned by \texttt{R}, for each unique level. 
+  \item The integer values are assigned to factor levels so that they have an order associated with them.
+  \item By default, the unique levels are assigned the values 1, 2,..., according to ascending alphabetical order. This is not always appropriate! 
+  \item Example: Consider the factor \texttt{issp.df\$Q6}
+\end{itemize}
+\begin{table}[h]
+  \centering
+  \begin{tabular}[h]{lr}
+    Level  & Default order \\
+    \hline
+    almost always wrong  & 1\\
+    always wrong         & 2\\
+    cant choose, dk      & 3\\ 
+    only sometimes wrong & 4\\
+    not wrong at all     & 5\\
+    \hline
+  \end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Factor}
+  Specify order using \texttt{levels} argument, i.e.
+<<tidy=FALSE>>=
+issp.df$Q6 <- factor(issp.df$Q6, 
+                     levels = c("always wrong", 
+                                "almost always wrong", 
+                                "only sometimes wrong", 
+                                "not wrong at all", 
+                                "cant choose, dk"))
+with(issp.df, table(Q6, Gender))
+@ 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Repeat for Q7 and Q8}
+<<tidy=FALSE>>=
+Q7.na <- which(issp.df$Q7 == "na, refused")
+issp.df$Q7[Q7.na] <- NA
+issp.df$Q7 = factor(issp.df$Q7, levels = c("always wrong", 
+            "almost always wrong", "only sometimes wrong", 
+            "not wrong at all", "cant choose, dk"))
+with(issp.df, table(Q7, Gender))
+@ 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Repeat for Q7 and Q8}
+<<>>=
+Q8.na <- which(issp.df$Q8 == "na, refused")
+issp.df$Q8[Q8.na] <- NA
+issp.df$Q8 = factor(issp.df$Q8, levels = c("always wrong", 
+            "almost always wrong", "only sometimes wrong", 
+            "not wrong at all", "cant choose, dk"))
+with(issp.df, table(Q8, Gender))
+@ 
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Q1 to Q4}
+<<>>=
+with(issp.df, table(Q1, Gender))
+@ 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Tidy up Q1}
+This time we will treat both "\Sexpr{names(table(issp.df$Q1))[4]}" and "\Sexpr{names(table(issp.df$Q1))[2]}" as missing values.
+<<tidy=FALSE>>=
+Q1.na <- which(issp.df$Q1 == "na, refused" | 
+              issp.df$Q1 == "can't choose, dk")
+issp.df$Q1[Q1.na] <- NA
+@ 
+\vspace{-2mm}
+The pipe symbol `\texttt{|}' is read as `or'.\\
+\vspace{4mm}
+Convert \texttt{Q1} to a \texttt{factor} with appropriately ordered levels, i.e.
+\vspace{-2mm}
+<<tidy = FALSE>>=
+issp.df$Q1 <- factor(issp.df$Q1,
+                     levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+@
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Always check whether \texttt{R} has done the right thing!}
+<<>>=
+with(issp.df, table(Q1, Gender))
+@ 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Binning ages into age groups}
+Sometimes we are interested in examining responses by age group. The \texttt{ifelse()} function provides a quick way of doing binning ages into age groups, i.e.
+\begin{figure}
+\centering
+\begin{BVerbatim}
+  ifelse(test, yes, no)
+\end{BVerbatim}
+\end{figure}
+\begin{itemize}
+  \item \texttt{test}: a logical test.
+  \item \texttt{yes}, what happens if the test is True.
+  \item \texttt{no}, what happens if the test is False.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{ifelse()}}
+{\bf Example.} Consider the ages of the first 10 participants.
+<<>>=
+test1 <- issp.df$Age[1:10]
+test1
+test1 < 30
+ifelse(test1<=30, "Under 30", "Over 31")
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{ifelse()}}
+What about {\em three} age groups?\\
+\vspace{5mm}
+Nest one \texttt{ifelse()} inside another. E.g.
+<<>>=
+test1
+ifelse(test1<=30, "Under 30", 
+       ifelse(test1 <= 40, "31 to 40", "Over 40"))
+@
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{\texttt{ifelse()}}
+Now, assign each of the \Sexpr{nrow(issp.df)} respondents to one of three age groups: "Under 35", "36 to 60" and "Over 61".
+<<tidy=FALSE>>=
+issp.df$age.group <- 
+  ifelse(issp.df$Age<=35, "Under 35", 
+         ifelse(issp.df$Age <= 60, "36 to 60", "Over 61"))
+table(issp.df$age.group)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{ifelse()}}
+Convert \texttt{age.group} to a \texttt{factor} with levels in ascending order.
+<<tidy = FALSE>>=
+issp.df$age.group <- factor(issp.df$age.group, 
+                           levels = c("Under 35", 
+                                      "36 to 60", 
+                                      "Over 61"))
+table(issp.df$age.group)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{ifelse()} to tidy up \texttt{Q2} -- \texttt{Q4}}
+Use \texttt{ifelse()} to replace "\Sexpr{names(table(issp.df$Q2))[4]}" and "\Sexpr{names(table(issp.df$Q2))[2]}" with \texttt{NA}s.
+\vspace{-2mm}
+<<results='hide'>>=
+issp.df$Q2[7:12]
+@
+\vspace{-5mm}
+<<echo=FALSE>>=
+issp.df$Q2[7:12]
+@
+\vspace{-2mm}
+<<results='hide', tidy=FALSE>>=
+# Create logical (TRUE/FALSE) variable of cases 
+# to replace with NA
+make.na <- (issp.df$Q2 == "cant choose, dk" | 
+            issp.df$Q2 == "na, refused")
+make.na[7:12]
+@
+\vspace{-5mm}
+<<echo=FALSE>>=
+make.na[7:12]
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{ifelse()} to tidy up \texttt{Q2} -- \texttt{Q4}}
+<<>>=
+issp.df$Q2 <- ifelse(make.na, NA, issp.df$Q2)
+issp.df$Q2[7:12]
+@
+Translation: If \texttt{make.na} is \texttt{TRUE} (i.e. cases for which \texttt{Q2} is "cant choose, dk" or "na, refused"), then replace that case in \texttt{Q2} with \texttt{NA}, otherwise leave it as is.
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{ifelse()} to tidy up \texttt{Q2} -- \texttt{Q4}}
+<<tidy = FALSE>>=
+issp.df$Q2 <- factor(issp.df$Q2, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+with(issp.df, table(Q2, age.group))
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{ifelse()} to tidy up \texttt{Q2} -- \texttt{Q4}}
+<<tidy = FALSE>>=
+issp.df$Q3 <- ifelse(issp.df$Q3 == "cant choose, dk" | 
+                     issp.df$Q3 == "na, refused", 
+                     NA, issp.df$Q3)
+issp.df$Q3 <- factor(issp.df$Q3, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+issp.df$Q4 <- ifelse(issp.df$Q4 == "cant choose, dk" | 
+                     issp.df$Q4 == "na, refused", 
+                     NA, issp.df$Q4)
+issp.df$Q4 <- factor(issp.df$Q4, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{ifelse()} to tidy up \texttt{Q2} -- \texttt{Q4}}
+<<>>=
+with(issp.df, table(Q3, age.group))
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{ifelse()} to tidy up \texttt{Q2} -- \texttt{Q4}}
+<<>>=
+with(issp.df, table(Q4, age.group))
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Summary}
+  \begin{itemize}
+  \item Missing values
+  \item Factor
+  \item Subsetting vectors and datasets
+  \item \texttt{ifelse()}
+  \end{itemize}
+\end{frame}
+
+\end{document}
+ 

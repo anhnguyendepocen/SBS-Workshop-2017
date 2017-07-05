@@ -1,0 +1,10 @@
+\frametitle{Lattice plots}
+
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.7\textwidth, keepaspectratio]{Figure/oth2}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:oth2}
+\end{figure}

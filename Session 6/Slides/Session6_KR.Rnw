@@ -1,0 +1,704 @@
+\documentclass{beamer}
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{url}
+\usetheme{Warsaw}
+\setbeamertemplate{navigation symbols}{}
+\logo{\includegraphics[width=0.1\textwidth,keepaspectratio]{..//..//UOACrest.png}}
+\author[SCC]{Statistical Consulting Center}%\\
+\institute{\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}\\
+%Statistical Consulting Centre\\
+The Department of Statistics\\
+The University of Auckland}
+\title[\hspace{2em}\insertframenumber/\inserttotalframenumber]{NZSSN Courses: Introduction
+to \texttt{R}}
+\subtitle{Graphics -- Adding standard error bars}
+\date{19 November, 2013}
+\begin{document}
+%\SweaveOpts{concordance=TRUE}
+\maketitle
+ 
+\begin{frame}[fragile]
+  \frametitle{Plot means in context}
+<<echo = F>>=
+options(continue = " ")
+opts_chunk$set(comment=NA)
+thm = knit_theme$get("moe")  # parse the theme to a list
+knit_theme$set(thm)
+issp.df = read.csv("../../Data/issp.csv", stringsAsFactors = F)
+gender.na <- which(issp.df$Gender == "NA, refused")
+issp.df$Gender[gender.na] = NA
+Q6.na <- which(issp.df$Q6 == "na, refused")
+issp.df$Q6[Q6.na] = NA
+issp.df$Q6 = factor(issp.df$Q6, levels = c("always wrong", "almost always wrong", "only sometimes wrong", "not wrong at all", "cant choose, dk"))
+Q7.na <- which(issp.df$Q7 == "na, refused")
+issp.df$Q7[Q7.na] <- NA
+issp.df$Q7 = factor(issp.df$Q7, levels = c("always wrong", "almost always wrong", "only sometimes wrong", "not wrong at all", "cant choose, dk"))
+Q8.na <- which(issp.df$Q8 == "na, refused")
+issp.df$Q8[Q8.na] <- NA
+issp.df$Q8 = factor(issp.df$Q8, levels = c("always wrong", "almost always wrong", "only sometimes wrong", "not wrong at all", "cant choose, dk"))
+Q1.na <- which(issp.df$Q1 == "na, refused" | issp.df$Q1 == "can't choose, dk")
+issp.df$Q1[Q1.na] <- NA
+issp.df$Q1 = factor(issp.df$Q1, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+issp.df$age.group = ifelse(issp.df$Age<=35, "Under 35", 
+                           ifelse(issp.df$Age <= 60, "36 to 60", "Over 61"))
+issp.df$age.group = factor(issp.df$age.group, 
+                           levels = c("Under 35", 
+                                      "36 to 60", 
+                                      "Over 61"))
+issp.df$Q2 <- ifelse(issp.df$Q2 == "cant choose, dk" | issp.df$Q2 == "na, refused", NA, issp.df$Q2)
+issp.df$Q2 = factor(issp.df$Q2, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+
+issp.df$Q3 <- ifelse(issp.df$Q3 == "cant choose, dk" | 
+                     issp.df$Q3 == "na, refused", 
+                     NA, issp.df$Q3)
+issp.df$Q3 = factor(issp.df$Q3, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+issp.df$Q4 <- ifelse(issp.df$Q4 == "cant choose, dk" | 
+                     issp.df$Q4 == "na, refused", 
+                     NA, issp.df$Q4)
+issp.df$Q4 = factor(issp.df$Q4, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+Q1.lik <- as.numeric(issp.df$Q1)
+Q2.lik <- as.numeric(issp.df$Q2)
+Q3.lik <- as.numeric(issp.df$Q3)
+Q4.lik <- as.numeric(issp.df$Q4)
+total.lik <- Q1.lik + Q2.lik + Q3.lik + Q4.lik
+scale.df <- data.frame(cbind(Q1.lik, Q2.lik, Q3.lik, Q4.lik, total.lik))
+issp.df$Income <- ifelse(issp.df$Income 
+                         == "NAV; NAP No own income",
+                         NA, issp.df$Income)
+issp.df$total.lik <- scale.df$total.lik
+issp.df$Q5 <- with(issp.df, ifelse(Q5 == "can t choose, dk" 
+                          | Q5 == "NA, refused", NA, Q5))
+@
+<<tidy = F>>=
+with(issp.df, tapply(total.lik, age.group, 
+                     mean, na.rm = T))
+@
+\begin{itemize}
+\item Means are all but meaningless unless they are presented in context.
+\item Always present with standard deviations (SDs) or standard errors of means (SEs) or confidence intervals.
+\item Plot means with 95\% confidence intervals ($\pm$ 1.96 $\times$ SE).
+\begin{itemize}
+\item $\pm$ 1 $\times$ SE yields (approx.) a \Sexpr{round((1 - pnorm(-1)*2)*100, 0)}\% confidence interval. Equivalent to using a 16\% level of significance!!!!
+\item $\pm$ 1 $\times$ SD tells us \textbf{ABSOLUTELY NOTHING} about whether two means are statistically different from one another.
+\end{itemize}
+\end{itemize}
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Calculating 95\% CIs}
+\begin{itemize}
+\item 95\% CI $=$ Mean $\pm$ 1.96 $\times$ SE
+\item Standard Errors $= \frac{\text{Standard Deviation}}{\sqrt{\text{Sample Size}}}$
+\end{itemize}
+<<tidy = F>>=
+my.m <- with(issp.df, tapply(total.lik, age.group, mean, 
+                             na.rm = T))
+my.m
+my.sd <- with(issp.df, tapply(total.lik, age.group, sd, 
+                              na.rm = T))
+my.sd
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Calculating 95\% CIs}
+<<tidy = F>>=
+my.n <- with(issp.df, tapply(total.lik, age.group, 
+            function(x)length(which(!is.na(x)))))
+my.n
+my.stder <- my.sd/sqrt(my.n)
+ci.upper <- my.m + 1.96*my.stder
+ci.lower <- my.m - 1.96*my.stder
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Calculating 95\% CIs}
+<<tidy = F>>=
+cbind(my.m, ci.lower, ci.upper)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Plot the means}
+<<m1, fig.align ='center', out.width = "0.65\\linewidth">>=
+plot(my.m)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Make room for the SE bars}
+<<m2, fig.align ='center', out.width = "0.65\\linewidth">>=
+plot(my.m, ylim = c(10, 14), xlim = c(0, 4))
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Adding error bars}
+<<eval = F, tidy = F>>=
+plot(my.m, ylim = c(10, 14), xlim = c(0, 4))
+arrows(1:3, ci.lower, 1:3, ci.upper, code = 3, 
+       angle = 90)
+@
+<<m3, include = F, tidy = F>>=
+plot(my.m, ylim = c(10, 14), xlim = c(0, 4))
+arrows(1:3, ci.lower, 1:3, ci.upper, code = 3, 
+       angle = 90)
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.65\textwidth, keepaspectratio]{Figure/m3}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:m3}
+\end{figure}
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Essential embellishments}
+The labels on x-axis are wrong:
+\begin{itemize}
+\item Use \texttt{axes = F} in \texttt{plot()} to prevent the drawing of axes.
+\item Use \texttt{axis()} function to draw the axes manually, with correct labels
+\end{itemize}
+<<eval = F, tidy = F>>=
+plot(my.m, ylim = c(10, 14), xlim = c(0, 4), axes = F)
+arrows(1:3, ci.lower, 1:3, ci.upper, code = 3, 
+       angle = 90)
+axis(2)
+axis(1, at = 1:3, 
+     label = c("Under 35", "36 to 60", "Over 61"))
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Essential embellishments}
+<<m4, include = F, tidy = F>>=
+plot(my.m, ylim = c(10, 14), xlim = c(0, 4), axes = F)
+arrows(1:3, ci.lower, 1:3, ci.upper, code = 3, 
+       angle = 90)
+axis(2)
+axis(1, at = 1:3, label = c("Under 35", "36 to 60", "Over 61"))
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.8\textwidth, keepaspectratio]{Figure/m4}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:m4}
+\end{figure}
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Essential embellishments}
+\begin{itemize}
+\item Need to draw an outer box that connects x-axis and y-axis.
+\item The length of the heads of the error bars are too long.
+\item Give correct labels for the axes 
+\end{itemize}
+<<eval = F, tidy = F>>=
+plot(my.m, ylim = c(10, 14), xlim = c(0, 4), axes = F,
+     xlab = "Age group", 
+     ylab = "Mean total score")
+arrows(1:3, ci.lower, 1:3, ci.upper, code = 3, 
+       length = .1, angle = 90)
+axis(2)
+axis(1, at = 1:3, 
+     label = c("Under 35", "36 to 60", "Over 61"))
+box()
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Essential embellishments}
+<<m5, include = F, tidy = F>>=
+plot(my.m, ylim = c(10, 14), xlim = c(0, 4), axes = F,
+     xlab = "Age group", 
+     ylab = "Mean total score")
+arrows(1:3, ci.lower, 1:3, ci.upper, code = 3, 
+       length = .1, angle = 90)
+axis(2)
+axis(1, at = 1:3, 
+     label = c("Under 35", "36 to 60", "Over 61"))
+box()
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.8\textwidth, keepaspectratio]{Figure/m5}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:m5}
+\end{figure}
+\end{frame} 
+
+
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{ggplot2}}
+<<gg, include = F, tidy = F>>=
+library(ggplot2)
+y.df = data.frame(cbind(names(my.m), my.m, ci.upper, ci.lower))
+names(y.df)[1] = "age.group"
+y.df$age.group = factor(y.df$age.group, levels = names(my.m))
+y.df$my.m = as.numeric(as.character(y.df$my.m))
+y.df$ci.upper = as.numeric(as.character(y.df$ci.upper))
+y.df$ci.lower = as.numeric(as.character(y.df$ci.lower))
+ggplot(y.df, aes(x = age.group, y = my.m))+geom_point() +
+     geom_errorbar(aes(ymax = ci.upper, ymin = ci.lower), width = 0.1)+
+     xlab("Age Group")+
+     ylab("Mean total score")
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.7\textwidth, keepaspectratio]{Figure/gg}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:gg}
+\end{figure}
+\end{frame} 
+ 
+ 
+\begin{frame}[fragile]
+  \frametitle{Any interactions between Gender and Age group?}
+<<tidy = F>>=
+GA.m <- with(issp.df, tapply(total.lik, 
+           list(Gender, age.group), mean, na.rm = T))
+GA.m
+@
+We must plot these means in context. Therefore, we must calculate their corresponding (95\%) CIs.
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Calculating 95\% CIs}
+<<tidy = F>>=
+GA.sd <- with(issp.df, tapply(total.lik, 
+              list(Gender, age.group), sd, na.rm = T))
+GA.n <- with(issp.df, tapply(total.lik, 
+            list(Gender,age.group), 
+            function(x)length(which(!is.na(x)))))
+GA.stder <- GA.sd/sqrt(GA.n)
+GA.upper <- GA.m + 1.96*GA.stder
+GA.lower <- GA.m - 1.96*GA.stder
+GA.lower
+@
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{Step-by-step}
+\begin{itemize}
+\item The first (second) row of each of \texttt{GA.m}, \texttt{GA.lower}, \texttt{GA.upper} contains the mean, lower 95\% CI and upper 95\% CI, respectively, for female (male) respondents.
+\item Plot the points and error bars (corresponding to lower/upper 95\% confidence limits) for females.
+\item Repeat for males.
+\end{itemize}
+<<tidy = F, eval = F>>=
+plot(GA.m[1, ], xlab = "Age Group", 
+     ylab = "Mean total score",
+     axes = F, xlim = c(0, 4), ylim = c(10, 14.5))
+arrows(1:3, GA.upper[1, ], 1:3, GA.lower[1, ],
+       angle = 90, code = 3, length = .1)
+axis(1, at = 1:3, label = colnames(GA.m))
+axis(2)
+box()
+@
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Plotting mean $\pm$ 95\% CI: Females}
+<<m6, include = F, echo = F>>=
+plot(GA.m[1, ], xlab = "Age Group", 
+     ylab = "Mean total score",
+     axes = F, xlim = c(0, 4), ylim = c(10, 14.5))
+arrows(1:3, GA.upper[1, ], 1:3, GA.lower[1, ],
+       angle = 90, code = 3, length = .1)
+axis(1, at = 1:3, label = colnames(GA.m))
+axis(2)
+box()
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.8\textwidth, keepaspectratio]{Figure/m6}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:m6}
+\end{figure}
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{Plotting mean $\pm$ 95\% CI: Males}
+Using \textcolor{blue}{blue} symbols/lines for males.
+<<tidy = F, eval = F>>=
+plot(GA.m[1, ], xlab = "Age Group", 
+     ylab = "Mean total score",
+     axes = F, xlim = c(0, 4), ylim = c(10, 14.5))
+arrows(1:3, GA.upper[1, ], 1:3, GA.lower[1, ],
+       angle = 90, code = 3, length = .1)
+axis(1, at = 1:3, label = colnames(GA.m))
+axis(2)
+box()
+points(GA.m[2, ], col = "blue")
+arrows(1:3, GA.upper[2, ], 1:3, GA.lower[2, ],
+       angle = 90, code = 3, length = .1, col = "blue")
+@
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Add the means for males}
+<<m7, include = F, echo = F>>=
+plot(GA.m[1, ], xlab = "Age Group", 
+     ylab = "Mean total score",
+     axes = F, xlim = c(0, 4), ylim = c(10, 14.5))
+arrows(1:3, GA.upper[1, ], 1:3, GA.lower[1, ],
+       angle = 90, code = 3, length = .1)
+axis(1, at = 1:3, label = colnames(GA.m))
+axis(2)
+box()
+points(GA.m[2, ], col = "blue")
+arrows(1:3, GA.upper[2, ], 1:3, GA.lower[2, ],
+       angle = 90, code = 3, length = .1, col = "blue")
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.8\textwidth, keepaspectratio]{Figure/m7}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:m7}
+\end{figure}
+\end{frame} 
+
+\begin{frame}
+\frametitle{Improvements}
+\begin{itemize}
+\item Points/error bars overlay one another. Need to separate them?
+\item So far, we have plotted means/error bars at x = 1, 2 and 3. We can use different x coordinates for males and females.
+\item Probably the space between age groups should be larger than the space between males and females.
+\item How about:
+  \begin{itemize}
+    \item Female: x = 1, 3, 5.
+    \item Male: x = 1.5, 3.5, 5.5
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Side-by-side}
+<<tidy = F, eval = F>>=
+plot(c(1, 3, 5), GA.m[1, ], xlab = "Age Group", 
+     ylab = "Mean total score",col = 1,
+     axes = F, xlim = c(0, 6.5), ylim = c(10, 14.5))
+arrows(c(1, 3, 5), GA.upper[1, ], c(1, 3, 5), 
+       GA.lower[1, ],
+       angle = 90, code = 3, length = .1, col = 1)
+points(c(1.5, 3.5, 5.5),GA.m[2, ], col = "blue")
+arrows(c(1.5, 3.5, 5.5), GA.upper[2, ], c(1.5, 3.5, 5.5), 
+       GA.lower[2, ],
+       angle = 90, code = 3, length = .1, col = "blue")
+axis(1)
+@
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Side-by-side}
+<<m8, include = F, echo = F>>=
+plot(c(1, 3, 5), GA.m[1, ], xlab = "Age Group", 
+     ylab = "Mean total score",col = 1,
+     axes = F, xlim = c(0, 6.5), ylim = c(10, 14.5))
+arrows(c(1, 3, 5), GA.upper[1, ], c(1, 3, 5), 
+       GA.lower[1, ],
+       angle = 90, code = 3, length = .1, col = 1)
+points(c(1.5, 3.5, 5.5),GA.m[2, ], col = "blue")
+arrows(c(1.5, 3.5, 5.5), GA.upper[2, ], c(1.5, 3.5, 5.5), 
+       GA.lower[2, ],
+       angle = 90, code = 3, length = .1, col = "blue")
+axis(1)
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.8\textwidth, keepaspectratio]{Figure/m8}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:m8}
+\end{figure}
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{Tidy up tick marks and labels on x-axis}
+<<tidy = F, eval = F>>=
+plot(c(1, 3, 5), GA.m[1, ], xlab = "Age Group", 
+     ylab = "Mean total score",col = 1,
+     axes = F, xlim = c(0, 6.5), ylim = c(10, 14.5))
+arrows(c(1, 3, 5), GA.upper[1, ], c(1, 3, 5), 
+       GA.lower[1, ],
+       angle = 90, code = 3, length = .1, col = 1)
+points(c(1.5, 3.5, 5.5),GA.m[2, ], col = "blue")
+arrows(c(1.5, 3.5, 5.5), GA.upper[2, ], c(1.5, 3.5, 5.5), 
+       GA.lower[2, ],
+       angle = 90, code = 3, length = .1, col = "blue")
+axis(1, at = c(1.25, 3.25, 5.25), label = colnames(GA.m))
+axis(2)
+box()
+@
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Add a box around the figure}
+<<m9, include = F, echo = F>>=
+plot(c(1, 3, 5), GA.m[1, ], xlab = "Age Group", 
+     ylab = "Mean total score",col = 1,
+     axes = F, xlim = c(0, 6.5), ylim = c(10, 14.5))
+arrows(c(1, 3, 5), GA.upper[1, ], c(1, 3, 5), 
+       GA.lower[1, ],
+       angle = 90, code = 3, length = .1, col = 1)
+points(c(1.5, 3.5, 5.5),GA.m[2, ], col = "blue")
+arrows(c(1.5, 3.5, 5.5), GA.upper[2, ], c(1.5, 3.5, 5.5), 
+       GA.lower[2, ],
+       angle = 90, code = 3, length = .1, col = "blue")
+axis(1, at = c(1.25, 3.25, 5.25), label = colnames(GA.m))
+axis(2)
+box()
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.8\textwidth, keepaspectratio]{Figure/m9}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:m9}
+\end{figure}
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{Connect the points?}
+<<tidy = F, eval = F>>=
+plot(c(1, 3, 5), GA.m[1, ], xlab = "Age Group", 
+     ylab = "Mean total score",col = 1, type = "b",
+     axes = F, xlim = c(0, 6.5), ylim = c(10, 14.5))
+arrows(c(1, 3, 5), GA.upper[1, ], c(1, 3, 5), 
+       GA.lower[1, ],
+       angle = 90, code = 3, length = .1, col = 1)
+points(c(1.5, 3.5, 5.5),GA.m[2, ], col = "blue", type = "b")
+arrows(c(1.5, 3.5, 5.5), GA.upper[2, ], c(1.5, 3.5, 5.5), 
+       GA.lower[2, ],
+       angle = 90, code = 3, length = .1, col = "blue")
+axis(1, at = c(1.25, 3.25, 5.25), label = colnames(GA.m))
+axis(2)
+box()
+@
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Connect the points}
+<<m10, include = F, echo = F>>=
+plot(c(1, 3, 5), GA.m[1, ], xlab = "Age Group", 
+     ylab = "Mean total score",col = 1, type = "b",
+     axes = F, xlim = c(0, 6.5), ylim = c(10, 14.5))
+arrows(c(1, 3, 5), GA.upper[1, ], c(1, 3, 5), 
+       GA.lower[1, ],
+       angle = 90, code = 3, length = .1, col = 1)
+points(c(1.5, 3.5, 5.5),GA.m[2, ], col = "blue", type = "b")
+arrows(c(1.5, 3.5, 5.5), GA.upper[2, ], c(1.5, 3.5, 5.5), 
+       GA.lower[2, ],
+       angle = 90, code = 3, length = .1, col = "blue")
+axis(1, at = c(1.25, 3.25, 5.25), label = colnames(GA.m))
+axis(2)
+box()
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.8\textwidth, keepaspectratio]{Figure/m10}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:m10}
+\end{figure}
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{Add legend}
+<<tidy = F, eval = F>>=
+plot(c(1, 3, 5), GA.m[1, ], xlab = "Age Group", 
+     ylab = "Mean total score",col = 1, type = "b",
+     axes = F, xlim = c(0, 6.5), ylim = c(10, 14.5))
+arrows(c(1, 3, 5), GA.upper[1, ], c(1, 3, 5), 
+       GA.lower[1, ],
+       angle = 90, code = 3, length = .1, col = 1)
+points(c(1.5, 3.5, 5.5),GA.m[2, ], col = "blue", type = "b")
+arrows(c(1.5, 3.5, 5.5), GA.upper[2, ], c(1.5, 3.5, 5.5), 
+       GA.lower[2, ],
+       angle = 90, code = 3, length = .1, col = "blue")
+axis(1, at = c(1.25, 3.25, 5.25), label = colnames(GA.m))
+axis(2)
+box()
+legend("topright", pch = 21, lty = 1, bty = "n",
+       col = c("black", "blue"), cex = 1.5, 
+       legend = c("Female", "Male"))
+@
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Add legend}
+<<m11, include = F, echo = F>>=
+plot(c(1, 3, 5), GA.m[1, ], xlab = "Age Group", 
+     ylab = "Mean total score",col = 1, type = "b",
+     axes = F, xlim = c(0, 6.5), ylim = c(10, 14.5))
+arrows(c(1, 3, 5), GA.upper[1, ], c(1, 3, 5), 
+       GA.lower[1, ],
+       angle = 90, code = 3, length = .1, col = 1)
+points(c(1.5, 3.5, 5.5),GA.m[2, ], col = "blue", type = "b")
+arrows(c(1.5, 3.5, 5.5), GA.upper[2, ], c(1.5, 3.5, 5.5), 
+       GA.lower[2, ],
+       angle = 90, code = 3, length = .1, col = "blue")
+axis(1, at = c(1.25, 3.25, 5.25), label = colnames(GA.m))
+axis(2)
+box()
+legend("topright", pch = 21, lty = 1, bty = "n",
+       col = c("black", "blue"), cex = 1.5, 
+       legend = c("Female", "Male"))
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.8\textwidth, keepaspectratio]{Figure/m11}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:m11}
+\end{figure}
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{ggplot2}}
+<<gg1, include = F, tidy = F>>=
+GA.df = data.frame(matrix(NA, nrow = 6, ncol = 5))
+colnames(GA.df) = c("Age.group", "Gender", "Mean", "Upper", "Lower")
+GA.df$Age.group = rep(colnames(GA.m), 2)
+GA.df$Gender = rep(rownames(GA.m), c(3, 3))
+GA.df$Mean = c(GA.m[1, ], GA.m[2, ])
+GA.df$Upper = c(GA.upper[1, ], GA.upper[2, ])
+GA.df$Lower = c(GA.lower[1, ], GA.lower[2, ])
+GA.df$Age.group = factor(GA.df$Age.group, levels = colnames(GA.m))
+     ggplot(GA.df, aes(x = Age.group, y = Mean, color = Gender))+geom_point() +
+       geom_errorbar(aes(ymax = Upper, ymin = Lower), width = 0.1)+
+       xlab("Age Group")+
+       ylab("Mean total score")
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.7\textwidth, keepaspectratio]{Figure/gg1}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:gg1}
+\end{figure}
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{How far can we go?}
+<<oth1, include = F, echo = F>>=
+     f.index <- which(issp.df$Gender == "Female")
+     m.index <- which(issp.df$Gender == "Male")
+     f.points <- with(issp.df, ifelse(as.numeric(age.group) == 1, 1,
+                               ifelse(as.numeric(age.group) == 2, 4,
+                               ifelse(as.numeric(age.group) == 3, 7, NA))))
+     m.points <- with(issp.df, ifelse(as.numeric(age.group) == 1, 2,
+                                      ifelse(as.numeric(age.group) == 2, 5,
+                                             ifelse(as.numeric(age.group) == 3, 8, NA))))
+     plot.df <- issp.df
+     plot.df$x.f <- f.points
+     plot.df$x.m <- m.points
+     plot.new()
+     plot.window(xlim = c(0, 9.5), ylim = c(4, 22))
+     with(plot.df[f.index,], points(x.f+rnorm(length(x.f), 0, 0.01), 
+                                    total.lik+rnorm(length(x.f), 0, 0.1), col = 2))
+     with(plot.df[m.index,], points(x.m+rnorm(length(x.m), 0, 0.01), 
+                                    total.lik+rnorm(length(x.m), 0, 0.1), col = 4))
+     points(c(1.3, 4.3, 7.3), GA.m[1, ], pch = 24, col = 2, cex = 0.8)
+     arrows(c(1.3, 4.3, 7.3), GA.upper[1, ], c(1.3, 4.3, 7.3), 
+            GA.lower[1, ], cex = 2,
+            angle = 90, code = 3, length = .1, col = 2)  
+     
+     points(c(2.3, 5.3, 8.3), GA.m[2, ], pch = 24, col = 4, cex = 0.8)
+      
+     arrows(c(2.3, 5.3, 8.3), GA.upper[2, ], c(2.3, 5.3, 8.3), 
+            GA.lower[2, ],
+            angle = 90, code = 3, length =.1 , col = 4)
+     
+     axis(1, at = c(1.5, 4.5, 7.5), label = colnames(GA.m))
+     axis(2)
+     box()
+     title(xlab = "Age Group", ylab = "Total total score")
+     legend("topright", pch = c(21, 21, 24, 24), col = c(2, 4, 2, 4),
+            lty = c(0, 0, 1, 1), 
+            legend = c("Female", "Male", "Female mean and CI", "Male mean and CI"),bty = "n")
+     
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.8\textwidth, keepaspectratio]{Figure/oth1}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:oth1}
+\end{figure}
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{Lattice plots}
+<<oth2, include = F, echo = F>>=  
+library(lattice)
+with(issp.df, bwplot(total.lik~age.group|Income))     
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.8\textwidth, keepaspectratio]{Figure/oth2}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:oth2}
+\end{figure}
+\end{frame} 
+\end{document}     

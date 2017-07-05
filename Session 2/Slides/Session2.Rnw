@@ -1,0 +1,369 @@
+\documentclass{beamer}
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{url}
+\usetheme{Madrid}
+\usecolortheme{beaver}
+\setbeamertemplate{navigation symbols}{}
+\titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+%\logo{\includegraphics[width=0.1\textwidth,keepaspectratio]{..//..//UOACrest.png}}
+\author[SCC]{Statistical Consulting Centre}%\\
+\institute[\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}\\
+%Statistical Consulting Centre\\
+The Department of Statistics\\
+The University of Auckland}
+\title[Session 2 -- Subsetting data]{NZSSN Courses: Introduction to \texttt{R}}
+\subtitle{Session 2 -- Subsetting data} 
+\date{1 March, 2017}
+\begin{document}
+\maketitle
+\begin{frame}
+\vspace{10pt}
+  \frametitle{Functions}
+  A function is a relationship between a set of inputs (arguments)
+    and a set of outputs. E.g., the function is fed some information on which it
+    operates, the results of which are the output.
+    
+<<fun1, echo = F, message = F, warning=FALSE, include = F>>=
+require(plotrix)
+plot.new()
+plot.window(xlim = c(-8, 8), ylim = c(-1, 1))
+draw.circle(-6, 0, 2)
+draw.circle(0, 0, 2)
+draw.circle(6, 0, 2)
+text(c(-6, 0, 6), 0, c("Input", "Function", "Output"), cex = 1.4)
+arrows(c(-3.75, 2.25), 0, c(-2.25, 3.75), 0, length = 0.1)
+@ 
+\vspace{-60pt}
+\begin{figure}[h]
+  \centering
+  \includegraphics[height = 0.9\textwidth, keepaspectratio]{Figure/fun1}
+  \label{fig:fun1}
+\end{figure}
+
+This is an essential building block for the R package. 
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Functions}
+\vspace{10pt}
+  We have seen many functions, e.g. \texttt{log},
+    \texttt{mean}, \texttt{table}, \texttt{with}, etc.
+<<fun2, echo = F, message = F, warning=FALSE, include = F>>=
+plot.new()
+plot.window(xlim = c(-8, 8), ylim = c(-1, 1))
+draw.circle(-6, 0, 2)
+draw.circle(0, 0, 2)
+draw.circle(6, 0, 2)
+text(c(-6, 0, 6), 0, c("1, 2, 3, 4", "Mean", "2.5"), cex = 1.4)
+arrows(c(-3.75, 2.25), 0, c(-2.25, 3.75), 0, length = 0.1)
+@ 
+\vspace{-60pt}
+\begin{figure}[h]
+  \centering
+  \includegraphics[height = 0.9\textwidth, keepaspectratio]{Figure/fun2}
+  \label{fig:fun2}
+\end{figure}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Working with functions}
+\begin{itemize}
+   \item Functions can be user-defined, i.e., you can write your own.
+   \item Output is the last line of the function. You can use \texttt{return()} to specifiy the output.
+   \item Here is a function calculates the standard error of the mean (SEM).
+\end{itemize}
+<<echo = F>>=
+options(continue = " ")
+opts_chunk$set(comment=NA)
+thm <- knit_theme$get("moe")  # parse the theme to a list
+knit_theme$set(thm)
+issp.df = read.csv("../../Data/issp.csv", stringsAsFactors = FALSE)
+@
+<<tidy = F>>=
+mystder <- function(x){
+    mysd <- sd(x, na.rm = TRUE) # Calc std. deviation
+    n <- length(x)              # Calc sample size
+    mysd/sqrt(n)                # Definition of SEM
+}
+mystder(issp.df$Age)
+@
+\begin{itemize}
+  \item A set of user-defined functions can be bundled together into an R \texttt{package}.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Getting data into \texttt{R}}
+\begin{itemize}
+  \item Base \texttt{R} includes only functions which read data sets saved in simple file formats, e.g. \texttt{csv}, \texttt{txt}, tab delimited, etc.
+  \item What if your data was saved in another format, e.g. STATA, SPSS, or SAS spreadsheets? 
+  \item The \texttt{haven} package for \texttt{R} contains functions that may help!
+  \url{https://cran.r-project.org/web/packages/haven/index.html}
+\end{itemize}
+%\begin{alltt}
+\begin{verbatim}
+> library(haven)
+> stata <- read_dta("data.dta")
+> spss <- read_sav("data.sav")
+> sas <- read_sas("data.sas7bdat")
+> sasxport <- read_xpt("data.xpt")
+\end{verbatim}
+%\end{alltt}
+However, it is always the easiest and safest to read data into \texttt{R} from a \texttt{csv} file.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Packages}
+  \begin{itemize}
+  \item Currently, the CRAN package repository features 10,098 available
+    packages (17 Feb. 2017). There are about 12,383 CRAN, BioConductor and Github packages in total.
+  \item To install packages from the \texttt{R} GUI, click on
+    \texttt{Packages} $\rightarrow$ \texttt{Install Package(s) ...}
+    $\rightarrow$ \texttt{New Zealand (or whatever region you are
+    located)} $\rightarrow$ \texttt{Package name}
+  \item Or, you can type \texttt{install.packages("\textit{package name}")}, e.g. \texttt{install.packages("haven")}. 
+  \item After the installation, use  \texttt{library(\textit{package name})}
+        to load it into \texttt{R}. Note: Installation is performed only once; however,
+        it must be loaded (i.e. use the command \texttt{library(\textit{package name})})
+        in \emph{every} \texttt{R} session.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Two-way frequency tables}
+<<>>=
+income.gender.tab <- with(issp.df,
+                          table(Income, Gender))
+income.gender.tab
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Two-way frequency tables}
+  We can convert the counts to percentages, i.e.
+<<>>=
+round(prop.table(income.gender.tab, 2) * 100, 1)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{\texttt{which} Income is unavailable or none?}
+Let's use \texttt{R}'s powerful subsetting capabilities to select those cases for which the value of Income is ``NAV; NAP No own income''.
+<<echo = F>>=
+options(width = 50)
+@
+<<>>=
+index <- which(issp.df$Income 
+               == "NAV; NAP No own income")
+index
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{How many are there?}
+<<echo = F>>=
+options(width = 58)
+@
+<<>>=
+# Use length() to count the number of elements in "index".
+length(index)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Who are they?}
+<<echo = F>>=
+options(width = 58)
+@
+<<>>=
+# Use square brackets to extract IDs corresponding  
+# to the cases numbers contained in "index"
+issp.df$ID[index]
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Subsetting}
+Square brackets \texttt{[]} are used to extract subsets of data.
+<<>>=
+# First element only
+issp.df$Gender[1]
+# All but the first element
+issp.df$Gender[-1]
+@
+\end{frame}
+\begin{frame}[fragile]
+\frametitle{Subsetting}
+<<>>=
+#Elements 3 through 8
+issp.df$Gender[3:8]
+#Elements 3 and 8
+issp.df$Gender[c(3, 8)]
+@
+\end{frame}
+\begin{frame}[fragile]
+\frametitle{More on subsetting}
+Subsetting two-dimensional arrays, such as data frames, requires the use of \em{two} indices.
+<<>>=
+#First row or record
+issp.df[1, ] 
+@
+\end{frame}
+\begin{frame}[fragile]
+\frametitle{More on subsetting}
+<<>>=
+#Second column or variable
+issp.df[, 2] 
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{More on subsetting}
+<<>>=
+#Some rows and columns
+issp.df[30:40, c(1, 10:12)] 
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{More on subsetting}
+<<>>=
+#Rows by number, columns by name
+issp.df[1:10, c("ID", "Ethnicity", "Education")] 
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Subsetting in calculations}
+Gender frequencies:
+<<>>=
+table(issp.df$Gender)
+@
+Let's exclude those records with missing gender.
+<<>>=
+exclude.rows <- which(issp.df$Gender == "NA, refused")
+exclude.rows
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Subsetting in calculations} 
+<<>>=
+issp.df$Gender[exclude.rows]
+table(issp.df$Gender[-exclude.rows])
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Subsetting in calculations} 
+<<>>=
+with(issp.df, table(Income, Gender)) 
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Subsetting in calculations} 
+Produce the last table with known gender and income
+<<echo = F>>=
+options(width = 50)
+@
+<<tidy = F>>=
+exclude.rows1 <- 
+  with(issp.df, 
+     which(Gender == "NA, refused"  | 
+           Income == "NAV; NAP No own income"))
+issp.df[exclude.rows1, c("Gender", "Income")]
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Subsetting in calculations} 
+Two-way frequency table, excluding cases of unknown Gender and uknown or no Income.
+<<>>=
+I.G.tab <- with(issp.df[-exclude.rows1, ], 
+                table(Income, Gender)) 
+I.G.tab
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Subsetting in calculations} 
+Convert counts to percentages rounded to 1 decimal place.
+<<>>=
+round(prop.table(I.G.tab)*100, 1)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Easier way} 
+<<>>=
+I.G.tab1 <- with(issp.df, table(Income, Gender))
+dim(I.G.tab1)
+row.names(I.G.tab1) 
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Easier way} 
+<<>>=
+colnames(I.G.tab1) 
+which(row.names(I.G.tab1) == "NAV; NAP No own income")
+which(colnames(I.G.tab1) == "NA, refused")
+@
+\end{frame}
+\begin{frame}[fragile]
+\frametitle{Easier way} 
+<<>>=
+I.G.tab1[-10, -3]
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Easier way} 
+<<>>=
+round(prop.table(I.G.tab1[-10, -3])*100, 1)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{More subsetting in calculations} 
+<<size = "small">>=
+#Mean age for everybody
+with(issp.df, mean(Age, na.rm = TRUE)) 
+#Mean age for male
+with(issp.df, mean(Age[Gender == "Male"], na.rm = TRUE)) 
+#Mean age for male whose annual income is 
+#less than "$10000"
+with(issp.df, mean(Age[Gender == "Male" & 
+                       Income == "$10000 or less"], 
+                   na.rm = TRUE)) 
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Summary}
+  \begin{itemize}
+  \item Making R functions
+  \item Installing and loading R pacakges
+  \item Subsetting vectors and datasets
+  \end{itemize}
+\end{frame}
+
+\end{document}

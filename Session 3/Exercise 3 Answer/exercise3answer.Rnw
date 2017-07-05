@@ -1,0 +1,184 @@
+
+
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage[cm]{fullpage}
+
+\begin{document}
+\setlength\parindent{0cm}
+%\setlength{\oddsidemargin}{0.25cm}
+%\setlength{\evensidemargin}{0.25cm}
+\title{\Large{\textbf{Introduction to \texttt{R}}}\\
+\textit{Answers to Session 3 exercises}}
+\author{Statistical Consulting Centre}
+\date{1 March, 2017}
+\maketitle
+ 
+
+\section{Missing values}
+\label{sec:missing}
+<<echo = FALSE>>=\item 
+options(continue = " ")
+opts_chunk$set(comment=NA)
+sports.df <- read.csv("../../Data/sports.csv", stringsAsFactors = FALSE)
+@
+\begin{enumerate}[(i)]
+\item \label{itm:q1} In question 3(ii) of exercise 2 you identified the ``Can't choose'' cases in \texttt{q1a}. Now, replace these cases by
+  \texttt{NA}.
+<<>>=
+exclude.q1a <- which(sports.df$q1a ==  "Can?t choose")
+sports.df$q1a[exclude.q1a] = NA
+@
+\item Repeat \ref{sec:missing}(\ref{itm:q1}) for \texttt{q1b} -- \texttt{q1e}, so that all cases of ``Can't choose'' are replaced by \texttt{NA}.
+<<>>=
+exclude.q1b <- which(sports.df$q1b ==  "Can?t choose")
+sports.df$q1b[exclude.q1b] <- NA
+exclude.q1c <- which(sports.df$q1c ==  "Can?t choose")
+sports.df$q1c[exclude.q1c] <- NA
+exclude.q1d <- which(sports.df$q1d ==  "Can?t choose")
+sports.df$q1d[exclude.q1d] <- NA
+exclude.q1e <- which(sports.df$q1e ==  "Can?t choose")
+sports.df$q1e[exclude.q1e] <- NA
+@
+\item \label{it:1way-ethnicity} Produce a one-way frequency table of \texttt{ethnicity}.
+<<>>=
+table(sports.df$ethnicity)
+@
+\item Repeat {\bf \ref{sec:missing}}(\ref{it:1way-ethnicity}) after replacing all cases of ``NA, dont know'' with \texttt{NA}.
+<<>>=
+exclude.ethnicity <- which(sports.df$ethnicity == "NA, dont know")
+sports.df$ethnicity[exclude.ethnicity] <- NA
+@
+\item There are only two possible values for \texttt{partner}:
+  \texttt{Yes} and \texttt{No}. Replace any values which are \underline{not} \texttt{Yes} or \texttt{No} with \texttt{NA}.
+<<>>=
+exclude.partner <- with(sports.df, which(partner != "Yes" & partner !="No"))
+sports.df$partner[exclude.partner] <- NA
+@
+
+
+\end{enumerate}
+
+\section{Factor}
+\label{sec:fac}
+\begin{enumerate}[(i)] 
+\item Produce a two-way frequency table of \texttt{q1a} versus \texttt{gender}.
+<<>>=
+with(sports.df, table(q1a, gender))
+@
+\item Table \ref{tab:level} shows the appropriate ordering of the levels of the values in \texttt{q1a} -- \texttt{q1e}. \\
+\begin{table}[!h]
+  \centering
+  \caption{The right levels for \texttt{q1a} to \texttt{q1e}}
+  \begin{tabular}[h]{lr}
+    q1a & Factor(q1a)\\
+\hline
+Daily & 1\\
+Several times a week & 2\\
+Several times a month & 3\\
+Several times a year or less often & 4
+  \end{tabular}
+  \label{tab:level}
+\end{table} \\
+Convert \texttt{q1a} -- \texttt{q1e} into factors with their levels ordered as shown in Table \ref{tab:level}. Then generate two-way frequency tables between \texttt{q1a} to
+\texttt{q1e}, respectively, versus \texttt{gender} to check that you've appropriately ordered these factors' levels.
+<<>>=
+sports.df$q1a <- factor(sports.df$q1a, 
+                        levels = c("Daily", "Several times a week", 
+                                   "Several times a month", 
+                                   "Several times a year or less often"))
+with(sports.df, table(q1a, gender))
+sports.df$q1b <- factor(sports.df$q1b, 
+                        levels = c("Daily", "Several times a week", 
+                                   "Several times a month", 
+                                   "Several times a year or less often"))
+with(sports.df, table(q1b, gender))
+sports.df$q1c <- factor(sports.df$q1c, 
+                        levels = c("Daily", "Several times a week",
+                                   "Several times a month", 
+                                   "Several times a year or less often"))
+with(sports.df, table(q1c, gender))
+sports.df$q1d <- factor(sports.df$q1d, 
+                        levels = c("Daily", "Several times a week", 
+                                   "Several times a month",
+                                   "Several times a year or less often"))
+with(sports.df, table(q1d, gender))
+sports.df$q1e <- factor(sports.df$q1e, 
+                        levels = c("Daily", "Several times a week", 
+                                   "Several times a month",
+                                   "Several times a year or less often"))
+with(sports.df, table(q1e, gender))
+@
+
+\item \label{itm:group} Create a new variable which categorises all
+  participants into one of three age groups: ``Under 40'', ``41 to 60'' and ``Over 61''.
+<<>>=
+age.group <- with(sports.df, ifelse(age <= 40, "Under 40", 
+                             ifelse(age > 40 & age <=60, "41 to 60", "Over 61")))
+@
+
+\item Convert the variable created in {\bf \ref{sec:fac}}(\ref{itm:group})
+  into factors with appropriate levels.
+<<>>=
+age.group <- factor(age.group, levels = c("Under 40", "41 to 60", "Over 61"))
+@
+\item Add the factor into \texttt{sports.df} and name it \texttt{age.group}
+<<>>=
+sports.df$age.group <- age.group
+@
+\end{enumerate}
+%\newpage
+\section{Challenge}
+\label{sec:cha}
+We mentioned in Exercise 2 that the function \texttt{mystder} calculates
+the standard error of the mean (SEM), i.e. 
+<<>>=
+mystder <- function(x){
+       mysd <- sd(x, na.rm = T)
+       n <- length(x)
+       mysd/sqrt(n)
+}
+@
+This function only calculates the standard error correctly if the input does NOT contain missing values. This is because the \texttt{length()} function counts the number of elements in the variable, including missing values. For example:
+<<>>=
+test <- c(1, 2, 3, 4, NA)
+length(test)
+@
+So, \texttt{length(test)} returns \Sexpr{length(test)} instead of \Sexpr{sum((!is.na(test)))}. Suppose you repeat an experiment 5 times, resulting in one missing value; your real/valid sample size is 4. Thus, when you calclate your standard error, use $n = 4$ instead of 5. For example,
+<<>>=
+mysd <- sd(test, na.rm = T)
+mysd
+n <- 4
+n
+mysd/sqrt(n)
+@
+The real SEM for \texttt{test} should be \Sexpr{mysd/sqrt(n)}; however, if we use \texttt{mystder()} to calculate it we get:
+<<>>=
+mystder(test)
+@
+
+Thus, calculating the sample size using \texttt{length()} will lead to an incorrect solution when there are missing values in the data. 
+\begin{enumerate}[(i)] 
+\item Now that you know what is wrong with \texttt{mystder()}, modify it so it gives the correct SEM even if the input contains missing values.  
+<<>>=
+#There are many many ways of doing this. Here is just one example:
+mystder <- function(x){
+       mysd <- sd(x, na.rm = T)
+       n <- sum(!is.na(x))
+       mysd/sqrt(n)
+}
+@
+\item Apply your modified \texttt{mystder} function to \texttt{test} to see whether it returns the correct answer, i.e. \Sexpr{mysd/sqrt(n)}.
+<<>>=
+mystder(test)
+@
+\item Create \texttt{test2}, as shown below, and test your function on this new variable.
+<<>>=
+test2 <- c(1:100, rep(NA, 30))
+mystder(test2)
+@
+The correct value for the SEM should be \Sexpr{sd(test2, na.rm = T)/sqrt(100)}.
+
+\end{enumerate}
+\end{document}

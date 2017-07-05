@@ -1,0 +1,121 @@
+
+
+\documentclass[12pt,a4paper]{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage[cm]{fullpage}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+\setlength\parindent{0cm}
+%\setlength{\oddsidemargin}{0.25cm}
+%\setlength{\evensidemargin}{0.25cm}
+\title{\Large{\textbf{Introduction to \texttt{R}}}\\
+\textit{Session 4 exercises}}
+\author{Statistical Consulting Centre}
+\date{1 March, 2017}
+\maketitle
+ 
+ 
+
+\begin{enumerate}
+\item \label{itm:q1a} Generate a one-way frequency table for \texttt{q1a}.
+ 
+\item Create a new variable called \texttt{q1a.sc} (meaning \emph{q1a score}), where \texttt{q1a.sc} is of type numeric/integer rather than of type \texttt{factor}.
+ 
+\item \label{itm:last} Generate a one-way frequency table of \texttt{q1a.sc} and compare it with the one you generated in question \ref{itm:q1a}. Their frequencies should be identical.
+ 
+\item Repeat the steps in questions \ref{itm:q1a} -- \ref{itm:last} for variables \texttt{q1b} to \texttt{q1e}, thereby creating new variables \texttt{q1b.sc} -- \texttt{q1e}.
+ 
+\item Create a data frame called \texttt{mean.df} containing all five score variables (\texttt{q1a.sc} -- \texttt{q1e.sc}) which you've created. 
+ 
+\item Use \texttt{apply()} on \texttt{mean.df} to calculate each participant's mean score across variables \texttt{q1a.sc} -- \texttt{q1e.sc}. Name this new variable \texttt{nerdy.sc}, meaning \emph{nerdy score}.
+ 
+\item Add the variable \texttt{nerdy.sc} to the \texttt{mean.df} data frame and use \texttt{summary()} to generate the five-number-summary of all \emph{six} variables in \texttt{mean.df}.
+ 
+\item Add the columns of \texttt{nerdy.sc} to \texttt{sports.df} for future use.
+ 
+\item \label{itm:income} Use \texttt{tapply()} to calculate the mean nerdy score for all ten income levels.
+ 
+\item \label{itm:level} Income level 1 is shown first in the output of question \ref{itm:income} while income level 10 is shown last. Do you agree with \texttt{R}'s default ordering of \texttt{income} levels? If not, appropriately order the levels of \texttt{Income}.
+ 
+\item Repeat question \ref{itm:income} to check that {\em your chosen} ordering of \texttt{Income} levels has been correctly set.
+ 
+\item You were introduced to the following function, \texttt{mytab()}, in the Session 4 lecture slides.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{mytab} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{someinput}\hlstd{)\{}
+ \hlstd{n} \hlkwb{<-} \hlkwd{length}\hlstd{(someinput)}
+ \hlstd{n.missing} \hlkwb{<-} \hlkwd{na.check}\hlstd{(someinput)}
+ \hlstd{n.complete} \hlkwb{<-} \hlstd{n} \hlopt{-} \hlstd{n.missing}
+ \hlstd{mymean} \hlkwb{<-} \hlkwd{round}\hlstd{(}\hlkwd{mean}\hlstd{(someinput,} \hlkwc{na.rm} \hlstd{= T),} \hlnum{2}\hlstd{)}
+ \hlstd{mysd} \hlkwb{<-} \hlkwd{round}\hlstd{(}\hlkwd{sd}\hlstd{(someinput,} \hlkwc{na.rm} \hlstd{= T),} \hlnum{2}\hlstd{)}
+ \hlstd{mystder} \hlkwb{<-} \hlkwd{round}\hlstd{(mysd}\hlopt{/}\hlkwd{sqrt}\hlstd{(n.complete),} \hlnum{2}\hlstd{)}
+ \hlstd{Lower.CI} \hlkwb{<-} \hlkwd{round}\hlstd{(mymean} \hlopt{-} \hlnum{1.96}\hlopt{*}\hlstd{mystder,} \hlnum{2}\hlstd{)}
+ \hlstd{Upper.CI} \hlkwb{<-} \hlkwd{round}\hlstd{(mymean} \hlopt{+} \hlnum{1.96}\hlopt{*}\hlstd{mystder,} \hlnum{2}\hlstd{)}
+ \hlkwd{c}\hlstd{(}\hlkwc{Complete.obs} \hlstd{= n.complete,} \hlkwc{Missing.obs} \hlstd{= n.missing,}
+   \hlkwc{Mean} \hlstd{= mymean,} \hlkwc{Std.Error} \hlstd{= mystder,}
+   \hlkwc{Lower.CI} \hlstd{= Lower.CI,} \hlkwc{Upper.CI} \hlstd{= Upper.CI)}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+It depends on the \texttt{na.check()} function, defined earlier, to calculate the number of missing values, i.e., \texttt{mytab()} depends on the availability of \texttt{na.check()} in order for it to work. Modify \texttt{mytab()} so it does {\em no longer} depends on \texttt{na.check()} to calculate the number of missing values. Let's call the modified function \texttt{mytab1()}.
+ 
+\item Use \texttt{mytab1()} to produce a summary table for all six variables in \texttt{mean.df}.
+ 
+\item Use \texttt{mytab1()} to produce a summary table of nerdy scores for all ten income levels.
+ 
+\end{enumerate}
+ 
+\end{document}

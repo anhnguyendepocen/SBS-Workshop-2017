@@ -1,0 +1,110 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+header-includes: 
+   \usepackage{graphicx}
+    \subtitle{Session 2 -- Subsetting data}    
+    \author[SCC]{Statistical Consulting Centre}
+   \institute[\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}\\
+  The Department of Statistics\\
+  The University of Auckland}
+   \titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+date: "19 July, 2017"
+output:
+  beamer_presentation:
+    theme: "Madrid"
+    colortheme: "crane"
+    fonttheme: "professionalfonts"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(tidy = TRUE)
+Growth.df <- read.csv("..\\..\\data\\Growth.csv")
+```
+
+#Functions
+A function is a relationship between a set of inputs (arguments) and a set of outputs. E.g., the function is fed some information on which it operates, the results of which are the output.
+
+\vspace{-30pt}
+
+```{r, echo = FALSE, message=FALSE, fig.asp=0.5}    
+require(plotrix)
+plot.new()
+plot.window(xlim = c(-8, 8), ylim = c(-1, 1))
+draw.circle(-6, 0, 2)
+draw.circle(0, 0, 2)
+draw.circle(6, 0, 2)
+text(c(-6, 0, 6), 0, c("Input", "Function", "Output"), cex = 1.4)
+arrows(c(-3.75, 2.25), 0, c(-2.25, 3.75), 0, length = 0.1)
+```
+\vspace{-50pt}
+
+This is an essential building block for the \texttt{R} package.    
+
+
+# Functions
+ We have seen many functions, e.g. \texttt{log}, \texttt{mean}, \texttt{table}, \texttt{with}, etc.
+
+ \vspace{-30pt}
+```{r, echo = FALSE, message=FALSE, fig.asp=0.5}    
+plot.new()
+plot.window(xlim = c(-8, 8), ylim = c(-1, 1))
+draw.circle(-6, 0, 2)
+draw.circle(0, 0, 2)
+draw.circle(6, 0, 2)
+text(c(-6, 0, 6), 0, c("1, 2, 3, 4", "Mean", "2.5"), cex = 1.4)
+arrows(c(-3.75, 2.25), 0, c(-2.25, 3.75), 0, length = 0.1)
+```
+
+
+# Working with functions
+
+- Functions can be user-defined, i.e., you can write your own.
+- Output is the last line of the function. You can use \texttt{return()} to specifiy the output.
+- Here is a function calculates the standard error of the mean (SEM).
+
+```{r}
+mystder <- function(x){
+    mysd <- sd(x, na.rm = TRUE) # Calc std. deviation
+    n <- length(x)              # Calc sample size
+    mysd/sqrt(n)                # Definition of SEM
+}
+mystder(Growth.df$biomass)
+```
+
+- A set of user-defined functions can be bundled together into an \texttt{R package}.
+
+
+#Getting data into \texttt{R}
+
+- Base \texttt{R} includes only functions which read data sets saved in simple file formats, e.g. \texttt{csv}, \texttt{txt}, tab delimited, etc.
+- What if your data was saved in another format, e.g. STATA, SPSS, or SAS spreadsheets? 
+- The \texttt{haven} package for \texttt{R} contains functions that may help [https://cran.r-project.org/web/packages/haven/index.html][id]
+  
+```
+> library(haven)
+> stata <- read_dta("data.dta")
+> spss <- read_sav("data.sav")
+> sas <- read_sas("data.sas7bdat")
+> sasxport <- read_xpt("data.xpt")
+```
+However, it is always the easiest and safest to read data into \texttt{R} from a \texttt{csv} file.
+
+[id]: https://cran.r-project.org/web/packages/haven/index.html
+
+
+#Packages
+- Currently, the CRAN package repository features 10,098 available packages (4 Jul. 2017). There are about 13,169 CRAN, BioConductor and Github packages in total.
+- To install packages from the \texttt{R} GUI, click on \texttt{Packages}
+  $\rightarrow$ \texttt{Install Package(s) ...} 
+  $\rightarrow$ \texttt{New Zealand (or whatever region you are located)} 
+  $\rightarrow$ \texttt{Package name}
+- Or, you can type \texttt{install.packages(\textit{package name})}, e.g. `install.packages("haven")`. 
+- After the installation, use \texttt{library("\textit{package name}")} to load it into \texttt{R}. 
+
+Note: Installation is performed only once; however, it must be loaded (i.e. use the command \texttt{library("\textit{package name}")}) in *every* \texttt{R} session.
+
+
+
+

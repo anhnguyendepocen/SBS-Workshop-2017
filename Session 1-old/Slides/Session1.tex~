@@ -1,0 +1,661 @@
+\documentclass{beamer}
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{Sweave}
+
+\usetheme{Warsaw}
+\setbeamertemplate{navigation symbols}{}
+\logo{\includegraphics[width=0.1\textwidth,keepaspectratio]{..//..//UOACrest.png}}
+\author[SCC]{Statistical Consulting Center}%\\
+\institute{\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}\\
+%Statistical Consulting Centre\\
+The Department of Statistics\\
+The University of Auckland}
+\title[\hspace{2em}\insertframenumber/\inserttotalframenumber]{NZSSN Courses: Introduction
+to \texttt{R}}
+%\subtitle{Stats 780}
+\begin{document}
+\input{Session1-concordance}
+\maketitle
+\begin{frame}
+  \frametitle{Outline for the course}
+  \begin{table}[h]
+    \centering
+    \begin{tabular}[h]{lll}
+     \hline
+     \textbf{Day} & \textbf{Time}     & \textbf{Session}  \\
+     \hline
+     Tuesday      & 08:30am - 10:30am & R Basics          \\
+                  & 10:30am - 11:00am & Break             \\
+                  & 10:45am - 01:00pm & Data Manipulation \\
+     Wednesday    & 08:30am - 10:30am & R graphics        \\
+                  & 10:30am - 11:00am & Break             \\
+                  & 11:00pm - 01:00pm & Analysis          \\
+     \hline
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{\texttt{R} and UoA's Department of Statistics}
+  \begin{itemize}
+  \item \texttt{R} was initially written by Robert Gentleman and Ross
+    Ihaka -- \textit{R \& R} -- of the \textbf{\textcolor{blue}{Department of Statistics,
+      University of Auckland}}.
+  \item Three members of the \textit{R Development Core Team} are in
+    our department.
+  \end{itemize}
+
+\end{frame}
+\begin{frame}
+  \frametitle{\texttt{R} and UoA's Department of Statistics}
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width = .3\textwidth, keepaspectratio]{ross.jpg}
+  \end{figure}
+   \begin{center}
+     \Large Ross Ihaka
+   \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{\texttt{R} and UoA's Department of Statistics}
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width = .3\textwidth, keepaspectratio]{rob.jpg}
+  \end{figure}
+   \begin{center}
+     \Large Robert Gentleman
+   \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{\texttt{R} and UoA's Department of Statistics}
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width = .3\textwidth, keepaspectratio]{paul.jpg}
+  \end{figure}
+   \begin{center}
+     \Large Paul Murrell
+   \end{center}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{\texttt{R} and UoA's Department of Statistics}
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width = .3\textwidth, keepaspectratio]{thomas.jpg}
+  \end{figure}
+   \begin{center}
+     \Large Thomas Lumley
+   \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{\texttt{R} and UoA's Department of Statistics}
+  \begin{block}{What does this mean?}
+    \textit{If you want to learn \texttt{R}, you are in the right place}
+  \end{block}
+\end{frame}
+
+
+\begin{frame}
+  \begin{block}{What is \texttt{R}?}
+    ``\texttt{R} is a free software environment for statistical computing and graphics''
+  \end{block}
+Key words:
+  \begin{itemize}
+    \item FREE!!!!!
+    \item Statistical computing
+    \item Graphics (much more flexible than SAS, SPSS, JMP, etc.)
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{The \texttt{R} Graphical User Interface (GUI)}
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width = 1\textwidth, keepaspectratio]{Rgui.jpg}
+  \end{figure}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{How to download and install \texttt{R}}
+  \begin{enumerate}
+  \item Go to the CRAN (Comprehensive R Archive Network)
+    \url{cran.stat.auckland.ac.nz}.
+  \item Download the relevant version for Linux/Mac/Windows.
+    \begin{itemize}
+    \item We will only look at \texttt{R} in the Windows environment today.
+    \end{itemize}
+  \item Install it on your computer.
+  \item Once again, it's absolutely for free.
+  \end{enumerate}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Using the \texttt{R} editor}
+  \begin{itemize}
+    \item The \texttt{R} GUI is not menu driven.
+    \item Commands can be typed at the console.
+    \begin{itemize}
+      \item OK for simple calculations requiring few lines of code
+      \item Painful for anything more!
+    \end{itemize}
+    \item We \emph{strongly} recommend using an \texttt{R} editor
+    \begin{itemize}
+      \item Great for reproducible analyses and research!!
+      \item Best editor for you depends on whether you are a(n)...
+      \begin{enumerate}
+        \item Beginner: Built-in \texttt{R} editor,
+        \item Advanced user: \texttt{R} studio, Tinn-R, Notepad++, and many others
+        \item \texttt{R} geek: Emacs
+      \end{enumerate}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{R} as a calculator}
+\begin{Schunk}
+\begin{Sinput}
+> 1+2
+\end{Sinput}
+\begin{Soutput}
+[1] 3
+\end{Soutput}
+\end{Schunk}
+\begin{Schunk}
+\begin{Sinput}
+> 1 + 3^2
+\end{Sinput}
+\begin{Soutput}
+[1] 10
+\end{Soutput}
+\end{Schunk}
+\begin{Schunk}
+\begin{Sinput}
+> log(15) - sqrt(3.4)
+\end{Sinput}
+\begin{Soutput}
+[1] 0.8641413
+\end{Soutput}
+\end{Schunk}
+\begin{Schunk}
+\begin{Sinput}
+> pnorm(1.96)
+\end{Sinput}
+\begin{Soutput}
+[1] 0.9750021
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{R} as a calculator}
+\begin{Schunk}
+\begin{Sinput}
+> x <- 2
+> y <- 3
+> x^2 - 3*y + 5
+\end{Sinput}
+\begin{Soutput}
+[1] 0
+\end{Soutput}
+\end{Schunk}
+\begin{itemize}
+\item \verb|<-| operates \emph{almost} the same as $=$, but \emph{not
+    exactly} the same as $=$.
+\item \verb|<-| has a direction, from right to left, \verb|x <- 2| means
+  assigning 2 to $x$,
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{R} as a calculator}
+  \begin{itemize}
+\item \verb|->| operates the other way around, assigning $x$ to 2. \\
+2 is a real value so you can't do that.
+\begin{Schunk}
+\begin{Sinput}
+> x -> 2
+\end{Sinput}
+\end{Schunk}
+\begin{verbatim}
+Error in 2 <- x : invalid (do_set) left-hand
+side to assignment
+\end{verbatim}
+\item $=$ has no direction and can be confusing sometimes.
+\item A good programmer will stick to \verb|<-|
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Getting help}
+  \begin{itemize}
+  \item Google!!!!\\
+    e.g. How to calculate the mean in \texttt{R}? The
+    search results
+    tell you that the function \texttt{mean()} would be helpful.
+  \item \texttt{?}\\
+    e.g. \texttt{?mean} brings up the help file for this function. It will tell
+    you (almost) everything you need to know to use \texttt{mean()}.
+   \item \texttt{??}\\
+     \texttt{??mean} searches for everything related to mean in your computer.
+   \item \texttt{RSiteSearch(" ")}\\
+    Searches everything on CRAN as well as your computer.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Data, files, statisticians and \texttt{R}}
+  \begin{itemize}
+    \item Statisticians prefer (read: \textbf{\emph{want}}) rectangular data files
+    \begin{itemize}
+      \item Each case in its own row
+      \item Data collected on each variable in its own column
+      \item Variable names in the first row of each column
+      \item No blanks, e.g. fill with NA, *, 99999, anything but a blank!
+    \end{itemize}
+    \item \texttt{R} likes (read: \textbf{\emph{needs}}) this too!
+    \item \texttt{R} prefers to read data files in Comma Separated Value (CSV) format.
+    \item It does not necessarily means \texttt{R} only reads csv.
+  \end{itemize}
+\end{frame}
+ 
+
+%\begin{frame}[fragile]
+%  \frametitle{Getting data into \texttt{R}}
+%%  Try your best to save your data in a \texttt{csv} or
+%    \texttt{txt} format.
+%    \begin{itemize}
+%    \item Most datasets are saved in an Excel spreadsheet.
+%    \item Do as much data cleaning as you can in Excel. No comments,
+%      no formatting, no colours, no fancy fonts.
+%    \item Convert it into \texttt{csv} by clicking on \texttt{Save
+%        As}. Change the \texttt{Save
+%        as type} from \texttt{xlsx} or \texttt{xls} into \texttt{CSV
+%        (Comma Delimited)}.
+%    \item \texttt{CSV} can have one worksheet only. If you have
+%      multiple worksheets, it saves the active worksheet.
+%    \end{itemize}
+%\end{frame}
+
+\begin{frame}
+  \frametitle{\texttt{issp.df}}
+  \begin{itemize}
+\item International Social Survey Programme (ISSP): 1994 - Family and Changing Gender Roles II (Modified)
+\item Question 1 to 4, choose one of the following: Agree strongly, Agree, Neither agree nor disagree, Disagree, Disagree strongly, Can't choose.
+  \end{itemize}
+\begin{enumerate}
+\item Both the man and woman should contribute to the household income.
+\item A man's job is to earn money: a woman's job is to look after the home and family.
+\item It is not good if the man stays at home and cares for the children and the woman goes out to work.
+\item Family life often suffers because men concentrate too much on their work.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{\texttt{issp.df}}
+\begin{enumerate}
+\setcounter{enumi}{4}
+\item Which of these would you say is more important in preparing children for life, to be obedient, to think for themselves, or Can't choose.
+\end{enumerate}
+\begin{itemize}
+\item Question 6 to 8, choose one of the following: Always wrong, Almost always wrong, Wrong only sometimes, Not wrong at all, Can't choose.
+\end{itemize}
+\begin{enumerate}
+\setcounter{enumi}{5}
+\item Do you think it is wrong or not wrong if a man and a woman have sexual relations before marriage?
+\item What if they are in their early teens, say under 16 years old, in that case is it...
+\item What about a married person having sexual relations with someone other than his or her husband or wife, it is...
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\begin{itemize}
+\item ID: Identification number.
+\item Gender.
+\item Age.
+\item Marital Status.
+\item Education: Education level.
+\item Working hours per week: the average number of hours per week.
+\item Income: Individual annual income.
+\item Ethnicity
+\end{itemize}
+\end{frame}
+
+
+%\begin{frame}[fragile]
+  %\frametitle{Read and Check}
+  %\begin{itemize}
+  %\item: Use \texttt{read.csv} to read a CSV file.
+  %\item \texttt{dim()}: Returns the no. of variables (columns) and observations
+   % (rows).
+  %\item \texttt{head()}/\texttt{tail()}: Returns the first/last parts of a data set.
+  %\item \texttt{str()}: Returns the structure of the dataset, e.g., dimension, possible values.
+  %\item \texttt{names()}: Returns the names (variable names in this case) of the dataset.
+ % \end{itemize}
+%\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Reading data into \texttt{R}}
+\begin{Schunk}
+\begin{Sinput}
+> issp.df <- read.csv("C:/issp.csv")
+> head(issp.df)
+\end{Sinput}
+\end{Schunk}
+\begin{Schunk}
+\begin{Soutput}
+       ID                Q1                    Q2
+1 1900073          disagree                 agree
+2 1900013 strongly disagree neither agree nor dis
+3 1900025          disagree     strongly disagree
+4 1900037   cant choose, dk              disagree
+5 1900043          disagree neither agree nor dis
+6 1900061          disagree              disagree
+                     Q3    Q4               Q5
+1 neither agree nor dis agree think themselves
+2              disagree agree think themselves
+3     strongly disagree agree think themselves
+4              disagree agree can t choose, dk
+5              disagree agree think themselves
+6              disagree agree think themselves
+                Q6                  Q7                   Q8
+1     always wrong        always wrong         always wrong
+2     always wrong        always wrong         always wrong
+3 not wrong at all almost always wrong only sometimes wrong
+4 not wrong at all     cant choose, dk         always wrong
+5  cant choose, dk        always wrong         always wrong
+6 not wrong at all        always wrong         always wrong
+  Gender Age  Marital.Status              Education
+1 Female  56 marr,liv as mar        Secondary compl
+2   Male  45        divorced      University degree
+3 Female  38 marr,liv as mar Incpl university,other
+4 Female  33 single,nev marr Incpl university,other
+5 Female  37 marr,liv as mar        Incpl secondary
+6   Male  27 single,nev marr Incpl university,other
+  Working.hours.per.week         Income       Ethnicity
+1                NAV;NAP $10000 or less European/Pakeha
+2                     50  $40001-$50000 European/Pakeha
+3                NAV;NAP  $15001-$20000 European/Pakeha
+4                NAV;NAP  $10001-$15000 European/Pakeha
+5                NAV;NAP $10000 or less European/Pakeha
+6                     35  $20001-$25000 European/Pakeha
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{\texttt{issp.df}
+\begin{Schunk}
+\begin{Sinput}
+> dim(issp.df)
+\end{Sinput}
+\begin{Soutput}
+[1] 1047   16
+\end{Soutput}
+\begin{Sinput}
+> str(issp.df)
+\end{Sinput}
+\begin{Soutput}
+'data.frame':	1047 obs. of  16 variables:
+ $ ID                    : int  1900073 1900013 1900025 1900037 1900043 1900061 1900079 1900085 1900097 1900115 ...
+ $ Q1                    : chr  "disagree" "strongly disagree" "disagree" "cant choose, dk" ...
+ $ Q2                    : chr  "agree" "neither agree nor dis" "strongly disagree" "disagree" ...
+ $ Q3                    : chr  "neither agree nor dis" "disagree" "strongly disagree" "disagree" ...
+ $ Q4                    : chr  "agree" "agree" "agree" "agree" ...
+ $ Q5                    : chr  "think themselves" "think themselves" "think themselves" "can t choose, dk" ...
+ $ Q6                    : chr  "always wrong" "always wrong" "not wrong at all" "not wrong at all" ...
+ $ Q7                    : chr  "always wrong" "always wrong" "almost always wrong" "cant choose, dk" ...
+ $ Q8                    : chr  "always wrong" "always wrong" "only sometimes wrong" "always wrong" ...
+ $ Gender                : chr  "Female" "Male" "Female" "Female" ...
+ $ Age                   : int  56 45 38 33 37 27 43 24 NA 22 ...
+ $ Marital.Status        : chr  "marr,liv as mar" "divorced" "marr,liv as mar" "single,nev marr" ...
+ $ Education             : chr  "Secondary compl" "University degree" "Incpl university,other" "Incpl university,other" ...
+ $ Working.hours.per.week: chr  "NAV;NAP" "50" "NAV;NAP" "NAV;NAP" ...
+ $ Income                : chr  "$10000 or less" "$40001-$50000" "$15001-$20000" "$10001-$15000" ...
+ $ Ethnicity             : chr  "European/Pakeha" "European/Pakeha" "European/Pakeha" "European/Pakeha" ...
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+
+%\begin{frame}[fragile]
+%\frametitle{\texttt{issp.df}}
+%<<>>=
+%#Names of the variables
+%names(issp.df)
+%@
+%\begin{itemize}
+%\item Anything following the \# symbol is treated as a comment and ignored by \texttt{R}.
+%\item Writing comments is a very good habit to develop!
+%\end{itemize}
+%\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Getting data into \texttt{R}}
+  Try your best to save your data in a \texttt{csv} or
+    \texttt{txt} format.
+    \begin{itemize}
+    \item Most datasets are saved in an Excel spreadsheet.
+    \item Do as much data cleaning as you can in Excel. No comments,
+      no formatting, no colours, no fancy fonts.
+    \item Convert it into \texttt{csv} by clicking on \texttt{Save
+        As}. Change the \texttt{Save
+        as type} from \texttt{xlsx} or \texttt{xls} into \texttt{CSV
+        (Comma Delimited)}.
+    \item \texttt{CSV} can have one worksheet only. If you have
+      multiple worksheets, it saves the active worksheet.
+    \end{itemize}
+\end{frame}
+
+%\begin{frame}[fragile]
+%  \frametitle{Data types}
+%  Everything in \texttt{R} is a vector (but some have only one
+%  element).
+%  \begin{enumerate}
+%  \item Numeric, including integer\\
+%    E.g. \texttt{Age}
+%  \item String, or categorical\\
+%    E.g. \texttt{Ethnicity}, \texttt{Gender}, \texttt{Q1 - Q8}.
+%  \item Logical: \texttt{TRUE} or \texttt{FALSE}, e.g.
+%<<>>=
+%1 == 1
+%2 <= 0
+%3 != 2
+%@
+%  \end{enumerate}
+%\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Descriptive statistics}
+Calculate the mean of \texttt{Age}:
+\begin{verbatim}
+> mean(Age)
+Error in mean(Age) : object 'Age' not
+found
+\end{verbatim}
+You must tell \texttt{R} that \texttt{Age} is a variable (column) 
+\emph{within} \texttt{issp.df}, i.e.
+\begin{Schunk}
+\begin{Sinput}
+> mean(issp.df$Age)
+\end{Sinput}
+\begin{Soutput}
+[1] NA
+\end{Soutput}
+\end{Schunk}
+You must also tell \texttt{R} how to deal with missing values, i.e.
+\begin{Schunk}
+\begin{Sinput}
+> mean(issp.df$Age, na.rm = TRUE)
+\end{Sinput}
+\begin{Soutput}
+[1] 45.77179
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Frequency Table}
+\begin{Schunk}
+\begin{Sinput}
+> table(issp.df$Gender)
+\end{Sinput}
+\begin{Soutput}
+     Female        Male NA, refused 
+        607         418          22 
+\end{Soutput}
+\begin{Sinput}
+> sum(table(issp.df$Gender))
+\end{Sinput}
+\begin{Soutput}
+[1] 1047
+\end{Soutput}
+\begin{Sinput}
+> table(issp.df$Gender)/sum(table(issp.df$Gender))
+\end{Sinput}
+\begin{Soutput}
+     Female        Male NA, refused 
+ 0.57975167  0.39923591  0.02101242 
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Frequency Table}
+Tired of typing \texttt{issp.df\$} over and over again? Use the \texttt{with} function.
+\begin{Schunk}
+\begin{Sinput}
+> with(issp.df, table(Gender)/sum(table(Gender)))
+\end{Sinput}
+\begin{Soutput}
+Gender
+     Female        Male NA, refused 
+ 0.57975167  0.39923591  0.02101242 
+\end{Soutput}
+\end{Schunk}
+Turn it into percentages, keep only 1 decimal place.
+\begin{Schunk}
+\begin{Sinput}
+> gender.pct <- with(issp.df, 
+                    table(Gender)/sum(table(Gender)))
+> round(gender.pct*100, 1)
+\end{Sinput}
+\begin{Soutput}
+Gender
+     Female        Male NA, refused 
+       58.0        39.9         2.1 
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Two Way Frequency Table} 
+\begin{Schunk}
+\begin{Sinput}
+> with(issp.df, table(Income, Gender))
+\end{Sinput}
+\begin{Soutput}
+                        Gender
+Income                   Female Male NA, refused
+  $10000 or less            177   57           4
+  $10001-$15000             115   35           2
+  $15001-$20000              49   29           2
+  $20001-$25000              65   50           0
+  $25001-$30000              71   48           2
+  $30001-$40000              59   70           4
+  $40001-$50000              27   47           2
+  $50001-$70000               7   27           1
+  $70001-$100000              4   35           2
+  NAV; NAP No own income     33   20           3
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Two Way Frequency Table} 
+\begin{Schunk}
+\begin{Sinput}
+> income.gender.tab <- with(issp.df, 
+                           table(Income, Gender))
+> prop.table(income.gender.tab, 2)
+\end{Sinput}
+\begin{Soutput}
+                        Gender
+Income                        Female        Male
+  $10000 or less         0.291598023 0.136363636
+  $10001-$15000          0.189456343 0.083732057
+  $15001-$20000          0.080724876 0.069377990
+  $20001-$25000          0.107084020 0.119617225
+  $25001-$30000          0.116968699 0.114832536
+  $30001-$40000          0.097199341 0.167464115
+  $40001-$50000          0.044481054 0.112440191
+  $50001-$70000          0.011532125 0.064593301
+  $70001-$100000         0.006589786 0.083732057
+  NAV; NAP No own income 0.054365733 0.047846890
+                        Gender
+Income                   NA, refused
+  $10000 or less         0.181818182
+  $10001-$15000          0.090909091
+  $15001-$20000          0.090909091
+  $20001-$25000          0.000000000
+  $25001-$30000          0.090909091
+  $30001-$40000          0.181818182
+  $40001-$50000          0.090909091
+  $50001-$70000          0.045454545
+  $70001-$100000         0.090909091
+  NAV; NAP No own income 0.136363636
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Two Way Frequency Table} 
+\begin{Schunk}
+\begin{Sinput}
+> round(prop.table(income.gender.tab, 2)*100, 1)
+\end{Sinput}
+\begin{Soutput}
+                        Gender
+Income                   Female Male NA, refused
+  $10000 or less           29.2 13.6        18.2
+  $10001-$15000            18.9  8.4         9.1
+  $15001-$20000             8.1  6.9         9.1
+  $20001-$25000            10.7 12.0         0.0
+  $25001-$30000            11.7 11.5         9.1
+  $30001-$40000             9.7 16.7        18.2
+  $40001-$50000             4.4 11.2         9.1
+  $50001-$70000             1.2  6.5         4.5
+  $70001-$100000            0.7  8.4         9.1
+  NAV; NAP No own income    5.4  4.8        13.6
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+\begin{frame}
+\frametitle{Packages}
+\includegraphics{Session1-pack}
+\end{frame}
+\end{document}

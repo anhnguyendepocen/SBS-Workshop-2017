@@ -1,0 +1,124 @@
+
+
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage[cm]{fullpage}
+\usepackage{graphicx}
+\begin{document}
+\setlength\parindent{0cm}
+%\setlength{\oddsidemargin}{0.25cm}
+%\setlength{\evensidemargin}{0.25cm}
+\title{\Large{\textbf{Introduction to \texttt{R}}}\\
+\textit{Answers to Session 7 exercises}}
+\author{Statistical Consulting Centre}
+\date{2 March, 2017}
+\maketitle
+ 
+ 
+<<echo = FALSE>>=
+options(continue = " ")
+opts_chunk$set(comment=NA)
+sports.df <- read.csv("../../Data/sports.csv", stringsAsFactors = FALSE)
+exclude.q1a <- which(sports.df$q1a ==  "Can?t choose")
+sports.df$q1a[exclude.q1a] = NA
+exclude.q1b <- which(sports.df$q1b ==  "Can?t choose")
+sports.df$q1b[exclude.q1b] = NA
+exclude.q1c <- which(sports.df$q1c ==  "Can?t choose")
+sports.df$q1c[exclude.q1c] = NA
+exclude.q1d <- which(sports.df$q1d ==  "Can?t choose")
+sports.df$q1d[exclude.q1d] = NA
+exclude.q1e <- which(sports.df$q1e ==  "Can?t choose")
+sports.df$q1e[exclude.q1e] = NA
+exclude.ethnicity <- which(sports.df$ethnicity == "NA, dont know")
+sports.df$ethnicity[exclude.ethnicity] = NA
+exclude.partner <- with(sports.df, which(partner != "Yes" & partner !="No"))
+sports.df$partner[exclude.partner] = NA
+sports.df$q1a <- factor(sports.df$q1a, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1b <- factor(sports.df$q1b, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1c <- factor(sports.df$q1c, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1d <- factor(sports.df$q1d, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1e <- factor(sports.df$q1e, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+age.group <- with(sports.df, ifelse(age <= 40, "Under 40", 
+                             ifelse(age > 40 & age <=60, "41 to 60", "Over 61")))
+age.group <- factor(age.group, levels = c("Under 40", "41 to 60", "Over 61"))
+sports.df$age.group <- age.group
+q1a.sc <- as.numeric(sports.df$q1a)
+q1b.sc <- as.numeric(sports.df$q1b)
+q1c.sc <- as.numeric(sports.df$q1c)
+q1d.sc <- as.numeric(sports.df$q1d)
+q1e.sc <- as.numeric(sports.df$q1e)
+mean.df <- data.frame(cbind(q1a.sc, q1b.sc, q1c.sc, q1d.sc, q1e.sc))
+nerdy.sc <- apply(mean.df, 1, mean, na.rm = T)
+mean.df$nerdy.sc <- nerdy.sc
+sports.df$nerdy.sc <- nerdy.sc
+sports.df$income = factor(sports.df$income, levels = c("5 000$", "10 000$-15 000$", "15 000$-20 000$",
+                                             "20 000$-25 000$", "25 000$-30 000$", "30 000$-40 000$",
+                                             "40 000$-50 000$", "50 000$-70 000$", "70 000$-100 000$",
+                                             "> 100 000$"))
+@ 
+\section{$t$-tests} 
+\label{sec:ttest}
+Carry out a two-sample $t$-test to determine whether:
+\begin{enumerate}[(i)]
+\item males and females have different mean nerdy scores.
+<<>>=
+with(sports.df, t.test(nerdy.sc~gender))
+@
+\item the mean nerdy score of respondents living with their partners differs from that of respondents who do not live with their partners.
+<<>>=
+with(sports.df, t.test(nerdy.sc~partner))
+@
+\end{enumerate}
+
+
+\section{ANOVA} 
+\label{sec:anova}
+\begin{enumerate}[(i)]
+\item Perform a one-way anova to test mean nerdy score differs between the three age groups we have been considering.
+<<>>=
+oneway <- with(sports.df, aov(nerdy.sc~age.group))
+summary(oneway)
+@
+\item What are your conclusions from the one-way anova?
+\item[] {\em At least one age group's mean nerdy score differs from that of the others.}
+\item Find the estimated mean nerdy score over all age groups and for individual age groups.
+<<>>=
+model.tables(oneway, "means")
+@
+\item Perform pair-wise comparisons of mean nerdy scores between all age groups using Tukey's Honest Significance Difference method to compute $p$-values adjusted for multiple comparisons.
+<<>>=
+TukeyHSD(oneway)
+@
+\item Which pairs of age groups differ in mean nerdy score?
+\item[] {\em ``41--60'' and ``Over 61''}
+\item Perform a two-way anova of nerdy score on age group and gender.
+<<>>=
+twoway <- with(sports.df, aov(nerdy.sc~age.group*gender))
+summary(twoway)
+@
+\item Which rows of the two-way ANOVA table are statistically significant? \item[] {\em Those corresponding to} \texttt{age.group} {\em and} \texttt{gender}. {\em The interaction between} \texttt{age.group} {\em and} \texttt{gender} {\em is \underline{not} statistically significant at the 5\% level since} Pr($>$F)$>$0.05.
+<<>>=
+@
+\item Calculate the estimated means for each \texttt{age.group}, \texttt{gender} and \texttt{age.group-gender} combination. Perform {\em appropriate} pair-wise comparisons of means.
+<<>>=
+model.tables(twoway, "means")
+TukeyHSD(twoway)
+@
+\end{enumerate}
+
+
+\section{Tests of Independence} 
+\label{sec:ind}
+\begin{enumerate}[(i)]
+\item Produce a two-way frequency table of counts between \texttt{income} and \texttt{gender}.
+<<>>=
+with(sports.df, table(income, gender))
+@
+\item Do you think that income level depends on gender? Perform an appropriate test to find out.
+<<>>=
+chisq.test(with(sports.df, table(income, gender)))
+@
+
+\end{enumerate}
+\end{document}

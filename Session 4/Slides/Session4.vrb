@@ -1,0 +1,7 @@
+\frametitle{Summary}
+  \begin{itemize}
+  \item Recoding
+  \item Summary Stats
+  \item \texttt{apply()}
+  \item \texttt{tapply()}
+  \end{itemize}

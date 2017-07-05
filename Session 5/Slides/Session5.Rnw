@@ -1,0 +1,549 @@
+\documentclass{beamer}
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{url}
+\usetheme{Madrid}
+\usecolortheme{beaver}
+\setbeamertemplate{navigation symbols}{}
+\titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+%\logo{\includegraphics[width=0.1\textwidth,keepaspectratio]{..//..//UOACrest.png}}
+\author[SCC]{Statistical Consulting Centre}%\\
+\institute[\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}\\
+%Statistical Consulting Centre\\
+The Department of Statistics\\
+The University of Auckland}
+\title[Session 5 -- Graphics]{NZSSN Courses: Introduction to \texttt{R}}
+\subtitle{Session 5 -- Graphics}
+\date{2 March, 2017}
+\begin{document}
+%\SweaveOpts{concordance=TRUE}
+\maketitle
+
+\begin{frame}[fragile]
+  \frametitle{Exploring your data}
+<<echo = F>>=
+options(continue = " ")
+opts_chunk$set(comment=NA)
+thm = knit_theme$get("moe")  # parse the theme to a list
+knit_theme$set(thm)
+issp.df = read.csv("../../Data/issp.csv", stringsAsFactors = FALSE)
+gender.na <- which(issp.df$Gender == "NA, refused")
+issp.df$Gender[gender.na] = NA
+Q6.na <- which(issp.df$Q6 == "na, refused")
+issp.df$Q6[Q6.na] = NA
+issp.df$Q6 = factor(issp.df$Q6, levels = c("always wrong", "almost always wrong", "only sometimes wrong", "not wrong at all", "cant choose, dk"))
+Q7.na <- which(issp.df$Q7 == "na, refused")
+issp.df$Q7[Q7.na] <- NA
+issp.df$Q7 = factor(issp.df$Q7, levels = c("always wrong", "almost always wrong", "only sometimes wrong", "not wrong at all", "cant choose, dk"))
+Q8.na <- which(issp.df$Q8 == "na, refused")
+issp.df$Q8[Q8.na] <- NA
+issp.df$Q8 = factor(issp.df$Q8, levels = c("always wrong", "almost always wrong", "only sometimes wrong", "not wrong at all", "cant choose, dk"))
+Q1.na <- which(issp.df$Q1 == "na, refused" | issp.df$Q1 == "can't choose, dk")
+issp.df$Q1[Q1.na] <- NA
+issp.df$Q1 = factor(issp.df$Q1,
+                    levels = c("strongly agree",
+                    "agree", "neither agree nor dis",
+                    "disagree", "strongly disagree"))
+issp.df$age.group = ifelse(issp.df$Age<=35, "Under 35",
+                           ifelse(issp.df$Age <= 60, "36 to 60", "Over 61"))
+issp.df$age.group = factor(issp.df$age.group,
+                           levels = c("Under 35",
+                                      "36 to 60",
+                                      "Over 61"))
+issp.df$Q2 <- ifelse(issp.df$Q2 == "cant choose, dk" | issp.df$Q2 == "na, refused", NA, issp.df$Q2)
+issp.df$Q2 = factor(issp.df$Q2,
+                    levels = c("strongly agree",
+                    "agree", "neither agree nor dis",
+                    "disagree", "strongly disagree"))
+
+issp.df$Q3 <- ifelse(issp.df$Q3 == "cant choose, dk" |
+                     issp.df$Q3 == "na, refused",
+                     NA, issp.df$Q3)
+issp.df$Q3 = factor(issp.df$Q3,
+                    levels = c("strongly agree",
+                    "agree", "neither agree nor dis",
+                    "disagree", "strongly disagree"))
+issp.df$Q4 <- ifelse(issp.df$Q4 == "cant choose, dk" |
+                     issp.df$Q4 == "na, refused",
+                     NA, issp.df$Q4)
+issp.df$Q4 = factor(issp.df$Q4,
+                    levels = c("strongly agree",
+                    "agree", "neither agree nor dis",
+                    "disagree", "strongly disagree"))
+Q1.sca <- as.numeric(issp.df$Q1)
+Q2.sca <- as.numeric(issp.df$Q2)
+Q3.sca <- as.numeric(issp.df$Q3)
+Q4.sca <- as.numeric(issp.df$Q4)
+total.lik <- Q1.sca + Q2.sca + Q3.sca + Q4.sca
+scale.df <- data.frame(cbind(Q1.sca, Q2.sca, Q3.sca, Q4.sca, total.lik))
+issp.df$Income <- ifelse(issp.df$Income
+                         == "NAV; NAP No own income",
+                         NA, issp.df$Income)
+issp.df$total.lik <- scale.df$total.lik
+@
+\begin{itemize}
+  \item Examine for patterns, relationships, structures, and
+    other features.
+  \item Do this using graphs, tables and summary statistics.
+  \item Patterns are more easily seen in graphs.
+  \item Remember:
+    \begin{center}
+      ``\texttt{R} is a free software environment for statistical computing and \emph{graphics}''
+    \end{center}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Designing graphs}
+Two important considerations when designing a graph:
+\vspace{0.5cm}
+\begin{itemize}
+\item It should have something to say.
+  \begin{itemize}
+  \item Decide what information you want your graph to display.
+  \item Graphical software is capable of producing any number of different graphs, so generating graphs with meaningless information is quite simple to do!
+  \end{itemize}
+\item It should be easy to interpret.
+  \begin{itemize}
+  \item Simplicity is key!
+  \item Sufficiently large fonts, all axes labelled, clearly defined legends, etc.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Some functions for drawing graphs}
+  \begin{itemize}
+  \item Usually, we use \texttt{plot()} to create a graph and then
+    \texttt{lines()}, \texttt{points()}, \texttt{text()}, and other
+    commands to annotate it.
+  \item \texttt{plot()} does appropriate things for different types of
+    variables (see later examples).
+  \item Variables of type \texttt{cha}racter are not suitable for plotting (and analysis). Convert such variables to type \texttt{factor}.
+  \item There are no ``erase'' or ``undo'' functions, so store your commands in an \texttt{R} script.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Boxplots}
+<<eval = F>>=
+with(issp.df, plot(age.group, total.lik))
+@
+<<box1, include = F>>=
+with(issp.df, plot(age.group, total.lik))
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.6\textwidth, keepaspectratio]{Figure/box1}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:box1}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Boxplots}
+<<>>=
+with(issp.df, plot(Gender, total.lik))
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Boxplots}
+\texttt{age.group} is a factor but \texttt{Gender} is not.
+<<>>=
+class(issp.df$Gender)
+class(issp.df$age.group)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Boxplots}
+
+<<box2, fig.align = 'center', out.width = '0.6\\linewidth'>>=
+with(issp.df, plot(factor(Gender), total.lik))
+@
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Axes need labels}
+<<eval = F, tidy = F>>=
+with(issp.df, plot(age.group, total.lik,
+    xlab = "Age Group", ylab = "Total score"))
+@
+<<box3, include = F>>=
+with(issp.df, plot(age.group, total.lik, xlab = "Age Group",
+                   ylab = "Total score"))
+@
+\begin{figure}[h]
+  \vspace{-25pt}
+  \centering
+  \includegraphics[height = 0.6\textwidth, keepaspectratio]{Figure/box3}
+  \label{fig:box3}
+\end{figure}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Axis labels are too small!!}
+<<eval = F, tidy = F>>=
+with(issp.df, plot(age.group, total.lik, cex.lab = 1.5,
+    xlab = "Age Group", ylab = "Total score"))
+@
+<<box4, include = F>>=
+with(issp.df, plot(age.group, total.lik, xlab = "Age Group",
+                   ylab = "Total score", cex.lab = 1.5))
+@
+\begin{figure}[h]
+  \vspace{-25pt}
+  \centering
+  \includegraphics[height = 0.6\textwidth, keepaspectratio]{Figure/box4}
+  \label{fig:box4}
+\end{figure}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Sometimes you need a title}
+<<eval = F, tidy = F>>=
+with(issp.df, plot(age.group, total.lik, cex.lab = 1.5,
+   xlab = "Age Group", ylab = "Total score",
+    main = "Total Score versus Age"))
+@
+<<box5, include = F>>=
+with(issp.df, plot(age.group, total.lik, cex.lab = 1.5,
+   xlab = "Age Group", ylab = "Total score",
+    main = "Total Score versus Age"))
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+\centering
+  \includegraphics[height = 0.55\textwidth, keepaspectratio]{Figure/box5}
+ \label{fig:box5}
+\end{figure}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{boxplot()}}
+More flexible than \texttt{plot()}, \textbf{if} drawing boxplots. Check the help documentation for more details.
+<<eval = F, tidy = F>>=
+with(issp.df, boxplot(total.lik~age.group, 
+   xlab = "Age Group", ylab = "Total score"))
+@
+<<box6, include = F>>=
+with(issp.df, boxplot(total.lik~age.group, xlab = "Age Group", ylab = "Total score"))
+@
+\begin{figure}[h]
+  \vspace{-20pt}
+\centering
+  \includegraphics[height = 0.5\textwidth, keepaspectratio]{Figure/box6}
+ \label{fig:box6}
+\end{figure}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Importance of childhood obedience by age group}
+  Q5: Is obedience important in terms of preparing children for life?\\
+  \vspace{2mm}
+  Examine the data via a two-way frequency table.
+  \vspace{-2mm}
+<<results='hide'>>=
+with(issp.df, table(Q5, age.group))
+@
+\vspace{-6mm}
+<<echo=FALSE>>=
+with(issp.df, table(Q5, age.group))
+@
+\vspace{-5mm}
+<<tidy = F>>=
+issp.df$Q5 <- with(issp.df,
+                ifelse(Q5 == "can t choose, dk" |
+                       Q5 == "NA, refused", NA, Q5))
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Importance of childhood obedience by age group}
+First, convert counts to percentages. Why?
+<<tidy = F>>=
+q5.age <- with(issp.df,
+               100*prop.table(table(Q5, age.group), 2))
+round(q5.age, 1)
+@
+How do we graphically display the information contained in this table?
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Absolute disaster!!!}
+<<bar1, fig.align = 'center', out.width = '0.45\\linewidth', tidy = F>>=
+barplot(q5.age, xlab = "Age group in years", 
+        ylab = "Percentage")
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Better}
+<<bar2, fig.align = 'center', out.width = '0.45\\linewidth', tidy = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years")
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Line along horizontal axis?}
+<<bar10, fig.align = 'center', out.width = '0.45\\linewidth', tidy = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years")
+abline(h = 0)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Vertical axis higher than bars?}
+<<bar11, fig.align = 'center', out.width = '0.45\\linewidth', tidy = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years", ylim = c(0, 100))
+abline(h = 0)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Adding space between bars}
+<<bar3, fig.align = 'center', out.width = '0.45\\linewidth', tidy = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years", ylim = c(0, 100), 
+        space = c(0.2, 1.5))
+abline(h = 0)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Shading with lines?}
+<<eval=FALSE, tidy = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years", ylim = c(0, 100), 
+        space = c(0.2, 1.5), density = c(0, 10))
+abline(h = 0)
+@
+\vspace{-5mm}
+<<bar4, fig.align = 'center', out.width = '0.4\\linewidth', echo = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years", ylim = c(0, 100), 
+        space = c(0.2, 1.5), density = c(0, 10))
+abline(h = 0)
+@
+\vspace{-3mm}
+\begin{center}
+  Can't see the shading?
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Shading with lines?}
+The default colour for shading lines is pale white! Change to black using the \texttt{col} argument.
+<<eval = F, tidy = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years", ylim = c(0, 100), 
+        space = c(0.2, 1.5), density = c(0, 10),
+        col = "black")
+abline(h = 0)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Shading with lines?}
+<<bar5, fig.align = 'center', out.width = '0.6\\linewidth', echo = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years", ylim = c(0, 100), 
+        space = c(0.2, 1.5), density = c(0, 10),
+        col = "black")
+abline(h = 0)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Color-filled bars?}
+<<eval = F, tidy = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years", ylim = c(0, 100), 
+        space = c(0.2, 1.5), col = c("blue", "green"))
+abline(h = 0)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Color-filled bars?}
+<<bar6, fig.align = 'center', out.width = '0.6\\linewidth', echo = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years", ylim = c(0, 100), 
+        space = c(0.2, 1.5), col = c("blue", "green"))
+abline(h = 0)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Legend?}
+<<eval = F, tidy = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years", ylim = c(0, 100), 
+        space = c(0.2, 1.5), legend.text = TRUE)
+abline(h = 0)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Legend?}
+<<bar7, fig.align = 'center', out.width = '0.6\\linewidth', echo = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years", ylim = c(0, 100), 
+        space = c(0.2, 1.5), legend.text = TRUE)
+abline(h = 0)
+@
+\end{frame}
+ 
+
+
+\begin{frame}[fragile]
+  \frametitle{Further improvements}
+\begin{itemize}
+\item Larger title for axes
+\item Get rid of the box drawn outside the legend
+\item Larger legend
+\end{itemize}
+<<eval = F, tidy = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years", ylim = c(0, 100), 
+        space = c(0.2, 1.5), legend.text = TRUE,
+        args.legend = list(bty = "n", cex = 1.3))
+abline(h = 0)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Further improvements}
+<<bar9, fig.align = 'center', out.width='0.6\\linewidth', echo = F>>=
+barplot(q5.age, beside = TRUE, ylab = "Percentage",
+        xlab = "Age group in years", ylim = c(0, 100), 
+        space = c(0.2, 1.5), legend.text = TRUE,
+        args.legend = list(bty = "n", cex = 1.3))
+abline(h = 0)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Histograms}
+<<hist1, fig.align = 'center', out.width='0.6\\linewidth'>>=
+hist(issp.df$Age)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Fewer bins?}
+<<hist2, fig.align = 'center', out.width='0.6\\linewidth'>>=
+hist(issp.df$Age, breaks = 10)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{More bins?}
+<<hist3, fig.align = 'center', out.width='0.6\\linewidth'>>=
+hist(issp.df$Age, breaks = 40)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Always use meaningful axis labels}
+<<hist4, fig.align = 'center', out.width='0.5\\linewidth'>>=
+hist(issp.df$Age, xlab = "Age", main = NULL)
+box(bty="l")
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Scatter plots}
+\begin{itemize}
+\item Not often used in the social sciences??
+\item Introduced briefly here.
+\item Used to display paired quantitative (numeric) data, e.g. age and score per respondent.
+\item Make sure they are numeric.
+\item Use \texttt{plot()} function, e.g.
+<<eval =FALSE>>=
+with(issp.df, plot(Age, total.lik))
+@
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Scatter plots}
+<<scat1, fig.align = 'center', out.width='0.6\\linewidth', echo = FALSE>>=
+with(issp.df, plot(Age, total.lik))
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Graphical Parameters}
+<<eval = FALSE>>=
+?par
+op <- par(mfrow = c(2, 2))       
+  with(issp.df, boxplot(total.lik~age.group,
+      xlab = "Age Group", ylab = "Total score"))
+  barplot(q5.age, beside = TRUE, ylab = "Percentage",
+      xlab = "Age group in years", ylim = c(0, 100),
+      space = c(0.2, 1.5), legend.text = TRUE)
+      abline(h = 0)
+  hist(issp.df$Age)
+  with(issp.df, plot(Age, total.lik))
+## At end of plotting, reset to previous settings:
+par(op)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Graphical Parameters}
+<<par1, fig.align = 'center', out.width='0.6\\linewidth', echo = FALSE>>=
+op <- par(mfrow = c(2, 2))       
+  with(issp.df, boxplot(total.lik~age.group,
+      xlab = "Age Group", ylab = "Total score"))
+  barplot(q5.age, beside = TRUE, ylab = "Percentage",
+      xlab = "Age group in years", ylim = c(0, 100),
+      space = c(0.2, 1.5), legend.text = TRUE)
+      abline(h = 0)
+  hist(issp.df$Age)
+  with(issp.df, plot(Age, total.lik))
+par(op)
+@
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Summary}
+  \begin{itemize}
+  \item Boxplots
+  \item Histograms/Barplots
+  \item Scatterplots
+  \end{itemize}
+\end{frame}
+
+\end{document}

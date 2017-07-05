@@ -1,0 +1,385 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+header-includes: 
+   \usepackage{graphicx}
+    \subtitle{Session 1 -- Introduction}    
+    \author[SCC]{Statistical Consulting Centre}
+   \institute[\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}\\
+  The Department of Statistics\\
+  The University of Auckland}
+   \titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+date: "19 July, 2017"
+output:
+  beamer_presentation:
+    theme: "Madrid"
+    colortheme: "crane"
+    fonttheme: "professionalfonts"
+    fig_caption: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(tidy = TRUE)
+```
+
+# Wednesday
+
+Each session comprises two parts: lecture and practice.
+
+|Session       | Time              | Session 
+|------------- | -------------     | -------------
+|1             | 09:00am - 10:30am | Introduction 
+|              | 10:30am - 10:50am | Break
+|2             | 10:50am - 01:00pm | Subsetting data 
+|              | 01:00pm - 02:00pm | Lunch break  
+|3             | 02:00pm - 03:00pm | Data manipulation 
+|              | 03:00pm - 03:20pm | Break
+|4             | 03:20pm - 04:30pm | Data exploration 
+             
+ 
+# Thursday
+
+Each session comprises two parts: lecture and practice.
+
+|Session       | Time              | Session 
+|------------- | -------------     | -------------
+|1             | 09:00am - 10:30am | Graphics 
+|              | 10:30am - 10:50am | Break
+|2             | 10:50am - 01:00pm | Advanced Graphics 
+|              | 01:00pm - 02:00pm | Lunch break  
+|3             | 02:00pm - 03:00pm | Simple analysis 
+|              | 03:00pm - 03:20pm | Break
+|4             | 03:20pm - 04:30pm | Advanced analysis
+
+
+#  `R` and UoA's Department of Statistics
+
+- `R` was initially written by Robert Gentleman and Ross Ihaka  *R & R* of the **\textcolor{blue}{Department of Statistics, University of Auckland}**.
+- Three members of the *R Development Core Team* are in UoA's Department of Statistics.
+
+\center ![](..//..//S-DS-VC-RGB.png){#id .class width=5cm}
+
+
+# `R` and UoA's Department of Statistics
+
+\center ![Ross Ihaka](ross.jpg){#id .class width=100px} Ross Ihaka
+ 
+\center ![Robert Gentleman](rob.jpg){#id .class width=100px} Robert Gentleman
+
+# `R` and UoA's Department of Statistics
+
+\center ![](paul.jpg){#id .class width=100px} Paul Murrell 
+
+\center ![](Thomas.jpg){#id .class width=70px} Thomas Lumley
+
+
+# `R` and UoA's Department of Statistics
+\begin{block}{What does this mean?}
+  \textit{If you want to learn \texttt{R}, you are talking to the right people!}
+\end{block}
+
+\center ![](groupNew.jpg){#id .class width=300px} 
+
+
+# What is 'R`?
+\begin{block}{What does this mean?}
+  \texttt{R} is a free software environment for statistical computing and graphics''
+\end{block}
+ 
+Key words:
+\begin{itemize}
+  \item FREE!
+  \item Statistical computing
+  \item Graphics (much more flexible than SAS, SPSS, JMP, etc.)
+  \item Support from communities of different fields, i.e. \texttt{R} packages. \url{https://cran.r-project.org/web/views/} and Bioconductor \url{https://www.bioconductor.org/}.
+  \item Even Microsoft is in it: Microsoft R Open. \url{https://mran.microsoft.com/open/}.
+\end{itemize}
+
+# What is 'R`?
+\begin{block}{What does this mean?}
+  \texttt{R} is a free software environment for statistical computing and graphics''
+\end{block}
+
+\texttt{R} and the biological sciences:
+\begin{itemize}
+  \item Many \textcolor{blue}{\emph{applications of statistical methods to biological datasets are 
+  implemented in \texttt{R}}} 
+  \item These \texttt{R} \emph{packages} are publically available on the web for immediate download and use.
+  \item E.g. Next Generation Sequencing, Genomics (\texttt{Bioconductor}).
+\end{itemize}
+
+
+
+#How to download and install \texttt{R}
+\begin{enumerate}
+\item Go to the CRAN (Comprehensive R Archive Network)
+  \url{cran.stat.auckland.ac.nz}.
+\item Download the relevant version for Linux/Mac/Windows.
+  \begin{itemize}
+  \item We will only look at \texttt{R} in the Windows environment today.
+  \end{itemize}
+\item Install it on your computer (for Windows only):
+  \begin{itemize}
+  \item Choose ``Yes (customized startup)'' in Startup options.
+  \item Choose ``SDI (separate windows)'' in Display mode.
+  \item Choose ``HTML help'' in Help .
+  \end{itemize}
+\end{enumerate}
+
+
+#Using the \texttt{R} editor
+\begin{itemize}
+  \item The \texttt{R} GUI is not menu driven.
+  \item Commands can be typed at the console.
+  \begin{itemize}
+    \item OK for simple calculations requiring few lines of code
+    \item Painful for anything more!
+  \end{itemize}
+  \item We \emph{strongly} recommend using an \texttt{R} editor
+  \begin{itemize}
+    \item Great for reproducible analyses and research.
+    \item Best editor for you depends on whether you are a(n)...
+    \begin{enumerate}
+      \item Beginner: Built-in \texttt{R} editor,
+      \item Advanced user: \texttt{R}studio, Tinn-R, Notepad++, and many others.
+      \item \texttt{R} geek: Emacs
+    \end{enumerate}
+  \end{itemize}
+\end{itemize}
+
+# Rstudio
+- Helps in write better R code.
+- Produce reports (Rmarkdown).
+- Produce interactive reports/tools (Shiny).
+- Develope R packages.
+
+# Using \texttt{R} as a calculator
+
+```{r, echo=TRUE}
+1+2
+
+1 + 3^2
+
+log(15) - sqrt(3.4)
+
+pnorm(1.96)
+```
+
+# Variable assignment
+
+- `<-` is the "assign to" operator, made up of `<` and `-` without a space.
+- E.g., `x <- 2` is read as "The value 2 is assigned to the object `x`".
+
+```{r, echo = TRUE}  
+x <- 2
+y <- 3
+x^2 - 3*y + 5
+```
+
+- `<-` has a direction, from right to left, `x <- 2` means assigning 2 to `x`,
+
+# Variable assignment
+
+- `->` operates from left to right, assigning `x` to 2.
+    + 2 is a real value so you can not do that.
+
+```{r, error=TRUE, echo = TRUE, size=10}
+x -> 2
+```
+
+- `=` has no direction and can be confusing sometimes.
+- It is good programming practice to use `<-`.
+- The most important thing is to keep consistent. 
+
+
+# Getting help
+\begin{itemize}
+\item Google!!!!\\
+  e.g. How to calculate the mean in \texttt{R}? The
+  search results
+  tell you that the function \texttt{mean()} would be helpful.
+\item Quick-R: \url{http://www.statmethods.net/}
+\item R-bloggers: \url{https://www.r-bloggers.com/}
+\end{itemize}
+
+
+# Getting help
+\begin{itemize}
+  \item \texttt{?} \\
+  e.g. \texttt{?mean} brings up the help file for this function. It will tell
+    you (almost) everything you need to know to use \texttt{mean()}.
+   \item \texttt{??} \\
+   e.g. \texttt{??mean} searches for everything related to mean in your computer.
+   \item \texttt{RSiteSearch(" ")}\\
+    Searches everything on CRAN as well as your computer.
+\end{itemize}
+
+
+# Data, files, statisticians and \texttt{R}
+\begin{itemize}
+  \item Statisticians prefer (read: \textbf{\emph{want}}) rectangular data files
+  \begin{itemize}
+    \item Each case in its own row
+    \item Data collected on each variable in its own column
+    \item Variable names in the first row of each column
+    \item No blanks, e.g. fill with NA, *, 99999, anything but a blank!
+  \end{itemize}
+  \item \texttt{R} likes (read: \textbf{\emph{needs}}) this too!
+  \item \texttt{R} prefers to read data files in Comma Separated Value (CSV) format.
+  \item This does not mean \texttt{R} only reads files stored in csv format.
+\end{itemize}
+
+# Getting data into \texttt{R}
+Try your best to save your data in a \texttt{csv} or \texttt{txt} format.
+\begin{itemize}
+  \item Most datasets are saved in an Excel spreadsheet.
+  \item Do as much data cleaning as you can in Excel. No comments,
+    no formatting, no colours, no fancy fonts.
+  \item Convert it into \texttt{csv} by clicking on \texttt{Save
+      As}. Change the \texttt{Save as type} from \texttt{xlsx} or \texttt{xls} into \texttt{CSV (Comma Delimited)}.
+  \item \texttt{CSV} can have one worksheet only. If you have
+    multiple worksheets, it saves the active worksheet.
+\end{itemize}
+
+
+
+# Read and Check
+
+- Always set a working directory using `setwd()`, this can be a directory where you store the data and/or outputing the results.  
+- Use \texttt{read.csv} to read a CSV file into \texttt{R}.
+- \texttt{dim()}: Returns the number of observations (rows) and variables (columns).
+- \texttt{head()}/\texttt{tail()}: Returns the first/last few rows of a data set.
+- \texttt{str()}: Returns the structure of the dataset, e.g., dimension, column names, type of data object, first few values of each variable.
+- \texttt{names()}: Returns the names of the variables contained in a dataset.
+
+
+# \texttt{Growth.df}
+Five variables:
+
+- `CO2`: current or double (the current) CO~2~ level.
+- `Species`: *Psidium guajava* (PG), *Archontophoenix cunninghamiana* (AC) and *Scheffera actinophylla* (SA).
+- `root`: root biomass
+- `shoot`: shoot biomass
+- `biomass`: total biomass
+
+
+# Reading data into \texttt{R}
+```{r, eval=FALSE, echo = TRUE}
+setwd("your working directory")
+Growth.df <- read.csv("Growth.csv")
+head(Growth.df)
+```
+
+```{r, eval=TRUE, echo = FALSE}
+Growth.df <- read.csv("..\\..\\data\\Growth.csv")
+head(Growth.df)
+```
+
+# \texttt{dim()} and \texttt{str()}
+```{r, eval=FALSE, echo = TRUE}
+dim(Growth.df)
+str(Growth.df)
+```
+
+```{r, eval=TRUE, echo = FALSE}
+dim(Growth.df)
+str(Growth.df)
+```
+
+# \texttt{names(Growth.df)}
+
+```{r, eval=TRUE, echo = TRUE}
+#Names of the variables
+names(Growth.df)
+```
+
+- Anything following the \texttt{\#} symbol is treated as a comment and ignored by \texttt{R}.
+- Writing comments is a very good habit to develop!
+
+
+# Descriptive statistics
+Calculate the mean of \texttt{biomass}:
+
+```{r, error=TRUE, echo = TRUE}
+mean(biomass)
+```
+
+You must tell \texttt{R} that \texttt{biomass} is a variable (column) *within* \texttt{Growth.df}, i.e.
+```{r, error=TRUE, echo = TRUE}
+mean(Growth.df$biomass)
+```
+You must also tell \texttt{R} how to deal with missing values: remove them before calculating the mean, i.e.
+```{r, error=TRUE, echo = TRUE}
+mean(Growth.df$biomass, na.rm = TRUE)
+```
+
+# \texttt{table} of counts
+```{r}
+# One-way table of counts
+
+table(Growth.df$Species)
+```
+
+# \texttt{table} of proportions
+
+```{r}
+# Total count
+total <- sum(table(Growth.df$Species))
+total
+
+# Proportions of total
+table(Growth.df$Species)/total
+```
+
+# One-way tables \texttt{with} less typing
+Tired of typing \texttt{Growth.df\$} over and over again? Use the \texttt{with} function.
+```{r}
+Species.table <- with(Growth.df, table(Species))
+Species.table
+total <- sum(Species.table)
+Species.table/total
+```
+
+
+# One-way tables \texttt{with} less typing
+
+```{r}
+#Convert to percentages
+Species.pct <- 100*Species.table/total
+Species.pct
+# Round to 1 decimal place
+round(Species.pct, 1)
+```
+
+#  Two-way frequency tables
+```{r}
+Species.CO2.tab <- with(Growth.df, table(Species, CO2))
+Species.CO2.tab
+```
+
+#  Two-way frequency tables
+```{r}
+# Calculate proportion with respect to 'margin' total
+# margin = 1 (row total) or 2 (column total) 
+perc.Species.CO2 <- prop.table(Species.CO2.tab, margin=2)
+perc.Species.CO2
+```
+
+# Two-way frequency tables
+```{r}
+# Tabulate as percentages
+round(100*perc.Species.CO2, 1)
+```
+
+# Summary
+- Quick introduction to \texttt{R}
+- Getting data into \texttt{R}
+- Frequency tables
+
+
+
+
+
+
+

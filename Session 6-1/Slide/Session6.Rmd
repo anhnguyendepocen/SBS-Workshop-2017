@@ -1,0 +1,508 @@
+---
+title: "NZSSN Courses: Introduction to $\\mathtt{R}$"
+header-includes: 
+   \usepackage{graphicx}
+    \subtitle{Session 6 -- Advanced Graphics}    
+    \author[SCC]{Statistical Consulting Centre}
+   \institute[\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}\\
+  The Department of Statistics\\
+  The University of Auckland}
+   \titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+date: "2 March, 2017"
+output:
+  beamer_presentation:
+    theme: "Madrid"
+    colortheme: "beaver"
+    fonttheme: "professionalfonts"
+---
+
+```{r setup, include=FALSE}
+options(continue = " ")
+issp.df = read.csv("../../Data/issp.csv", stringsAsFactors = FALSE)
+gender.na <- which(issp.df$Gender == "NA, refused")
+issp.df$Gender[gender.na] = NA
+Q6.na <- which(issp.df$Q6 == "na, refused")
+issp.df$Q6[Q6.na] = NA
+issp.df$Q6 = factor(issp.df$Q6, levels = c("always wrong", "almost always wrong", "only sometimes wrong", "not wrong at all", "cant choose, dk"))
+Q7.na <- which(issp.df$Q7 == "na, refused")
+issp.df$Q7[Q7.na] <- NA
+issp.df$Q7 = factor(issp.df$Q7, levels = c("always wrong", "almost always wrong", "only sometimes wrong", "not wrong at all", "cant choose, dk"))
+Q8.na <- which(issp.df$Q8 == "na, refused")
+issp.df$Q8[Q8.na] <- NA
+issp.df$Q8 = factor(issp.df$Q8, levels = c("always wrong", "almost always wrong", "only sometimes wrong", "not wrong at all", "cant choose, dk"))
+Q1.na <- which(issp.df$Q1 == "na, refused" | issp.df$Q1 == "can't choose, dk")
+issp.df$Q1[Q1.na] <- NA
+issp.df$Q1 = factor(issp.df$Q1, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+issp.df$age.group = ifelse(issp.df$Age<=35, "Under 35", 
+                           ifelse(issp.df$Age <= 60, "36 to 60", "Over 61"))
+issp.df$age.group = factor(issp.df$age.group, 
+                           levels = c("Under 35", 
+                                      "36 to 60", 
+                                      "Over 61"))
+issp.df$Q2 <- ifelse(issp.df$Q2 == "cant choose, dk" | issp.df$Q2 == "na, refused", NA, issp.df$Q2)
+issp.df$Q2 = factor(issp.df$Q2, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+
+issp.df$Q3 <- ifelse(issp.df$Q3 == "cant choose, dk" | 
+                     issp.df$Q3 == "na, refused", 
+                     NA, issp.df$Q3)
+issp.df$Q3 = factor(issp.df$Q3, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+issp.df$Q4 <- ifelse(issp.df$Q4 == "cant choose, dk" | 
+                     issp.df$Q4 == "na, refused", 
+                     NA, issp.df$Q4)
+issp.df$Q4 = factor(issp.df$Q4, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+Q1.lik <- as.numeric(issp.df$Q1)
+Q2.lik <- as.numeric(issp.df$Q2)
+Q3.lik <- as.numeric(issp.df$Q3)
+Q4.lik <- as.numeric(issp.df$Q4)
+total.lik <- Q1.lik + Q2.lik + Q3.lik + Q4.lik
+scale.df <- data.frame(cbind(Q1.lik, Q2.lik, Q3.lik, Q4.lik, total.lik))
+issp.df$Income <- ifelse(issp.df$Income 
+                         == "NAV; NAP No own income",
+                         NA, issp.df$Income)
+issp.df$total.lik <- scale.df$total.lik
+issp.df$Q5 <- with(issp.df, ifelse(Q5 == "can t choose, dk" 
+                          | Q5 == "NA, refused", NA, Q5))
+```
+##`ggplot2` package
+- Documentation: 
+[http://docs.ggplot2.org/current/](http://docs.ggplot2.org/current/)
+
+- recommended reading "The Layered Grammar of Graphics":
+[http://vita.had.co.nz/papers/layered-grammar.pdf](http://vita.had.co.nz/papers/layered-grammar.pdf)
+
+- Load `ggplot2` package
+```{r}
+library(ggplot2)
+```
+
+## Create a new ggplot
+
+- Initialising a ggplot object.
+```{r, fig.height=2, fig.width=3, warning=FALSE, fig.align='center'}
+ggplot(data = issp.df,
+       mapping = aes(x = Age, y = total.lik))
+```
+
+## Create a new ggplot
+
+- Initialising a ggplot object.
+```{r, eval=FALSE}
+ggplot(data = issp.df, 
+       mapping = aes(x = Age, y = total.lik))
+```
+There are three common ways to invoke ggplot:
+
+- `ggplot(issp.df, aes(x, y, <other aesthetics>))`
+- `ggplot(issp.df)`
+- `ggplot()`
+
+## Create a new ggplot
+- assign this ggplot object to a variable
+```{r, fig.height=2, fig.width=3, warning=FALSE, fig.align='center'}
+g <- ggplot(data = issp.df, 
+       mapping = aes(x = Age, y =  total.lik))
+```
+
+## Create a Scatterplot
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+g + geom_point()
+```
+- `geom`, short for geometric object, describes the type of plot you will produce.
+
+## Create a Scatterplot
+- Note that here are three common ways to invoke ggplot: 
+```{r, eval=FALSE}
+ggplot(data = issp.df, 
+       mapping = aes(x = Age, y =  total.lik)) + geom_point()
+ggplot(data = issp.df) + 
+  geom_point( mapping = aes(x = Age, y =  total.lik))
+ggplot() + 
+  geom_point(data = issp.df, 
+             mapping = aes(x = Age, y =  total.lik))
+```
+- always check the documentation, `?geom_point`, for which aesthetics can be used. 
+
+## First method is recommended
+```{r, fig.height=2, fig.width=3, warning=FALSE, fig.align='center'}
+g <- ggplot(data = issp.df, 
+       mapping = aes(x = Age, y =  total.lik))
+g + geom_point()
+```
+
+## Control colour and shape
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+g + geom_point(aes(colour = Gender, shape = Gender))
+```
+- always check the documentation, `?geom_point`, for which aesthetics can be used.
+- note the missing values in the legend labelling
+
+## Modify axis, legend, and plot labels
+```{r, fig.height=2.25, fig.width=4, warning=FALSE, fig.align='center'}
+(g <- g + geom_point(aes(colour = Gender, shape = Gender)) +
+   labs(title = "Total score versus Age",
+   x = "Age", y = "Total score"))
+```
+
+## Theme controls non-data components of the plot
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+g + theme(plot.title = element_text(size=8, hjust = 0.5),
+        axis.title = element_text(size=8),
+        legend.title = element_text(size=8), 
+        legend.text = element_text(size=8) )
+```
+
+## Create a Scatterplot
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+g <- ggplot(
+  data = na.omit(issp.df[,c("Age", "total.lik", "Gender")]), 
+  mapping = aes(x = Age, y =  total.lik, 
+                color = Gender, shape = Gender)) + 
+  geom_point() +
+  labs(title ="Total score versus Age",  
+        x = "Age", y = "Total score")
+```
+
+- `ggplot` object can be further modified. 
+ 
+
+## Create a Scatterplot
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+myTheme <- theme_bw() + 
+  theme(plot.title = element_text(size=8, hjust = 0.5),
+        axis.title=element_text(size=8),
+        legend.title = element_text(size=8), 
+        legend.text = element_text(size=8) )
+```
+
+- `myTheme` can be reused for different types of plot. 
+
+
+## Scatterplot
+```{r, fig.height=2.5, fig.width=5, warning=FALSE, fig.align='center'}
+g +  myTheme
+```
+
+## Scatterplot with a smoother
+```{r, fig.height=2.5, fig.width=5, warning=FALSE, fig.align='center', message=FALSE}
+g +  geom_smooth() + myTheme
+```
+
+## Bar chart
+```{r, fig.height=2.5, fig.width=4, warning=FALSE, fig.align='center'}
+ggplot(na.omit(issp.df[,c("ID", "age.group")]), 
+       aes(x = age.group)) + geom_bar() + myTheme
+```
+
+## Importance of childhood obedience by age group
+Q5: Is obedience important in terms of preparing children for life?
+```{r, fig.height=2, fig.width=5, warning=FALSE, fig.align='center'}
+ggplot(na.omit(issp.df[,c("ID", "age.group", "Q5")]), 
+       aes(x = age.group, fill = Q5)) + 
+      geom_bar() + myTheme
+```
+
+## Bar chart on proportions
+
+```{r, fig.height=2, fig.width=5, warning=FALSE, fig.align='center'}
+g <- ggplot(na.omit(issp.df[,c("ID", "age.group", "Q5")]), 
+  aes(x = age.group, y = (..count..)/sum(..count..), 
+      fill = Q5))
+g + geom_bar() + myTheme
+```
+
+## Bar chart on proportions
+```{r, fig.height=2, fig.width=5, warning=FALSE, fig.align='center'}
+g + geom_bar(position = "dodge") + 
+  labs( x = "Age group in years", y = "Percentage")+
+  myTheme
+```
+
+## Boxplot using geom_boxplot()
+```{r , fig.height=2, fig.width=3, warning=FALSE, fig.align='center'}
+ggplot(na.omit(issp.df[,c("age.group", "total.lik")]), 
+       aes(x = age.group, y = total.lik)) + 
+  geom_boxplot()  + 
+  labs(title = "Total Score versus Age", 
+      x = "Age Group", y = "Total score") +  myTheme
+```
+
+## Boxplot with panels using facet_wrap()
+```{r, fig.height=3, fig.width=4, warning=FALSE, fig.align='center'}
+g <- ggplot(na.omit(issp.df[,c("ID", "age.group", 
+                               "total.lik", "Income")]), 
+       aes(x = age.group, y = total.lik)) + 
+  geom_boxplot()  + labs(title = "Total Score versus Age", 
+            x = "Age Group", y = "Total score") 
+```
+
+## Boxplot with panels using facet_wrap()
+```{r}
+g + facet_wrap(~Income) + myTheme
+```
+
+
+## Histogram
+
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center', message = FALSE}
+ggplot(issp.df, aes(x = Age)) +   
+  geom_histogram() + myTheme
+
+```
+
+## Histogram with wider binwidth
+
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+ggplot(issp.df, aes(x = Age)) +   
+  geom_histogram(binwidth = 10)+
+  labs(x = "Age") + myTheme
+```
+
+## Histogram with narrower binwidth
+
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+ggplot(issp.df, aes(x = Age)) +   
+  geom_histogram(binwidth = 1)+
+  labs(x = "Age")  + myTheme
+```
+
+## Plot means in context
+
+```{r}
+with(issp.df, tapply(total.lik, age.group, 
+                     mean, na.rm = TRUE))
+```
+- Means are all but meaningless unless they are presented in context.
+- Always present with standard deviations (SDs) or standard error of means (SEs) or confidence intervals.
+- Plot means with 95\% confidence intervals ($\pm$ 1.96 $\times$ SE).
+    + $\pm$ 1 $\times$ SE yields (approx.) a `r round((1 - pnorm(-1)*2)*100, 0)`\% confidence interval. Equivalent to using a 16\% level of significance!!!!
+    + $\pm$ 1 $\times$ SD tells us \textbf{ABSOLUTELY NOTHING} about whether two means are statistically different from one another.
+    
+    
+## Calculating 95\% CIs
+-  95\% CI $=$ Mean $\pm$ 1.96 $\times$ SE
+- Standard Errors $= \frac{\text{Standard Deviation}}{\sqrt{\text{Sample Size}}}$
+```{r}
+my.m <- with(issp.df, tapply(total.lik, age.group, mean, 
+                             na.rm = TRUE))
+my.m
+my.sd <- with(issp.df, tapply(total.lik, age.group, sd, 
+                              na.rm = TRUE))
+my.sd
+```
+
+    
+## Calculating 95\% CIs
+```{r}
+my.n <- with(issp.df, tapply(total.lik, age.group, 
+            function(x)length(which(!is.na(x)))))
+my.n
+my.stder <- my.sd/sqrt(my.n)
+ci.upper <- my.m + 1.96*my.stder
+ci.lower <- my.m - 1.96*my.stder
+```
+
+## Calculating 95\% CIs
+```{r}
+my.stder <- my.sd/sqrt(my.n)
+ci.upper <- my.m + 1.96*my.stder
+ci.lower <- my.m - 1.96*my.stder
+
+cbind(my.m, ci.lower, ci.upper)
+
+```
+
+## Calculating 95\% CIs
+```{r}
+y.df = data.frame(age.group =  factor(names(my.m)),
+                  my.m, ci.upper, ci.lower)
+  
+y.df 
+```
+
+## Errorbars
+
+```{r, eval=FALSE}
+ggplot(y.df, aes(x = age.group, y = my.m))+geom_point() +
+     geom_errorbar(aes(ymax = ci.upper, ymin = ci.lower), 
+                   width = 0.1)+
+     xlab("Age Group")+
+     ylab("Mean total feminist score") +
+  myTheme
+```
+
+
+## Errorbars
+
+```{r, fig.height=3, fig.width=4, warning=FALSE, fig.align='center' , echo=FALSE}
+y.df = data.frame(age.group =  factor(names(my.m)),
+                  my.m, ci.upper, ci.lower)
+  
+ggplot(y.df, aes(x = age.group, y = my.m))+geom_point() +
+     geom_errorbar(aes(ymax = ci.upper, ymin = ci.lower), 
+                   width = 0.1)+
+     xlab("Age Group")+
+     ylab("Mean total feminist score") +
+  myTheme
+```
+
+
+## Any interaction between Gender and Age group?
+```{r}
+GA.m <- with(issp.df, tapply(total.lik, 
+           list(Gender, age.group), mean, na.rm = TRUE))
+GA.m
+```
+
+## Calculating 95% CIs
+```{r}
+GA.sd <- with(issp.df, 
+              tapply(total.lik, 
+                     list(Gender, age.group), 
+                          sd, na.rm = TRUE))
+
+GA.n <- with(issp.df, tapply(total.lik,
+      list(Gender,age.group),
+      function(x)length(which(!is.na(x)))))
+GA.stder <- GA.sd/sqrt(GA.n)
+GA.upper <- GA.m + 1.96*GA.stder
+GA.lower <- GA.m - 1.96*GA.stder
+```
+
+## Calculating 95% CIs
+```{r, warning=FALSE, fig.align='center'}
+GA.df <- data.frame(
+  Age.group = factor(rep(colnames(GA.m), 2),
+                     levels = colnames(GA.m)),
+  Gender = rep(rownames(GA.m), c(3, 3)),
+  Mean = c(GA.m[1,], GA.m[2,]),
+  Upper = c(GA.upper[1,], GA.upper[2,]),
+  Lower = c(GA.lower[1,], GA.lower[2,])
+  )
+```
+
+## Calculating 95% CIs
+```{r, warning=FALSE, fig.align='center', echo = FALSE}
+GA.df
+```
+
+## Plotting mean $\pm$ 95% CI:
+```{r, warning=FALSE, fig.align='center', eval=FALSE}
+g <- ggplot(GA.df, aes(x = Age.group, y = Mean,
+                  color = Gender)) +
+  xlab("Age Group")+ 
+  ylab("Mean total feminit score")
+
+g + geom_point()+ 
+  geom_errorbar(aes(ymax = Upper, ymin = Lower),
+                width = 0.1) +
+  myTheme
+
+```
+
+## Plotting mean $\pm$ 95% CI:
+```{r, fig.height=3, fig.width=5, warning=FALSE, fig.align='center', echo = FALSE}
+g <- ggplot(GA.df, aes(x = Age.group, y = Mean,
+                  color = Gender)) +
+  xlab("Age Group")+ 
+  ylab("Mean total feminit score")
+
+g + geom_point() + 
+  geom_errorbar(aes(ymax = Upper, ymin = Lower),
+                width = 0.1) +
+  myTheme
+```
+
+## Side-by-side?
+```{r, warning=FALSE, fig.align='center', eval=FALSE}
+dodge <- position_dodge(width=0.2)
+
+g + geom_point(position = dodge) + 
+  geom_errorbar(aes(ymax = Upper, ymin = Lower),
+                width = 0.1, position = dodge) +
+  myTheme
+```
+
+## Side-by-side
+```{r, fig.height=3, fig.width=5, warning=FALSE, fig.align='center', echo = FALSE}
+dodge <- position_dodge(width=0.2)
+
+g + geom_point(position = dodge) + 
+  geom_errorbar(aes(ymax = Upper, ymin = Lower),
+                width = 0.1, position = dodge) +
+  myTheme
+```
+
+## Flip
+```{r, fig.height=3, fig.width=5, warning=FALSE, fig.align='center', echo = FALSE}
+dodge <- position_dodge(width=0.2)
+
+g + geom_point(position = dodge) + 
+  geom_errorbar(aes(ymax = Upper, ymin = Lower),
+                width = 0.1, position = dodge) + coord_flip() +
+  myTheme
+```
+
+## Connect the points?
+```{r, warning=FALSE, fig.align='center', eval=FALSE}
+g + geom_point(position = dodge) + 
+  geom_errorbar(aes(ymax = Upper, ymin = Lower),
+                width = 0.1, position = dodge) + 
+  geom_path(aes(x = as.numeric(Age.group)), 
+            position = dodge) +
+  myTheme
+```
+
+## Connect the points
+```{r, fig.height=3, fig.width=5, warning=FALSE, fig.align='center', echo = FALSE}
+g + geom_point(position = dodge) + 
+  geom_errorbar(aes(ymax = Upper, ymin = Lower),
+                width = 0.1, position = dodge) + 
+  geom_path(aes(x = as.numeric(Age.group)), 
+            position = dodge) +
+  myTheme
+```
+
+##Save a ggplot 
+```{r, eval=FALSE}
+ggsave("mtcars.pdf")
+ggsave("mtcars.png")
+
+ggsave("mtcars.pdf", width = 4, height = 4)
+ggsave("mtcars.pdf", width = 20, height = 20, units = "cm")
+```
+
+
+##Summary 
+
+Plot Types     |  `geom` functions     
+-------------  |  -------------    
+Scatterplot   | `geom_point()`       
+Bars chart    | `geom_bar()` 
+Histogram     | `geom_histogram()`
+Boxplot        | `geom_boxplot()`    
+Line plot     | `geom_path()`       
+Errorbar      | `geom_errorbar()`   
+
+- `ggplot2` Documentation: 
+[http://docs.ggplot2.org/current/](http://docs.ggplot2.org/current/)
+
+- cheatsheets:
+[https://www.rstudio.com/resources/cheatsheets/](https://www.rstudio.com/resources/cheatsheets/)
+
+
+
+

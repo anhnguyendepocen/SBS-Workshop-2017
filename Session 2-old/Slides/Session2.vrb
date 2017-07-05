@@ -1,0 +1,6 @@
+\frametitle{Summary}
+  \begin{itemize}
+  \item Making R functions
+  \item Installing and loading R pacakges
+  \item Subsetting vectors and datasets
+  \end{itemize}

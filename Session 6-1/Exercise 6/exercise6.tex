@@ -1,0 +1,58 @@
+
+
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage[cm]{fullpage}
+\usepackage{graphicx}
+\usepackage{Sweave}
+\begin{document}
+\input{exercise6-concordance}
+\setlength\parindent{0cm}
+%\setlength{\oddsidemargin}{0.25cm}
+%\setlength{\evensidemargin}{0.25cm}
+\title{\Large{\textbf{Introduction to \texttt{R}}}\\
+\textit{Session 6 exercises}}
+\author{Statistical Consulting Centre}
+\date{2 March, 2017}
+\maketitle
+ 
+ 
+\begin{enumerate}
+\item Plot the mean nerdy score for each gender (with $\pm$1.96$\times$SE bars), as shown in Figure \ref{fig:stder1}. 
+\begin{figure}[h]   
+ \centering
+\caption{First plot with standard error bars}
+  \label{fig:stder1}
+\end{figure}
+\newpage
+\item Now reproduce Figure \ref{fig:stder2}. The graph should have:
+\begin{itemize}
+\item for Males: solid circles (representing the mean) and $\pm$1.96$\times$SE bars (representing the lower and upper 95\% confidence limits).
+\item for Females: solid circles (representing the mean) and $\pm$1.96$\times$SE bars (representing the lower and upper 95\% confidence limits).
+\end{itemize}
+\begin{figure}[h]   
+ \centering
+\caption{Second plot with standard error bars}
+  \label{fig:stder2}
+\end{figure}
+
+\newpage
+\item Now read-in the file called \verb|NZmap.csv| in the Data folder and reproduce Figure \ref{fig:stder3}. Hint: create the \texttt{ggplot} object using the following
+\begin{Schunk}
+\begin{Sinput}
+> ggplot(data = nz1.df, aes(x = long, y = lat, group = group, 
++                            fill = Outcome ))
+\end{Sinput}
+\end{Schunk}
+Then, use \verb|geom_polygon()| function.  
+
+\begin{figure}[h]   
+ \centering
+
+\caption{Third plot with mapping}
+  \label{fig:stder3}
+\end{figure}
+
+\end{enumerate}
+\end{document}

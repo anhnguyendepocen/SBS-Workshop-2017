@@ -1,0 +1,153 @@
+
+
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage[cm]{fullpage}
+
+\begin{document}
+\setlength\parindent{0cm}
+%\setlength{\oddsidemargin}{0.25cm}
+%\setlength{\evensidemargin}{0.25cm}
+\title{\Large{\textbf{Introduction to \texttt{R}}}\\
+\textit{Answers to Session 4 exercises}}
+\author{Statistical Consulting Centre}
+\date{1 March, 2017}
+\maketitle
+ 
+ 
+<<echo = FALSE>>=
+options(continue = " ")
+opts_chunk$set(comment=NA)
+sports.df <- read.csv("../../Data/sports.csv")
+exclude.q1a <- which(sports.df$q1a ==  "Can?t choose")
+sports.df$q1a[exclude.q1a] = NA
+exclude.q1b <- which(sports.df$q1b ==  "Can?t choose")
+sports.df$q1b[exclude.q1b] = NA
+exclude.q1c <- which(sports.df$q1c ==  "Can?t choose")
+sports.df$q1c[exclude.q1c] = NA
+exclude.q1d <- which(sports.df$q1d ==  "Can?t choose")
+sports.df$q1d[exclude.q1d] = NA
+exclude.q1e <- which(sports.df$q1e ==  "Can?t choose")
+sports.df$q1e[exclude.q1e] = NA
+exclude.ethnicity <- which(sports.df$ethnicity == "NA, dont know")
+sports.df$ethnicity[exclude.ethnicity] = NA
+exclude.partner <- with(sports.df, which(partner != "Yes" & partner !="No"))
+sports.df$partner[exclude.partner] = NA
+sports.df$q1a <- factor(sports.df$q1a, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1b <- factor(sports.df$q1b, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1c <- factor(sports.df$q1c, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1d <- factor(sports.df$q1d, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1e <- factor(sports.df$q1e, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+age.group <- with(sports.df, ifelse(age <= 40, "Under 40", 
+                             ifelse(age > 40 & age <=60, "41 to 60", "Over 61")))
+age.group <- factor(age.group, levels = c("Under 40", "41 to 60", "Over 61"))
+sports.df$age.group <- age.group
+@
+\begin{enumerate}
+\item \label{itm:q1a} Generate a one-way frequency table for \texttt{q1a}.
+<<>>=
+table(sports.df$q1a)
+@
+\item Create a new variable called \texttt{q1a.sc} (meaning \emph{q1a score}), where \texttt{q1a.sc} is of type numeric/integer rather than of type \texttt{factor}.
+<<>>=
+q1a.sc <- as.numeric(sports.df$q1a)
+@
+\item \label{itm:last} Generate a one-way frequency table of \texttt{q1a.sc} and compare it with the one you generated in question \ref{itm:q1a}. Their frequencies should be identical.
+<<>>=
+table(q1a.sc)
+@
+\item Repeat the steps in questions \ref{itm:q1a} -- \ref{itm:last} for variables \texttt{q1b} to \texttt{q1e}, thereby creating new variables \texttt{q1b.sc} -- \texttt{q1e}.
+<<>>=
+table(sports.df$q1b)
+q1b.sc <- as.numeric(sports.df$q1b)
+table(q1b.sc)
+table(sports.df$q1c)
+q1c.sc <- as.numeric(sports.df$q1c)
+table(q1c.sc)
+table(sports.df$q1d)
+q1d.sc <- as.numeric(sports.df$q1d)
+table(q1d.sc)
+table(sports.df$q1e)
+q1e.sc <- as.numeric(sports.df$q1e)
+table(q1e.sc)
+@
+\item Create a data frame called \texttt{mean.df} containing all five score variables (\texttt{q1a.sc} -- \texttt{q1e.sc}) which you've created. 
+<<>>=
+mean.df <- data.frame(cbind(q1a.sc, q1b.sc, q1c.sc, q1d.sc, q1e.sc))
+## Always check whether mean.df contains what it supposed to contain
+dim(mean.df)
+head(mean.df)
+@
+\item Use \texttt{apply()} on \texttt{mean.df} to calculate each participant's mean score across variables \texttt{q1a.sc} -- \texttt{q1e.sc}. Name this new variable \texttt{nerdy.sc}, meaning \emph{nerdy score}.
+<<>>=
+nerdy.sc <- apply(mean.df, 1, mean, na.rm = TRUE)
+@
+\item Add the variable \texttt{nerdy.sc} to the \texttt{mean.df} data frame and use \texttt{summary()} to generate the five-number-summary of all \emph{six} variables in \texttt{mean.df}.
+<<>>=
+mean.df$nerdy.sc <- nerdy.sc
+head(mean.df)
+apply(mean.df, 2, summary)
+@
+\item Add the columns of \texttt{nerdy.sc} to \texttt{sports.df} for future use.
+<<>>=
+sports.df$nerdy.sc <- nerdy.sc
+@
+\item \label{itm:income} Use \texttt{tapply()} to calculate the mean nerdy score for all ten income levels.
+<<>>=
+with(sports.df, tapply(nerdy.sc, income, mean, na.rm = TRUE))
+@
+\item \label{itm:level} Income level 1 is shown first in the output of question \ref{itm:income} while income level 10 is shown last. Do you agree with \texttt{R}'s default ordering of \texttt{income} levels? If not, appropriately order the levels of \texttt{Income}.
+<<>>=
+sports.df$income = factor(sports.df$income, levels = c("5 000$", "10 000$-15 000$", "15 000$-20 000$",
+                                             "20 000$-25 000$", "25 000$-30 000$", "30 000$-40 000$",
+                                             "40 000$-50 000$", "50 000$-70 000$", "70 000$-100 000$",
+                                             "> 100 000$"))
+@
+\item Repeat question \ref{itm:income} to check that {\em your chosen} ordering of \texttt{Income} levels has been correctly set.
+<<>>=
+with(sports.df, tapply(nerdy.sc, income, mean, na.rm = TRUE))
+@
+\item You were introduced to the following function, \texttt{mytab()}, in the Session 4 lecture slides.
+<<tidy = F>>=
+mytab <- function(someinput){
+ n <- length(someinput)
+ n.missing <- na.check(someinput)
+ n.complete <- n - n.missing
+ mymean <- round(mean(someinput, na.rm = TRUE), 2)
+ mysd <- round(sd(someinput, na.rm = TRUE), 2)
+ mystder <- round(mysd/sqrt(n.complete), 2)
+ Lower.CI <- round(mymean - 1.96*mystder, 2)
+ Upper.CI <- round(mymean + 1.96*mystder, 2)
+ c(Complete.obs = n.complete, Missing.obs = n.missing, 
+   Mean = mymean, Std.Error = mystder, 
+   Lower.CI = Lower.CI, Upper.CI = Upper.CI)
+}
+@
+It depends on the \texttt{na.check()} function, defined earlier, to calculate the number of missing values, i.e., \texttt{mytab()} depends on the availability of \texttt{na.check()} in order for it to work. Modify \texttt{mytab()} so it does {\em no longer} depends on \texttt{na.check()} to calculate the number of missing values. Let's call the modified function \texttt{mytab1()}.
+<<tidy = F>>=
+mytab1 <- function(someinput){
+ n <- length(someinput)
+ n.missing <- length(which(is.na(someinput)))
+ n.complete <- n - n.missing
+ mymean <- round(mean(someinput, na.rm = TRUE), 2)
+ mysd <- round(sd(someinput, na.rm = TRUE), 2)
+ mystder <- round(mysd/sqrt(n.complete), 2)
+ Lower.CI <- round(mymean - 1.96*mystder, 2)
+ Upper.CI <- round(mymean + 1.96*mystder, 2)
+ c(Complete.obs = n.complete, Missing.obs = n.missing, 
+   Mean = mymean, Std.Error = mystder, 
+   Lower.CI = Lower.CI, Upper.CI = Upper.CI)
+}
+@
+\item Use \texttt{mytab1()} to produce a summary table for all six variables in \texttt{mean.df}.
+<<>>=
+apply(mean.df, 2, mytab1)
+@
+\item Use \texttt{mytab1()} to produce a summary table of nerdy scores for all ten income levels.
+<<>>=
+tapply(mean.df$nerdy.sc, sports.df$income, mytab1)
+@
+\end{enumerate}
+ 
+\end{document}

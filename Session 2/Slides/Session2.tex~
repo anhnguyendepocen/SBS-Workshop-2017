@@ -1,0 +1,76 @@
+\documentclass{beamer}
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{Sweave}
+
+\usetheme{Warsaw}
+\setbeamertemplate{navigation symbols}{}
+\logo{\includegraphics[width=0.1\textwidth,keepaspectratio]{..//..//UOACrest.png}}
+\author[SCC]{Statistical Consulting Center}%\\
+\institute{\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}\\
+%Statistical Consulting Centre\\
+The Department of Statistics\\
+The University of Auckland}
+\title[\hspace{2em}\insertframenumber/\inserttotalframenumber]{NZSSN Courses: Introduction
+to \texttt{R}}
+\subtitle{Subsetting}
+\begin{document}
+\input{Session2-concordance}
+\maketitle
+
+\begin{frame}
+  \frametitle{Functions}
+  \begin{itemize}
+  \item We have seen many functions, e.g. \texttt{log},
+    \texttt{mean}, \texttt{table}, \texttt{with}, etc.
+  \item A function is a relationship between a set of inputs (arguments)
+    and a set of outputs. E.g. Function is fed some information, which it
+    then operates on and returns some output.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{What is a function?}
+\includegraphics{Session2-001}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Working with functions}
+\begin{itemize}
+   \item Functions can be user-defined. I.e., you can write your own
+    functions.
+   \item Here is a little function that calculates the standard error.
+
+\begin{Schunk}
+\begin{Sinput}
+> mystder <- function(x){
++     mysd <- sd(x, na.rm = T)
++     n <- length(x)
++     mysd/sqrt(n)
++ }
+> mystder(issp.df$Age)
+\end{Sinput}
+\begin{Soutput}
+[1] 0.5101842
+\end{Soutput}
+\end{Schunk}
+
+\end{itemize}
+\end{frame}
+ \begin{frame}
+\frametitle{Packages}
+\includegraphics{Session2-pack}
+\end{frame}
+\end{document}
