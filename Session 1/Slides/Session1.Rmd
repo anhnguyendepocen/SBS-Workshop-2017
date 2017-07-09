@@ -46,11 +46,11 @@ Each session comprises two parts: lecture and practice.
 |------------- | -------------     | -------------
 |1             | 09:00am - 10:30am | Graphics 
 |              | 10:30am - 10:50am | Break
-|2             | 10:50am - 01:00pm | Advanced Graphics 
+|2             | 10:50am - 01:00pm | Advanced Graphics (ggplot2) 
 |              | 01:00pm - 02:00pm | Lunch break  
 |3             | 02:00pm - 03:00pm | Simple analysis 
 |              | 03:00pm - 03:20pm | Break
-|4             | 03:20pm - 04:30pm | Advanced analysis
+|4             | 03:20pm - 04:30pm | R Markdown
 
 
 #  `R` and UoA's Department of Statistics
@@ -63,15 +63,20 @@ Each session comprises two parts: lecture and practice.
 
 # `R` and UoA's Department of Statistics
 
-\center ![Ross Ihaka](ross.jpg){#id .class width=100px} Ross Ihaka
- 
-\center ![Robert Gentleman](rob.jpg){#id .class width=100px} Robert Gentleman
+\center 
+\includegraphics[width=0.5\textwidth]{ross.jpg} $\;\;\;\;\;\;$
+\includegraphics[width=0.5\textwidth]{rob.jpg}
+
+Ross Ihaka and Robert Gentleman
 
 # `R` and UoA's Department of Statistics
 
-\center ![](paul.jpg){#id .class width=100px} Paul Murrell 
+\center 
+\includegraphics[width=120px]{paul.jpg} $\;\;\;\;\;\;$
+\includegraphics[width=100px]{Thomas.jpg}
 
-\center ![](Thomas.jpg){#id .class width=70px} Thomas Lumley
+Paul Murrell and Thomas Lumley
+
 
 
 # `R` and UoA's Department of Statistics
@@ -96,10 +101,15 @@ Key words:
   \item Even Microsoft is in it: Microsoft R Open. \url{https://mran.microsoft.com/open/}.
 \end{itemize}
 
+# What is `R`? (IEEE Spectrum’s ranking 2016)
+
+![](ranking 2016.png)
+
 # What is 'R`?
 \begin{block}{What does this mean?}
   \texttt{R} is a free software environment for statistical computing and graphics''
 \end{block}
+
 
 \texttt{R} and the biological sciences:
 \begin{itemize}
