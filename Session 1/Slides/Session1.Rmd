@@ -19,23 +19,23 @@ output:
     fig_caption: true
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, cache=FALSE}
 knitr::opts_chunk$set(tidy = TRUE)
+options(width = 50)
 ```
 
 # Wednesday
-
 Each session comprises two parts: lecture and practice.
 
 |Session       | Time              | Session 
 |------------- | -------------     | -------------
 |1             | 09:00am - 10:30am | Introduction 
 |              | 10:30am - 10:50am | Break
-|2             | 10:50am - 01:00pm | Subsetting data 
+|2             | 10:50am - 01:00pm | Data manipulation 
 |              | 01:00pm - 02:00pm | Lunch break  
-|3             | 02:00pm - 03:00pm | Data manipulation 
+|3             | 02:00pm - 03:00pm | Data exploration
 |              | 03:00pm - 03:20pm | Break
-|4             | 03:20pm - 04:30pm | Data exploration 
+|4             | 03:20pm - 04:30pm | Data Wrangling (with dplyr and tidyr)
              
  
 # Thursday
@@ -86,6 +86,13 @@ Paul Murrell and Thomas Lumley
 
 \center ![](groupNew.jpg){#id .class width=300px} 
 
+# Statistical Consulting Centre
+
+The School of Biological Sciences (SBS) has a contract with the Statistical Consulting Centre (SCC) to provide statistical support to staff and postgraduate students of SBS. 
+
+https://www.stat.auckland.ac.nz/consulting/meet-us/any1_uoa/appointment_scheduler_kevin
+
+
 
 # What is 'R`?
 \begin{block}{What does this mean?}
@@ -93,13 +100,13 @@ Paul Murrell and Thomas Lumley
 \end{block}
  
 Key words:
-\begin{itemize}
-  \item FREE!
-  \item Statistical computing
-  \item Graphics (much more flexible than SAS, SPSS, JMP, etc.)
-  \item Support from communities of different fields, i.e. \texttt{R} packages. \url{https://cran.r-project.org/web/views/} and Bioconductor \url{https://www.bioconductor.org/}.
-  \item Even Microsoft is in it: Microsoft R Open. \url{https://mran.microsoft.com/open/}.
-\end{itemize}
+
+- FREE!
+- Statistical computing
+- Graphics (much more flexible than SAS, SPSS, JMP, etc.)
+- Support from communities of different fields, i.e. \texttt{R} packages. \url{https://cran.r-project.org/web/views/}. 
+- Even Microsoft is in it: Microsoft R Open. \url{https://mran.microsoft.com/open/}.
+- \url{https://www.slideshare.net/RevolutionAnalytics/r-then-and-now}
 
 # What is `R`? (IEEE Spectrum’s ranking 2016)
 
@@ -110,15 +117,13 @@ Key words:
   \texttt{R} is a free software environment for statistical computing and graphics''
 \end{block}
 
-
 \texttt{R} and the biological sciences:
-\begin{itemize}
-  \item Many \textcolor{blue}{\emph{applications of statistical methods to biological datasets are 
-  implemented in \texttt{R}}} 
-  \item These \texttt{R} \emph{packages} are publically available on the web for immediate download and use.
-  \item E.g. Next Generation Sequencing, Genomics (\texttt{Bioconductor}).
-\end{itemize}
 
+- Many \textcolor{blue}{\emph{applications of statistical methods to biological datasets are 
+  implemented in \texttt{R}}} 
+- These \texttt{R} \emph{packages} are publically available on the web for immediate download and use.
+- \texttt{Bioconductor}) \url{https://www.bioconductor.org/}.
+- E.g. Next Generation Sequencing, Genomics.
 
 
 #How to download and install \texttt{R}
@@ -127,13 +132,13 @@ Key words:
   \url{cran.stat.auckland.ac.nz}.
 \item Download the relevant version for Linux/Mac/Windows.
   \begin{itemize}
-  \item We will only look at \texttt{R} in the Windows environment today.
+    \item We will only look at \texttt{R} in the Windows environment today.
   \end{itemize}
 \item Install it on your computer (for Windows only):
   \begin{itemize}
-  \item Choose ``Yes (customized startup)'' in Startup options.
-  \item Choose ``SDI (separate windows)'' in Display mode.
-  \item Choose ``HTML help'' in Help .
+    \item Choose "Yes (customized startup)" in Startup options.
+    \item Choose "SDI (separate windows) "in Display mode.
+    \item Choose "HTML help" in Help .
   \end{itemize}
 \end{enumerate}
 
@@ -159,10 +164,15 @@ Key words:
 \end{itemize}
 
 # Rstudio
-- Helps in write better R code.
-- Produce reports (Rmarkdown).
-- Produce interactive reports/tools (Shiny).
-- Develope R packages.
+
+- integrated development environment, or IDE, for R programming.
+- Download and install it from http://www.rstudio.com/download.
+
+## Reasons to use it
+- Writing better R code. 
+- Producing reports (R markdown). 
+- Producing interactive reports/tools (Shiny).
+- Developing R packages.
 
 # Using \texttt{R} as a calculator
 
@@ -205,12 +215,12 @@ x -> 2
 
 # Getting help
 \begin{itemize}
-\item Google!!!!\\
-  e.g. How to calculate the mean in \texttt{R}? The
-  search results
-  tell you that the function \texttt{mean()} would be helpful.
-\item Quick-R: \url{http://www.statmethods.net/}
-\item R-bloggers: \url{https://www.r-bloggers.com/}
+  \item Google!!!!\\
+    e.g. How to calculate the mean in \texttt{R}? The
+    search results
+    tell you that the function \texttt{mean()} would be helpful.
+  \item Quick-R: \url{http://www.statmethods.net/}
+  \item R-bloggers: \url{https://www.r-bloggers.com/}
 \end{itemize}
 
 
@@ -242,16 +252,11 @@ x -> 2
 
 # Getting data into \texttt{R}
 Try your best to save your data in a \texttt{csv} or \texttt{txt} format.
-\begin{itemize}
-  \item Most datasets are saved in an Excel spreadsheet.
-  \item Do as much data cleaning as you can in Excel. No comments,
-    no formatting, no colours, no fancy fonts.
-  \item Convert it into \texttt{csv} by clicking on \texttt{Save
-      As}. Change the \texttt{Save as type} from \texttt{xlsx} or \texttt{xls} into \texttt{CSV (Comma Delimited)}.
-  \item \texttt{CSV} can have one worksheet only. If you have
-    multiple worksheets, it saves the active worksheet.
-\end{itemize}
 
+- Most datasets are saved in an Excel spreadsheet.
+- Do as much data cleaning as you can in Excel. No comments, no formatting, no colours, no fancy fonts.
+- Convert it into \texttt{csv} by clicking on \texttt{Save As}. Change the \texttt{Save as type} from \texttt{xlsx} or \texttt{xls} into \texttt{CSV (Comma Delimited)}.
+- \texttt{CSV} can have one worksheet only. If you have multiple worksheets, it saves the active worksheet.
 
 
 # Read and Check
@@ -264,91 +269,119 @@ Try your best to save your data in a \texttt{csv} or \texttt{txt} format.
 - \texttt{names()}: Returns the names of the variables contained in a dataset.
 
 
-# \texttt{Growth.df}
-Five variables:
+# \texttt{Patient.df}
+Seven variables:
 
-- `CO2`: current or double (the current) CO~2~ level.
-- `Species`: *Psidium guajava* (PG), *Archontophoenix cunninghamiana* (AC) and *Scheffera actinophylla* (SA).
-- `root`: root biomass
-- `shoot`: shoot biomass
-- `biomass`: total biomass
+- `ID`: Identifcation Number.
+- `Age`: in years
+- `Sex`: 0 = Female, 1 = Male
+- `Race`: 1 = Caucasian, 2 = African, 3 = Other
+- `Weight`: in pounds
+- `Height`: in inches
+- `Smoke`: 1 = Yes, 2 = No
+
 
 
 # Reading data into \texttt{R}
 ```{r, eval=FALSE, echo = TRUE}
 setwd("your working directory")
-Growth.df <- read.csv("Growth.csv")
-head(Growth.df)
+Patient.df <- read.csv("Patient.csv")
+head(Patient.df)
 ```
 
 ```{r, eval=TRUE, echo = FALSE}
-Growth.df <- read.csv("..\\..\\data\\Growth.csv")
-head(Growth.df)
+Patient.df <- read.csv("..\\..\\data\\Patient.csv")
+head(Patient.df)
 ```
 
-# \texttt{dim()} and \texttt{str()}
-```{r, eval=FALSE, echo = TRUE}
-dim(Growth.df)
-str(Growth.df)
-```
-
-```{r, eval=TRUE, echo = FALSE}
-dim(Growth.df)
-str(Growth.df)
-```
-
-# \texttt{names(Growth.df)}
+# \texttt{names(Patient.df)}
 
 ```{r, eval=TRUE, echo = TRUE}
 #Names of the variables
-names(Growth.df)
+names(Patient.df)
 ```
 
 - Anything following the \texttt{\#} symbol is treated as a comment and ignored by \texttt{R}.
 - Writing comments is a very good habit to develop!
 
 
-# Descriptive statistics
-Calculate the mean of \texttt{biomass}:
+# \texttt{dim()} and \texttt{str()}
+```{r}
+dim(Patient.df)
+str(Patient.df)
+```
+Note that \textbf{character} vector, `Sex`, is automatically converted to \textbf{factor}.
 
-```{r, error=TRUE, echo = TRUE}
-mean(biomass)
+
+# Reading data into \texttt{R}
+```{r, eval=FALSE, echo = TRUE, tidy = FALSE}
+Patient.df <- read.csv("Patient.csv", 
+                       stringsAsFactors = FALSE)
+str(Patient.df)
 ```
 
-You must tell \texttt{R} that \texttt{biomass} is a variable (column) *within* \texttt{Growth.df}, i.e.
+```{r, eval=TRUE, echo = FALSE}
+Patient.df <- read.csv("..\\..\\data\\Patient.csv", stringsAsFactors = FALSE)
+str(Patient.df)
+```
+## \texttt{stringsAsFactors}
+\texttt{stringsAsFactors} argument is set to \texttt{FALSE}, so \textbf{character} vectors are not converted to \textbf{factor}s.
+
+# Data Type 
+Everything in \texttt{R} is a vector (but some have only one element).
+
+1. Numeric (same as double), or integer.
+    E.g. `Patient.ID`, `Age`, `Race`, `Weight`, `Height` and `Smoke`
+2. String (same as character).  E.g. `Sex`
+3. Logical: \texttt{TRUE} or \texttt{FALSE}, e.g.
+```{r}
+1 == 1
+2 <= 0
+3 != 2
+```
+
+
+# Descriptive statistics
+Calculate the mean of \texttt{Height}:
+
 ```{r, error=TRUE, echo = TRUE}
-mean(Growth.df$biomass)
+mean(Height)
+```
+
+You must tell \texttt{R} that \texttt{Height} is a variable (column) *within* \texttt{Patient.df}, i.e.
+```{r, error=TRUE, echo = TRUE}
+mean(Patient.df$Height)
 ```
 You must also tell \texttt{R} how to deal with missing values: remove them before calculating the mean, i.e.
 ```{r, error=TRUE, echo = TRUE}
-mean(Growth.df$biomass, na.rm = TRUE)
+mean(Patient.df$Height, na.rm = TRUE)
 ```
 
 # \texttt{table} of counts
 ```{r}
 # One-way table of counts
 
-table(Growth.df$Species)
+table(Patient.df$Sex)
 ```
 
 # \texttt{table} of proportions
 
 ```{r}
 # Total count
-total <- sum(table(Growth.df$Species))
+total <- sum(table(Patient.df$Sex))
 total
 
 # Proportions of total
-table(Growth.df$Species)/total
+table(Patient.df$Sex)/total
 ```
 
 # One-way tables \texttt{with} less typing
-Tired of typing \texttt{Growth.df\$} over and over again? Use the \texttt{with} function.
+Tired of typing \texttt{Patient.df\$} over and over again? Use the \texttt{with} function.
 ```{r}
-Species.table <- with(Growth.df, table(Species))
-Species.table
-total <- sum(Species.table)
-Species.table/total
+Sex.table <- with(Patient.df, table(Sex))
+Sex.table
+total <- sum(Sex.table)
+Sex.table/total
 ```
 
 
@@ -356,30 +389,30 @@ Species.table/total
 
 ```{r}
 #Convert to percentages
-Species.pct <- 100*Species.table/total
-Species.pct
+Sex.pct <- 100*Sex.table/total
+Sex.pct
 # Round to 1 decimal place
-round(Species.pct, 1)
+round(Sex.pct, 1)
 ```
 
 #  Two-way frequency tables
 ```{r}
-Species.CO2.tab <- with(Growth.df, table(Species, CO2))
-Species.CO2.tab
+Sex.Race.tab <- with(Patient.df, table(Sex, Race))
+Sex.Race.tab
 ```
 
 #  Two-way frequency tables
 ```{r}
 # Calculate proportion with respect to 'margin' total
 # margin = 1 (row total) or 2 (column total) 
-perc.Species.CO2 <- prop.table(Species.CO2.tab, margin=2)
-perc.Species.CO2
+perc.Sex.Race <- prop.table(Sex.Race.tab, margin=2)
+perc.Sex.Race
 ```
 
 # Two-way frequency tables
 ```{r}
 # Tabulate as percentages
-round(100*perc.Species.CO2, 1)
+round(100*perc.Sex.Race, 1)
 ```
 
 # Summary

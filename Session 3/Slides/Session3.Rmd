@@ -1,0 +1,507 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+header-includes: 
+   \usepackage{graphicx}
+   \usepackage{booktabs}
+   \usepackage{caption}
+    \subtitle{Session 3 -- Data Wrangling (with dplyr and tidyr)}    
+    \author[SCC]{Statistical Consulting Centre}
+   \institute[\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}\\
+  The Department of Statistics\\
+  The University of Auckland}
+   \titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+date: "19 July, 2017"
+output:
+  beamer_presentation:
+    theme: "Madrid"
+    colortheme: "crane"
+    fonttheme: "professionalfonts"
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+options(width = 50)
+Patient.df <- read.csv("..\\..\\data\\Patient.csv", stringsAsFactors = FALSE)
+Patient.df$Smoke.group <- 
+  with(Patient.df, ifelse(Smoke == 1, "Yes", "No"))
+table(Patient.df$Smoke.group)
+Patient.df$Race.group <- 
+  with(Patient.df,
+       ifelse(Race == 1, "Caucasian",
+              ifelse(Race == 2, "African", "Other")))
+table(Patient.df$Race.group)
+Patient.df$bmi <- with(Patient.df, (Weight/Height^2)*703)
+Patient.df$bmi.group <- 
+  ifelse(Patient.df$bmi >= 30, "obese", 
+         ifelse(Patient.df$bmi >= 25, "overweight",
+          "normal"))
+```
+
+
+# \texttt{factor}
+  \begin{block}{What is a factor?}
+    \textit{A variable which takes either qualitative values, ordinal values or a discrete set of quantitative values. The values of a factor are called its {\em levels}.}
+  \end{block}
+Examples of factors:  
+\begin{itemize}
+  \item \texttt{Gender} with 2 {\em qualitative} levels: \texttt{Male} and \texttt{Female}.
+  \item \texttt{Education} with 6 {\em ordinal} levels: \texttt{None} $<$ \texttt{"Primary compl} $<$ \texttt{Incpl secondary} $<$ \texttt{Secondary compl} $<$ \texttt{Incpl university} $<$ \texttt{University degree}.
+  \item \texttt{Income} has 9 {\em quantitative} levels when the mid-values of the income ranges are used: \texttt{5000}, \texttt{12500}, \texttt{17500}, \texttt{22500}, \texttt{27500}, \texttt{35000}, \texttt{45000}, \texttt{60000} and \texttt{85000}.
+\end{itemize}
+
+# \texttt{factor}
+
+- \texttt{R} stores two *additional* pieces of information for each factor: (1) the unique set of levels and (2) an integer value, assigned by \texttt{R}, for each unique level. 
+- The integer values are assigned to factor levels so that they have an order associated with them.
+- By default, the unique levels are assigned the values 1, 2,..., according to ascending alphabetical order. This is not always appropriate! 
+
+```{r}
+typeof(Patient.df$Sex)
+levels(Patient.df$Sex)
+```
+
+```{r}
+Patient.df$bmi.group <- factor(Patient.df$bmi.group)
+levels(Patient.df$bmi.group)
+
+```
+
+```{r}
+Patient.df$bmi.group <- factor(Patient.df$bmi.group,
+               levels = c("normal", "overweight", "obese"))
+levels(Patient.df$bmi.group)
+
+```
+
+# Which other variables should also be factors?
+
+```{r}
+str(Patient.df)
+```
+
+# Which other variables should also be factors?
+
+```{r}
+Patient.df$Sex <- factor(Patient.df$Sex)
+Patient.df$Race.group <- factor(Patient.df$Race.group)
+Patient.df$Smoke.group <- factor(Patient.df$Smoke.group)
+```
+
+
+# Converting numbers to factors 
+
+```{r}
+test <- factor(c(0,1,2))
+test
+```
+- then convert back to numbers? 
+
+# And convert back to numbers
+
+- need to convert it to character, using `as.character()` first, then convert back to numbers, using  `as.numeric()`. 
+```{r}
+test 
+
+as.numeric(test)
+
+as.numeric(as.character(test))
+```
+
+# Your turn 
+
+- Binning ages into age groups
+- Sometimes we are interested in examining responses by age group.
+- Now, assign each of the `r nrow(Patient.df)` patients to one of three age groups: "Under 35", "36 to 60" and "Over 61".
+- Convert \texttt{age.group} to a \texttt{factor} with levels in ascending order.
+
+
+# Your turn 
+
+Assign each of the `r nrow(Patient.df)` patients to one of three age groups: "Under 35", "36 to 60" and "Over 61".
+
+```{r}
+Patient.df$age.group <- 
+  ifelse(Patient.df$Age<=35, "Under 35", 
+         ifelse(Patient.df$Age <= 60, "36 to 60", "Over 61"))
+table(Patient.df$age.group)
+
+```
+
+# Your turn 
+
+Convert \texttt{age.group} to a \texttt{factor} with levels in ascending order.
+
+```{r}
+Patient.df$age.group <- factor(Patient.df$age.group, 
+                           levels = c("Under 35", "36 to 60", "Over 61"))
+table(Patient.df$age.group)
+
+```
+
+
+# Relational data
+
+- In general, it is rare in data analysis involves only a single table of data. 
+- Examples: 
+    + Patient information and blood test measurements
+    + Experimental design and measurments from the high-thoughput biological instrument
+
+# \texttt{Cholesterol.df}
+Serum Cholesterol level, mg/100ml, measured on:
+
+- `Day1` 
+- `Day5`
+- `Day10`
+
+# Reading data into \texttt{R}
+```{r, eval=FALSE, echo = TRUE}
+setwd("your working directory")
+Patient.df <- read.csv("CholesterolNA.csv")
+head(Cholesterol.df)
+```
+
+```{r, eval=TRUE, echo = FALSE}
+Cholesterol.df <- read.csv("..\\..\\data\\CholesterolNA.csv")
+head(Cholesterol.df)
+```
+
+# \texttt{names()}, \texttt{dim()} and \texttt{str()}
+
+```{r, eval=TRUE, echo = TRUE}
+#Names of the variables
+names(Cholesterol.df)
+dim(Cholesterol.df)
+str(Cholesterol.df)
+```
+
+# Combining data-frame by columns (\texttt{cbind()})
+```{r}
+combined.df <- cbind(Patient.df, Cholesterol.df[,-1])
+```
+- Thus, the function for combining the data-frame by rows is `rbind()`.
+- Make sure the dimensions are correct for two combining data-frames. 
+- Also, you need to make sure each row in `Patient.df` matches each row in `Cholesterol.df`.
+
+
+# Reading data into \texttt{R} (Again)
+```{r, eval=FALSE, echo = TRUE}
+setwd("your working directory")
+Patient.df <- read.csv("Cholesterol.csv")
+head(Cholesterol.df)
+```
+
+```{r, eval=TRUE, echo = FALSE}
+Cholesterol.df <- read.csv("..\\..\\data\\Cholesterol.csv")
+head(Cholesterol.df)
+```
+
+# \texttt{names()}, \texttt{dim()} and \texttt{str()} (Again)
+
+```{r, eval=TRUE, echo = TRUE}
+#Names of the variables
+names(Cholesterol.df)
+dim(Cholesterol.df)
+str(Cholesterol.df)
+```
+
+
+# Combining data-frame by columns (\texttt{cbind()})
+```{r, error=TRUE}
+combined.df <- cbind(Patient.df, Cholesterol.df)
+```
+
+
+# Better way 
+
+- Combining the based on the `Patient.ID` in both `Patient.df` and `Cholesterol.df`.
+- First thing is to make sure the `Patient.ID` are unique in both data-frames. 
+
+# Better way 
+
+- Combining the based on the `Patient.ID` in both `Patient.df` and `Cholesterol.df`.
+- First thing is to make sure the `Patient.ID` are unique in both data-frames. 
+
+```{r}
+sum(table(Patient.df$Patient.ID) > 1)
+sum(table(Cholesterol.df$Patient.ID) > 1)
+
+```
+
+# `dplyr` R package
+
+- `dplyr` R package provides some useful functions that correspond to the most data manipulation tasks.
+
+```{r}
+library(dplyr)
+```
+
+- Mutating joins allow you to combine variables from multiple tables, there are four common types: 
+    +  `left_join()`
+    +  `right_join()`
+    +  `full_join()`
+    +  `inner_join()`
+
+
+# `dplyr` R package
+```{r, tidy=FALSE}
+x <- data.frame(key = c(1,2,3), val.x = c("x1","x2","x3"))
+y <- data.frame(key = c(1,2,4), val.y = c("y1","y2","y4"))
+```
+
+```{r, echo=FALSE, results='asis'}
+t1 <- knitr::kable(x, format = "latex", booktabs = TRUE)
+t2 <- knitr::kable(y, format = "latex", booktabs = TRUE)
+
+cat(c("\\begin{table}[!htb]
+    \\begin{minipage}{.5\\linewidth}
+      \\caption*{Data-frame x}
+      \\centering",
+        t1,
+    "\\end{minipage}%
+    \\begin{minipage}{.5\\linewidth}
+      \\centering
+        \\caption*{Data-frame y}",
+        t2,
+    "\\end{minipage} 
+\\end{table}"
+)) 
+```
+
+
+# `left_join()` 
+```{r, eval = FALSE, message=FALSE}
+left_join(x, y, by = "key")
+```
+
+
+```{r, echo=FALSE, results='asis'}
+t1 <- knitr::kable(x, format = "latex", booktabs = TRUE)
+t2 <- knitr::kable(y, format = "latex", booktabs = TRUE)
+t3 <- knitr::kable(left_join(x, y), format = "latex", booktabs = TRUE)
+
+cat(c("\\begin{table}[!htb]
+    \\begin{minipage}{.33\\linewidth}
+      \\caption*{Data-frame x}
+      \\centering",
+        t1,
+    "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{Data-frame y}",
+        t2,
+      "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{left join}",
+        t3,
+    "\\end{minipage} 
+\\end{table}"
+)) 
+```
+
+
+# `right_join()` 
+```{r, eval = FALSE, message=FALSE}
+right_join(x, y, by = "key")
+```
+
+```{r, echo=FALSE, results='asis'}
+t1 <- knitr::kable(x, format = "latex", booktabs = TRUE)
+t2 <- knitr::kable(y, format = "latex", booktabs = TRUE)
+t3 <- knitr::kable(right_join(x, y), format = "latex", booktabs = TRUE)
+
+cat(c("\\begin{table}[!htb]
+    \\begin{minipage}{.33\\linewidth}
+      \\caption*{Data-frame x}
+      \\centering",
+        t1,
+    "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{Data-frame y}",
+        t2,
+      "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{right join}",
+        t3,
+    "\\end{minipage} 
+\\end{table}"
+))  
+```
+
+# `full_join()` 
+```{r, eval = FALSE, message=FALSE}
+full_join(x, y, by = "key")
+```
+
+
+```{r, echo=FALSE, results='asis'}
+t1 <- knitr::kable(x, format = "latex", booktabs = TRUE)
+t2 <- knitr::kable(y, format = "latex", booktabs = TRUE)
+t3 <- knitr::kable(full_join(x, y), format = "latex", booktabs = TRUE)
+
+cat(c("\\begin{table}[!htb]
+    \\begin{minipage}{.33\\linewidth}
+      \\caption*{Data-frame x}
+      \\centering",
+        t1,
+    "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{Data-frame y}",
+        t2,
+      "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{full join}",
+        t3,
+    "\\end{minipage} 
+\\end{table}"
+))  
+```
+
+# `inner_join()` 
+```{r, eval = FALSE, message=FALSE}
+inner_join(x, y, by = "key")
+```
+
+```{r, echo=FALSE, results='asis'}
+t1 <- knitr::kable(x, format = "latex", booktabs = TRUE)
+t2 <- knitr::kable(y, format = "latex", booktabs = TRUE)
+t3 <- knitr::kable(inner_join(x, y), format = "latex", booktabs = TRUE)
+
+cat(c("\\begin{table}[!htb]
+    \\begin{minipage}{.33\\linewidth}
+      \\caption*{Data-frame x}
+      \\centering",
+        t1,
+    "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{Data-frame y}",
+        t2,
+      "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{inner join}",
+        t3,
+    "\\end{minipage} 
+\\end{table}"
+)) 
+```
+
+# `dplyr` R package
+
+These four types of mutating join are differ in their behaviour when a match is not found. 
+
+-  `left_join()`
+-  `right_join()`
+-  `full_join()`
+-  `inner_join()`
+
+Which one should we use for this `Patient.df` and `Cholesterol.df` data-frames?
+
+# Combining two tables
+
+```{r}
+combined.df <- left_join(Patient.df, Cholesterol.df)
+```
+
+- Variable names:
+```{r}
+names(combined.df)
+```
+
+# Combining two tables
+
+```{r}
+str(combined.df)
+```
+
+- You can change the variable names.
+```{r}
+names(combined.df)[1] <- c("ID")
+names(combined.df)
+```
+
+# Categorical Variables
+
+
+```{r}
+table(combined.df$age.group)
+table(combined.df$Sex)
+```
+.
+.
+.
+
+
+# `for` loop to get column summary statistics
+```{r, eval = FALSE}
+for (i in c("age.group", "Sex", "Smoke.group", "Race.group", "bmi.group")){
+  print(table(combined.df[,i]))
+}
+```
+
+# `for` loop to get column summary statistics
+```{r, echo = FALSE}
+for (i in c("age.group", "Sex", "Smoke.group", "Race.group", "bmi.group")){
+  print(table(combined.df[,i]))
+}
+```
+
+# Smart way: \texttt(apply) to get column summary statistics
+```{r}
+apply(combined.df[,c("age.group", "Sex", "Smoke.group", 
+                     "Race.group", "bmi.group")], 2, table)
+``` 
+
+# \texttt{apply}
+```{r, eval = FALSE}
+apply(X, MARGIN, FUN, ...)
+```
+- `X`:     A data frame.
+- `MARGIN`: 1 indicates rows, 2 indicates columns.
+- `FUN`: function, what do you want \texttt{R} to do with the rows or columns of the data frame
+- `...`: optional arguments to \texttt{FUN}.
+
+Translation: Do something (\texttt{FUN}) to every row (or column) (\texttt{MARGIN}) of a data
+frame (\texttt{X}). 
+
+
+# Continous Variables
+
+```{r}
+mean(combined.df$Age)
+
+```
+
+
+# Your turn 
+- `for` loop.
+- `apply` function.
+
+
+
+# Your turn 
+```{r}
+apply(combined.df[,c("Age", "Height", "Weight", 
+                     "bmi", "Day1")], 2, mean)
+``` 
+
+
+
+
+
+
+
+
+
+
+
+
+

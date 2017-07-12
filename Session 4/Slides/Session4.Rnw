@@ -118,7 +118,7 @@ table(Q1.lik)
 
 \begin{frame}[fragile]
 \frametitle{Easier way}
-Recall that \texttt{Q1} -- \texttt{Q4} are now factors. We can check this using \texttt{R}'s \text{str}ucture function, i.e.
+Recall that \texttt{Q1} -- \texttt{Q4} are now s. We can check this using \texttt{R}'s \text{str}ucture function, i.e.
 <<>>=
 str(issp.df[, c("Q1", "Q2", "Q3", "Q4")])
 @

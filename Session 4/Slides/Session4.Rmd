@@ -1,0 +1,59 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+header-includes: 
+   \usepackage{graphicx}
+    \subtitle{Session 4 -- Data Wrangling (with dplyr and tidyr)}    
+    \author[SCC]{Statistical Consulting Centre}
+   \institute[\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}\\
+  The Department of Statistics\\
+  The University of Auckland}
+   \titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+date: "19 July, 2017"
+output:
+  beamer_presentation:
+    theme: "Madrid"
+    colortheme: "crane"
+    fonttheme: "professionalfonts"
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(tidy = TRUE)
+options(width = 50)
+Patient.df <- read.csv("..\\..\\data\\Patient.csv")
+Cholesterol.df <- read.csv("..\\..\\data\\CholesterolNA.csv")
+```
+
+
+# Apply 
+
+
+
+
+
+# A Grammar of Data Manipulation
+
+Single table verbs
+
+Dplyr aims to provide a function for each basic verb of data manipulation:
+
+filter() to select cases based on their values.
+arrange() to reorder the cases.
+select() and rename() to select variables based on their names.
+mutate() and transmute() to add new variables that are functions of existing variables.
+summarise() to condense multiple values to a single value.
+sample_n() and sample_frac() to take random samples.
+group_by()
+
+
+Piping
+
+spread()
+
+gather()
+
+
+
+
+

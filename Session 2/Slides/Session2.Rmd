@@ -2,7 +2,7 @@
 title: "Introduction to $\\mathtt{R}$"
 header-includes: 
    \usepackage{graphicx}
-    \subtitle{Session 2 -- Subsetting data}    
+    \subtitle{Session 2 -- Data manipulation}    
     \author[SCC]{Statistical Consulting Centre}
    \institute[\href{mailto:consulting@stat.auckland.ac.nz}
     {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
@@ -18,9 +18,10 @@ output:
     fonttheme: "professionalfonts"
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, cache=FALSE}
 knitr::opts_chunk$set(tidy = TRUE)
-Growth.df <- read.csv("..\\..\\data\\Growth.csv")
+options(width = 50)
+Patient.df <- read.csv("..\\..\\data\\Patient.csv", stringsAsFactors = FALSE)
 ```
 
 #Functions
@@ -70,31 +71,42 @@ mystder <- function(x){
     n <- length(x)              # Calc sample size
     mysd/sqrt(n)                # Definition of SEM
 }
-mystder(Growth.df$biomass)
+mystder(Patient.df$Height)
 ```
 
 - A set of user-defined functions can be bundled together into an \texttt{R package}.
 
-
-#Getting data into \texttt{R}
+# Getting data into \texttt{R}
 
 - Base \texttt{R} includes only functions which read data sets saved in simple file formats, e.g. \texttt{csv}, \texttt{txt}, tab delimited, etc.
-- What if your data was saved in another format, e.g. STATA, SPSS, or SAS spreadsheets? 
-- The \texttt{haven} package for \texttt{R} contains functions that may help [https://cran.r-project.org/web/packages/haven/index.html][id]
+- What if your data was saved in another format, e.g. Excel? 
+- The \texttt{readxl} package for \texttt{R} contains functions that may help, [https://cran.r-project.org/web/packages/readxl/index.html][readxl]
   
+```{r, eval = FALSE}
+library(readxl)
+excel <- read_excel("data.xlsx", sheet = 1)
 ```
-> library(haven)
-> stata <- read_dta("data.dta")
-> spss <- read_sav("data.sav")
-> sas <- read_sas("data.sas7bdat")
-> sasxport <- read_xpt("data.xpt")
+
+[readxl]: https://cran.r-project.org/web/packages/readxl/index.html
+
+# Getting data into \texttt{R}
+
+- What if your data was saved in another format, e.g. Excel, STATA, SPSS, or SAS spreadsheets? 
+- The \texttt{haven} package for \texttt{R} contains functions that may help, [https://cran.r-project.org/web/packages/haven/index.html][haven]
+  
+```{r, eval = FALSE}
+library(haven)
+stata <- read_dta("data.dta")
+spss <- read_sav("data.sav")
+sas <- read_sas("data.sas7bdat")
+sasxport <- read_xpt("data.xpt")
 ```
 However, it is always the easiest and safest to read data into \texttt{R} from a \texttt{csv} file.
 
-[id]: https://cran.r-project.org/web/packages/haven/index.html
+[haven]: https://cran.r-project.org/web/packages/haven/index.html
 
 
-#Packages
+# Packages
 - Currently, the CRAN package repository features 10,098 available packages (4 Jul. 2017). There are about 13,169 CRAN, BioConductor and Github packages in total.
 - To install packages from the \texttt{R} GUI, click on \texttt{Packages}
   $\rightarrow$ \texttt{Install Package(s) ...} 
@@ -104,6 +116,300 @@ However, it is always the easiest and safest to read data into \texttt{R} from a
 - After the installation, use \texttt{library("\textit{package name}")} to load it into \texttt{R}. 
 
 Note: Installation is performed only once; however, it must be loaded (i.e. use the command \texttt{library("\textit{package name}")}) in *every* \texttt{R} session.
+
+#Bioconductor Packages
+
+- To install core packages, type the following in an R command window:
+```{r, eval = FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite()
+```
+
+- Install specific packages, e.g., “GenomicFeatures” and “AnnotationDbi”, with
+```{r, eval = FALSE}
+biocLite(c("GenomicFeatures", "AnnotationDbi"))
+```
+
+Note: Installation is performed only once; however, it must be loaded (i.e. use the command \texttt{library("\textit{package name}")}) in *every* \texttt{R} session.
+
+
+# \texttt{which} individual does Smoke?
+Let's use \texttt{R}'s powerful subsetting capabilities to select those cases for which the value of Smoke is 1 (i.e. Yes).
+```{r}
+index <- which(Patient.df$Smoke == 1)
+index
+```
+
+#How many are there?
+```{r}
+# Use length() to count the number of elements in "index".
+length(index)
+```
+
+- `Patient.df$Smoke == 1` gives a vector of True/False for every observations.
+- `which()` gives a vector of the position of `TRUE`. 
+- `length()` tells us how many elements there are in the vector.
+
+#How many are there?
+Another way is to sum up how many `TRUE`s in the logical vector `Patient.df$Smoke == 1`
+```{r}
+sum(Patient.df$Smoke == 1)
+```
+
+#How many are there?
+Another way is to sum up how many `TRUE`s in the logical vector `Patient.df$Smoke == 1`
+```{r}
+sum(Patient.df$Smoke == 1, na.rm = TRUE)
+```
+
+# Who are they?
+```{r}
+# Use square brackets to extract IDs corresponding  
+# to the cases numbers contained in "index"
+index <- which(Patient.df$Smoke == 1)
+Patient.df$Patient.ID[index]
+```
+
+# Subsetting
+Square brackets \texttt{[]} are used to extract subsets of data.
+```{r}
+# First element only
+Patient.df$Height[1]
+# All but the first element
+Patient.df$Height[-1]
+```
+
+# Subsetting
+Square brackets \texttt{[]} are used to extract subsets of data.
+```{r}
+# Elements 3 through 8
+Patient.df$Height[3:8]
+# Elements 3 and 8
+Patient.df$Height[c(3,8)]
+```
+
+#More on subsetting
+Subsetting two-dimensional arrays, such as data frames, requires the use of \em{two} indices.
+```{r}
+#First row or record
+Patient.df[1, ] 
+```
+
+#More on subsetting
+For data frames, you need to use two indices.
+```{r}
+#Second column or variable
+Patient.df[, 2] 
+```
+
+#More on subsetting
+For data frames, you need to use two indices.
+```{r}
+#Some rows and columns
+Patient.df[2:5, 4:7] 
+```
+
+#More on subsetting
+For data frames, you need to use two indices.
+```{r}
+#Rows by number, columns by name
+Patient.df[1:10, c("Race", "Smoke")] 
+```
+
+
+# Missing values
+
+-\texttt{R} reserves the object \texttt{NA} (\texttt{N}ot \texttt{A}vailable) for elements of a vector that are missing or unavailable. 
+- Use of \texttt{is.na()} to search for missing values requires that they are recorded as \texttt{NA}. 
+- \texttt{na} will not do because \texttt{R} is case sensitive!
+
+```{r} 
+sum(is.na(Patient.df$Smoke))
+```
+
+# Missing values
+The default option of \texttt{table()} ignores \texttt{NA}s when constructing frequency tables. Now that all occurrences of \texttt{"NA, refused"} have been replaced with \texttt{NA}, missing values will no longer be shown in frequency tables constructed using \texttt{table()}.
+```{r}
+table(Patient.df$Smoke)
+```
+
+
+# Missing values
+If you still want to see how many \texttt{NA}s in the frequency tables, you can change the \texttt{useNA} arguement to \texttt{"always"} in \texttt{table()}.
+```{r}
+table(Patient.df$Smoke, useNA = "always")
+```
+
+# Data Cleaning
+The \texttt{ifelse()} function provides a quick way to convert the `Smoke` variable in `Patient.df` from number to words, i.e.
+```{r, eval = FALSE}
+  ifelse(test, yes, no)
+```
+
+\begin{itemize}
+  \item \texttt{test}: a logical test.
+  \item \texttt{yes}, what happens if the test is True.
+  \item \texttt{no}, what happens if the test is False.
+\end{itemize}
+
+# Data Cleaning
+```{r, tidy = FALSE}
+Patient.df$Smoke.group <- 
+  with(Patient.df, ifelse(Smoke == 1, "Yes", "No"))
+table(Patient.df$Smoke.group)
+```
+
+# Data Cleaning
+How about `Race`?
+One `ifelse()` inside another `ifelse()`:
+```{r, tidy = FALSE}
+Patient.df$Race.group <- 
+  with(Patient.df,
+       ifelse(Race == 1, "Caucasian",
+              ifelse(Race == 2, "African", "Other")))
+table(Patient.df$Race.group)
+```
+
+# Data Cleaning
+```{r}
+head(Patient.df)
+```
+
+# Data Cleaning
+```{r}
+str(Patient.df)
+```
+
+
+# Your turn
+
+First to calculate \texttt{BMI}:
+\[
+\mathtt{BMI} = \frac{\mathtt{Weight(kg)}}{\mathtt{Height(m)}^2}
+= \frac{\mathtt{Weight(pounds)}}{\mathtt{Height(inches)}^2} \times 703
+\]
+
+Then, create a `bmi.group` for `normal`, `overweight` and `obese`, where, 
+
+- overweight is a BMI greater than or equal to 25; and
+- obesity is a BMI greater than or equal to 30.
+
+
+
+# Your turn
+To calculate \texttt{BMI}:
+\[
+\mathtt{BMI} = \frac{\mathtt{Weight(kg)}}{\mathtt{Height(m)}^2}
+= \frac{\mathtt{Weight(pounds)}}{\mathtt{Height(inches)}^2} \times 703
+\]
+```{r, tidy=FALSE}
+Patient.df$bmi <- (Patient.df$Weight/Patient.df$Height^2)*703
+mean(Patient.df$bmi, na.rm = TRUE)
+```
+
+Or, 
+```{r, tidy=FALSE}
+# Calculate bmi using Weight and Height
+Patient.df$bmi <- with(Patient.df, (Weight/Height^2)*703)
+mean(Patient.df$bmi, na.rm = TRUE)
+```
+
+# Your turn
+
+```{r, tidy=FALSE}
+Patient.df$bmi.group <- 
+  ifelse(Patient.df$bmi >= 30, "obese", 
+         ifelse(Patient.df$bmi >= 25, "overweight",
+          "normal"))
+table(Patient.df$bmi.group)
+table(Patient.df$bmi.group, useNA = "always")
+
+```
+
+
+# Subsetting in calculations
+
+```{r}
+with(Patient.df, table(Race.group, bmi.group))
+```
+
+# Subsetting in calculations
+Produce the last table with Race groups of `African` and `Caucasian`, and BMI groups of `obese` and `overweight` 
+```{r}
+exclude.rows <-
+  with(Patient.df,
+     which(Race.group == "Other"  |
+           bmi.group == "Normal"))
+
+head(Patient.df[-exclude.rows, c("Race.group", "bmi.group")])
+```
+
+# Subsetting in calculations
+
+```{r, tidy=FALSE}
+R.B.tab <- with(Patient.df[-exclude.rows,], 
+                table(Race.group, bmi.group))
+R.B.tab
+```
+
+# Subsetting in calculations
+Convert counts to percentages rounded to 1 decimal place.
+```{r}
+round(prop.table(R.B.tab)*100, 1)
+```
+
+
+
+# Easier way
+```{r}
+R.B.tab1 <- with(Patient.df, 
+                 table(Race.group, bmi.group))
+dim(R.B.tab1)
+row.names(R.B.tab1)
+colnames(R.B.tab1)
+```
+
+# Easier way
+```{r}
+colnames(R.B.tab1)
+which(row.names(R.B.tab1) == "Other")
+which(colnames(R.B.tab1) == "Normal")
+```
+
+# Easier way
+```{r}
+R.B.tab1[-3, -1]
+
+round(prop.table(R.B.tab1[-3, -1])*100, 1)
+```
+
+
+# Subsetting in calculations
+```{r, tidy = FALSE}
+# Mean BMI level of females
+with(Patient.df, mean(bmi[Sex == "Female"], na.rm = TRUE))
+
+# Mean BMI level of females and Caucasian
+with(Patient.df,
+     mean(bmi[Sex == "Male" & 
+                   Race.group == "Caucasian"],
+          na.rm = TRUE))
+```
+
+
+# Summary
+
+- Making R functions
+- Installing and loading R pacakges
+- Subsetting vectors and datasets
+- `ifelse()` function
+
+
+
+
+
+
+
 
 
 
