@@ -77,8 +77,6 @@ Ross Ihaka and Robert Gentleman
 
 Paul Murrell and Thomas Lumley
 
-
-
 # `R` and UoA's Department of Statistics
 \begin{block}{What does this mean?}
   \textit{If you want to learn \texttt{R}, you are talking to the right people!}

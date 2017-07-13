@@ -1,0 +1,97 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+subtitle: "Session 1 -- Introduction"
+author: "Statistical Consulting Centre"
+date: "19 July, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+# 1. Using R as a calculator
+
+1. Find the values of:
+
+    (a) $1+4$
+
+    ```{r}
+      1+4
+    ```
+    
+    (b) $2^3 + \frac{4}{\sqrt{34}}$
+    
+    ```{r}
+      2^3 + 4/sqrt(34)
+    ```
+    
+    (c) $\log{30}$
+    
+    ```{r}
+      log(30)
+    ```
+    
+    (d) $\log_{10}30$
+    
+    ```{r}
+      log(30)
+    ```
+    
+    (e) $|-2|$ \hspace{0.2cm}(Hint: $|x|$ denotes the \emph{absolute
+    value} of $x$. Search on Google if you're unsure.)
+    
+    ```{r}
+      abs(-2)
+    ```
+
+2. Now open Rstudio, open a \texttt{R} script clicking \texttt{File}
+  $\rightarrow$ \texttt{New} $\rightarrow$ \texttt{R} script.
+  
+3. Save this script by clicking \texttt{File} $\rightarrow$
+  \texttt{Save As...}.
+  
+4. Select a directory/location and save the script. Note: the saved
+  script should have \texttt{.r} as extension. For example, if you
+  call your file \texttt{exercise one}, then you should save it as
+  \texttt{exercise one.r}
+  
+5. Copy and paste the code you typed (\emph{not the output, not the
+  $>$ symbol, just the code you typed}) at the console for into the \texttt{R} script opened in Rstudio.
+  
+6. Submit your entire script at once to the \texttt{R}
+  Console by highlighting all codes and pressing Ctrl $+$ R.
+  
+7. From now on, type all of your code in your \texttt{R} script and
+  submit it to the \texttt{R} Console using Ctrl $+$ R.
+  
+  
+# 2. Reading data into \texttt{R}
+
+1. \texttt{lake.csv} contains data on mercury contamination in
+  53 different lakes in Florida. The variable names and what has been
+  measured are presented below.
+  \begin{itemize}
+  \item ID: ID number of the lake
+  \item Lake: Name of the lake
+  \item pH: pH value
+  \item Calcium: concentration of Calcium
+  \item Chlorophyll: concentration of Chlorophyll (mg/L)
+  \item Avg\_Mercury: Average mercury concentration (parts per
+    million) in the muscle tissue of the fish sampled from that lake.
+  \end{itemize}
+  
+2. Read the data into \texttt{R}, saving it in object named \texttt{mercury.df}.
+
+3. Use \texttt{dim()} and \texttt{head()} to look at some of the  properties of the dataset you have just read into \texttt{R}. \emph{Always} perform this important step to check that your dataset is as it should be.
+
+4. Calculate the mean and standard deviation of both pH and
+  Chlorophyll.
+
+5. Check out what \texttt{summary()} does by running  \texttt{summary(mercury.df\$pH)}.
+
+
+
+
+
