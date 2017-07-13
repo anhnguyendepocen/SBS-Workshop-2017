@@ -2,7 +2,7 @@
 title: "Introduction to $\\mathtt{R}$"
 header-includes: 
    \usepackage{graphicx}
-    \subtitle{Session 4 -- Data Wrangling (with dplyr and tidyr)}    
+    \subtitle{Session 4 -- Data exploration}    
     \author[SCC]{Statistical Consulting Centre}
    \institute[\href{mailto:consulting@stat.auckland.ac.nz}
     {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
@@ -20,40 +20,443 @@ output:
 
 ```{r setup, include=FALSE, cache=FALSE}
 knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(message = FALSE)
 options(width = 50)
-Patient.df <- read.csv("..\\..\\data\\Patient.csv")
+Patient.df <- read.csv("..\\..\\data\\Patient.csv", stringsAsFactors = FALSE)
+Patient.df$Smoke.group <- 
+  with(Patient.df, ifelse(Smoke == 1, "Yes", "No"))
+table(Patient.df$Smoke.group)
+Patient.df$Race.group <- 
+  with(Patient.df,
+       ifelse(Race == 1, "Caucasian",
+              ifelse(Race == 2, "African", "Other")))
+table(Patient.df$Race.group)
+Patient.df$BMI <- with(Patient.df, (Weight/Height^2)*703)
+Patient.df$BMI.group <- 
+  ifelse(Patient.df$BMI >= 30, "obese", 
+         ifelse(Patient.df$BMI >= 25, "overweight",
+          "normal"))
+
+Patient.df <- Patient.df[, !names(Patient.df) %in% c("Smoke", "Race")]
+
+Patient.df$BMI.group <- factor(Patient.df$BMI.group,
+               levels = c("normal", "overweight", "obese"))
+
+Patient.df$Sex <- factor(Patient.df$Sex)
+Patient.df$Race.group <- factor(Patient.df$Race.group)
+Patient.df$Smoke.group <- factor(Patient.df$Smoke.group)
+
+Patient.df$Age.group <- 
+  ifelse(Patient.df$Age<=35, "Under 35", 
+         ifelse(Patient.df$Age <= 60, "36 to 60", "Over 61"))
+Patient.df$Age.group <- factor(Patient.df$Age.group, 
+                           levels = c("Under 35", "36 to 60", "Over 61"))
 Cholesterol.df <- read.csv("..\\..\\data\\CholesterolNA.csv")
+
+library(dplyr)
+
+combined.df <- left_join(Patient.df, Cholesterol.df)
+
+names(combined.df)[c(1,11,12,13)] <- 
+  c("ID", "Baseline", "PreTrt", "PostTrt")
+
+```
+
+# `for` loop to get column summary statistics
+```{r}
+for (i in c("Age.group", "Sex", "Smoke.group", "Race.group", "BMI.group")){
+  print(i)
+  print(table(combined.df[,i]))
+}
+
+for (i in c("Age", "Height", "Weight", "BMI", "Baseline", "PreTrt", "PostTrt")){
+  print(i)
+  print(mean(combined.df[,i], na.rm = TRUE))
+}
+```
+
+# `for` loop to get column summary statistics
+```{r}
+
+Categorical.df <- combined.df[,c("Age.group", "Sex", "Smoke.group", "Race.group", "BMI.group")]
+
+for (i in 1:ncol(Categorical.df)){
+  print(table(Categorical.df[,i]))
+}
+
+```
+
+# `for` loop to get column summary statistics
+```{r}
+
+Continous.df <- combined.df[,c("Age", "Height", "Weight", "BMI", "Baseline", "PreTrt", "PostTrt")]
+
+
+for (i in 1:ncol(Continous.df)){
+  print(i)
+  print(mean(Continous.df[,i], na.rm = TRUE))
+}
 ```
 
 
-# Apply 
+# Smart way: \texttt(apply) to get column summary statistics
+```{r, eval = FALSE}
+apply(X, MARGIN, FUN, ...)
+```
+- `X`:     A data frame.
+- `MARGIN`: 1 indicates rows, 2 indicates columns.
+- `FUN`: function, what do you want \texttt{R} to do with the rows or columns of the data frame
+- `...`: optional arguments to \texttt{FUN}.
+
+Translation: Do something (\texttt{FUN}) to every row (or column) (\texttt{MARGIN}) of a data
+frame (\texttt{X}). 
+
+
+# Smart way: \texttt(apply) to get column summary statistics
+```{r}
+apply(Categorical.df, 2, table)
+``` 
+
+
+# Smart way: \texttt(apply) to get column summary statistics
+```{r}
+apply(Continous.df, 2, mean, na.rm = TRUE)
+``` 
+
+# Smart way: \texttt(apply) to get column summary statistics
+```{r}
+apply(Continous.df, 2, sd, na.rm = TRUE)
+``` 
+
+# \texttt{apply()} using self-defined \texttt{R} function
+Functions used in \texttt{apply()} can be self-defined.
+```{r}
+na.check <- function(someinput){
+ test.na <- is.na(someinput) 
+ sum(test.na)
+}
+```
+Take an educated guess at what \texttt{na.check()} does.
+
+# \texttt{apply()} using a self-defined \texttt{R} function
+Let's look at what each row of \texttt{na.check()} does.
+```{r}
+test1 <- Continous.df$BMI[1:10]
+test1 
+
+test.na <- is.na(test1)
+test.na
+
+sum(test.na)
+```
+
+
+#\texttt{apply()} using a self-defined \texttt{R} function
+Let's now use \texttt{na.check()} in \texttt{apply()}.
+```{r}
+apply(Continous.df, 2, na.check)
+```
+Another way,
+```{r}
+apply(Continous.df, 2, function(x) sum(is.na(x)))
+```
+
+
+# A slightly more complicated function
+```{r, tidy = FALSE}
+mytab <- function(someinput){
+ n <- length(someinput)
+ n.missing <- na.check(someinput)
+ n.complete <- n - n.missing
+ mymean <- round(mean(someinput, na.rm = TRUE), 2)
+ mysd <- round(sd(someinput, na.rm = TRUE), 2)
+ mystder <- round(mysd/sqrt(n.complete), 2)
+ Lower.CI <- round(mymean - 1.96*mystder, 2)
+ Upper.CI <- round(mymean + 1.96*mystder, 2)
+ c(Complete.obs = n.complete, Missing.obs = n.missing, 
+   Mean = mymean, Std.Error = mystder, 
+   Lower.CI = Lower.CI, Upper.CI = Upper.CI)
+}
+```
+Take a \emph{more} educated guess at what \texttt{mytab()} does?
+
+# A slightly more complicated function
+
+- For the \texttt{R} novice, \texttt{mytab()} is possibly terrifying!
+- We too were \texttt{R} novices once!
+-  Our advice on understanding what an \texttt{R} function does?
+ 
+  \begin{center}
+  ``Use a data set for input into the function and work through it one line of code at a time.''
+  \end{center}
+  
+- We ``experts'' still do this!
+  
+# mytab()
+
+```{r}
+apply(Continous.df, 2, mytab)  
+```
+
+# More descriptive stats
+Calculate the mean `Baseline` score for male and female patients
+```{r, tidy = FALSE}
+with(combined.df, mean(Baseline[Sex == "Male"], 
+                   na.rm = TRUE))
+with(combined.df, mean(Baseline[Sex == "Female"], 
+                   na.rm = TRUE))
+```
+
+# Better way 
+```{r}
+with(combined.df, tapply(Baseline, Sex, mean, na.rm = T))
+
+```
+
+# `tapply()`
+```{r, eval=FALSE}
+with(issp.df, tapply(total.lik, Income, mean, na.rm = TRUE))
+```
+```{r, eval=FALSE}
+tapply(X, INDEX, FUN, ...)
+```
+Translation: Apply function \texttt{FUN} to \texttt{X} for each level in the grouping factor \texttt{INDEX}
+ 
+How about calculating the mean `Baseline` score for each Race group (3 levels)?
+
+# `tapply()`
+```{r}
+with(combined.df, tapply(Baseline, Race.group, mean, na.rm = TRUE))
+
+```
+
+# `tapply()`
+```{r, echo = FALSE}
+options(width = 60)
+```
+\vspace{-4mm}
+```{r, eval=FALSE}
+with(combined.df, tapply(Baseline, Race.group, mytab))
+```
+\vspace{-9mm}
+```{r, echo = FALSE}
+with(combined.df, tapply(Baseline, Race.group, mytab))
+```
+
+# Data cleaning 
+```{r} 
+str(combined.df)
+```
+
+# Data cleaning 
+```{r} 
+str(combined.df[,11:13])
+```
+
+- a common problem is the dataset where some of the column names are not names of the variables, but *values* of variable. 
+- the last three columns are Serum Cholesterol levels, mg/100ml, measured on: Day 1, Day 5 and Day 10, which we have recoded to `Baseline`, `PreTrt` and `PostTrt`, resepctively.  
 
 
 
+# `tidyr` R package 
+
+```{r, tidy = FALSE} 
+library(tidyr)
+```
+Two main functions: 
+    -  `gather()` - takes multiple columns and combines based at a *key* value, i.e. `Time`. 
+    -  `spread()` - opposite of `gather()`
+
+# `gather()` 
+
+```{r}
+combined.long.df <- gather(combined.df, "Baseline", "PreTrt", "PostTrt", key = Time, value= Cholesterol)
+
+```
+
+# `gather()` 
+
+```{r, tidy = FALSE} 
+combined.long.df <- gather(combined.df, key = Time,  value= Cholesterol, 
+                           -ID, -Age, -Age.group, -Sex, -Weight, -Height,
+                           -Smoke.group, -Race.group, -BMI,
+                           -BMI.group)
+```
 
 
-# A Grammar of Data Manipulation
+# `gather()` 
 
-Single table verbs
+```{r}
+head(combined.long.df)
+```
 
-Dplyr aims to provide a function for each basic verb of data manipulation:
+# `gather()`
 
-filter() to select cases based on their values.
-arrange() to reorder the cases.
-select() and rename() to select variables based on their names.
-mutate() and transmute() to add new variables that are functions of existing variables.
-summarise() to condense multiple values to a single value.
-sample_n() and sample_frac() to take random samples.
-group_by()
+```{r}
+str(combined.long.df)
+```
 
 
-Piping
+# `spread()` 
 
-spread()
+```{r}
+combined.wide.df <- spread(combined.long.df, key = Time,
+                           value = Cholesterol)
 
-gather()
+```
+
+# `dplyr` R package 
+
+```{r}
+
+Patient.df <- read.csv("..\\..\\data\\Patient.csv", stringsAsFactors = FALSE)
+
+step1 <- mutate(Patient.df, 
+                Sex = as.factor(Sex), 
+               Smoke.group = factor(ifelse(Smoke == 1, "Yes", "No")),
+               Race.group =  factor(ifelse(Race == 1, "Caucasian",
+              ifelse(Race == 2, "African", "Other"))), 
+              BMI =  (Weight/Height^2)*703)
+
+step2 <- select(step1, -Smoke, -Race)
+
+step3 <- mutate(step2, 
+               BMI.group =   factor(ifelse(BMI >= 30, "obese", 
+         ifelse(BMI >= 25, "overweight",
+          "normal")), 
+         levels = c("normal", "overweight", "obese")))
+
+step4 <- mutate(step3, 
+               Age.group =   factor( ifelse(Age<=35, "Under 35", 
+         ifelse(Age <= 60, "36 to 60", "Over 61")), 
+         levels = c("Under 35", "36 to 60", "Over 61")))
+
+Cholesterol.df <- read.csv("..\\..\\data\\Cholesterol.csv")
+
+step5 <- left_join(step4, Cholesterol.df)
+
+combine.wide.df <- rename(step5, ID = Patient.ID, Baseline = Day1, PreTrt = Day5, PostTrt = Day10)
 
 
+```
+
+# Piping `%>%` 
+
+` x %>% f(y)` is equivalent to `f(x, y)`, where `x` is typically the data-frame.
+
+
+# Piping operator `%>%` 
+
+```{r, eval=FALSE, tidy=FALSE}
+combine.wide.df <- Patient.df %>% mutate(
+  Sex = as.factor(Sex),
+  Smoke.group = factor(ifelse(Smoke == 1, "Yes", "No")),
+  Race.group =  factor(ifelse(
+    Race == 1, "Caucasian",
+    ifelse(Race == 2, "African", "Other")
+  )),
+  BMI =  (Weight / Height ^ 2) * 703
+) %>%
+  select(-Smoke,-Race) %>%
+  mutate(BMI.group = factor(
+    ifelse(BMI >= 30, "obese",
+           ifelse(BMI >= 25, "overweight",
+                  "normal")),
+    levels = c("normal", "overweight", "obese")
+  )) %>%
+ 
+  ```
+
+# Piping operator `%>%` 
+
+```{r, eval = FALSE, tidy=FALSE}
+ mutate(Age.group =   factor(
+    ifelse(Age <= 35, "Under 35",
+           ifelse(Age <= 60, "36 to 60", "Over 61")),
+    levels = c("Under 35", "36 to 60", "Over 61")
+  )) %>%
+  left_join(Cholesterol.df) %>% rename(
+    ID = Patient.ID,
+    Baseline = Day1,
+    PreTrt = Day5,
+    PostTrt = Day10
+  )
+ 
+ 
+combined.long.df <- combine.wide.df %>% 
+  gather("Baseline", "PreTrt", "PostTrt",
+         key = Time, value= Cholesterol)
+```
+
+# Grouping
+
+```{r}
+with(combined.df, tapply(Baseline, Race.group, mean, na.rm = TRUE))
+
+combine.wide.df %>% group_by(Race.group) %>% 
+  summarise(BaseMean = mean(Baseline, na.rm = TRUE))
+
+```
+
+# Grouping
+
+```{r}
+with(combined.df, tapply(Baseline, Race.group, mytab))
+
+combine.wide.df %>% group_by(Race.group) %>% 
+  summarise(Complete.obs = mytab(Baseline)[1],
+            Missing.obs = mytab(Baseline)[2],
+            Mean = mytab(Baseline)[1],
+            Std.Error = mytab(Baseline)[3],
+            Lower.CI = mytab(Baseline)[4],
+            Upper.CI = mytab(Baseline)[5],
+            )
+```
+# Grouping
+
+```{r}
+
+combine.wide.df %>% 
+  group_by(Age.group, Race.group, BMI.group) %>% 
+  count() 
+```
+
+# Grouping
+
+```{r}
+
+combine.wide.df %>% 
+  group_by(Age.group, Race.group, BMI.group) %>% 
+  count() %>% 
+  arrange(desc(n))
+```
+# Grouping
+
+```{r}
+combine.wide.df %>% 
+  group_by(Age.group, Race.group, BMI.group) %>% 
+  count()  %>% 
+  spread(Age.group, n) 
+```
+
+# Grouping
+
+```{r}
+combine.wide.df %>% 
+  group_by(Age.group, Race.group, BMI.group) %>% 
+  count()  %>% 
+  spread(Age.group, n) %>% 
+  filter(!is.na(BMI.group), !is.na(Race.group)) 
+
+```
+
+# Summary
+
+- `apply()`
+- `tapply()`
+- `gather()` and `spread()` of `tidyr` R package
+- `dplyr` R package
+- piping operator `%>%`
 
 
 

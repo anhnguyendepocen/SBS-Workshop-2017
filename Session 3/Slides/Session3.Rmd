@@ -4,7 +4,7 @@ header-includes:
    \usepackage{graphicx}
    \usepackage{booktabs}
    \usepackage{caption}
-    \subtitle{Session 3 -- Data Wrangling (with dplyr and tidyr)}    
+    \subtitle{Session 3 -- Data manipulation}    
     \author[SCC]{Statistical Consulting Centre}
    \institute[\href{mailto:consulting@stat.auckland.ac.nz}
     {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
@@ -33,11 +33,14 @@ Patient.df$Race.group <-
        ifelse(Race == 1, "Caucasian",
               ifelse(Race == 2, "African", "Other")))
 table(Patient.df$Race.group)
-Patient.df$bmi <- with(Patient.df, (Weight/Height^2)*703)
-Patient.df$bmi.group <- 
-  ifelse(Patient.df$bmi >= 30, "obese", 
-         ifelse(Patient.df$bmi >= 25, "overweight",
+Patient.df$BMI <- with(Patient.df, (Weight/Height^2)*703)
+Patient.df$BMI.group <- 
+  ifelse(Patient.df$BMI >= 30, "obese", 
+         ifelse(Patient.df$BMI >= 25, "overweight",
           "normal"))
+
+Patient.df <- Patient.df[, !names(Patient.df) %in% c("Smoke", "Race")]
+
 ```
 
 
@@ -64,15 +67,15 @@ levels(Patient.df$Sex)
 ```
 
 ```{r}
-Patient.df$bmi.group <- factor(Patient.df$bmi.group)
-levels(Patient.df$bmi.group)
+Patient.df$BMI.group <- factor(Patient.df$BMI.group)
+levels(Patient.df$BMI.group)
 
 ```
 
 ```{r}
-Patient.df$bmi.group <- factor(Patient.df$bmi.group,
+Patient.df$BMI.group <- factor(Patient.df$BMI.group,
                levels = c("normal", "overweight", "obese"))
-levels(Patient.df$bmi.group)
+levels(Patient.df$BMI.group)
 
 ```
 
@@ -110,12 +113,11 @@ as.numeric(test)
 as.numeric(as.character(test))
 ```
 
-# Your turn 
+# Your turn (Binning ages into age groups)
 
-- Binning ages into age groups
 - Sometimes we are interested in examining responses by age group.
 - Now, assign each of the `r nrow(Patient.df)` patients to one of three age groups: "Under 35", "36 to 60" and "Over 61".
-- Convert \texttt{age.group} to a \texttt{factor} with levels in ascending order.
+- Convert \texttt{Age.group} to a \texttt{factor} with levels in ascending order.
 
 
 # Your turn 
@@ -123,23 +125,64 @@ as.numeric(as.character(test))
 Assign each of the `r nrow(Patient.df)` patients to one of three age groups: "Under 35", "36 to 60" and "Over 61".
 
 ```{r}
-Patient.df$age.group <- 
+Patient.df$Age.group <- 
   ifelse(Patient.df$Age<=35, "Under 35", 
          ifelse(Patient.df$Age <= 60, "36 to 60", "Over 61"))
-table(Patient.df$age.group)
+table(Patient.df$Age.group)
 
 ```
 
 # Your turn 
 
-Convert \texttt{age.group} to a \texttt{factor} with levels in ascending order.
+Convert \texttt{Age.group} to a \texttt{factor} with levels in ascending order.
 
 ```{r}
-Patient.df$age.group <- factor(Patient.df$age.group, 
-                           levels = c("Under 35", "36 to 60", "Over 61"))
-table(Patient.df$age.group)
+Patient.df$Age.group <- factor(Patient.df$Age.group)
+table(Patient.df$Age.group)
 
 ```
+
+# Your turn 
+
+Convert \texttt{Age.group} to a \texttt{factor} with levels in ascending order.
+
+```{r}
+Patient.df$Age.group <- factor(Patient.df$Age.group, 
+                           levels = c("Under 35", "36 to 60", "Over 61"))
+table(Patient.df$Age.group)
+
+```
+
+
+#Other way: `if`/`else` statement 
+
+```{r, eval = FALSE}
+  if(test) {
+  #  yes
+  } else{
+  #  no
+  }
+```
+
+\begin{itemize}
+  \item \texttt{test}: a logical test.
+  \item \texttt{yes}, what happens if the test is True.
+  \item \texttt{no}, what happens if the test is False.
+\end{itemize}
+
+#Other way: `if`/`else` statement 
+
+```{r, eval = FALSE}
+  if(test) {
+  #  yes for (test)
+  } else if(test1) {
+  #  no for (test) but yes for (test1) 
+  } else{
+  #  no for both (test) and (test1)
+  }
+```
+
+
 
 
 # Relational data
@@ -422,9 +465,11 @@ names(combined.df)
 str(combined.df)
 ```
 
-- You can change the variable names.
-```{r}
-names(combined.df)[1] <- c("ID")
+# Combining two tables
+You can change the variable names.
+```{r, tidy=FALSE}
+names(combined.df)[c(1,11,12,13)] <- 
+  c("ID", "Baseline", "PreTrt", "PostTrt")
 names(combined.df)
 ```
 
@@ -432,7 +477,7 @@ names(combined.df)
 
 
 ```{r}
-table(combined.df$age.group)
+table(combined.df$Age.group)
 table(combined.df$Sex)
 ```
 .
@@ -440,37 +485,14 @@ table(combined.df$Sex)
 .
 
 
+
 # `for` loop to get column summary statistics
 ```{r, eval = FALSE}
-for (i in c("age.group", "Sex", "Smoke.group", "Race.group", "bmi.group")){
+for (i in c("Age.group", "Sex", "Smoke.group", "Race.group", "BMI.group")){
+  print(i)
   print(table(combined.df[,i]))
 }
 ```
-
-# `for` loop to get column summary statistics
-```{r, echo = FALSE}
-for (i in c("age.group", "Sex", "Smoke.group", "Race.group", "bmi.group")){
-  print(table(combined.df[,i]))
-}
-```
-
-# Smart way: \texttt(apply) to get column summary statistics
-```{r}
-apply(combined.df[,c("age.group", "Sex", "Smoke.group", 
-                     "Race.group", "bmi.group")], 2, table)
-``` 
-
-# \texttt{apply}
-```{r, eval = FALSE}
-apply(X, MARGIN, FUN, ...)
-```
-- `X`:     A data frame.
-- `MARGIN`: 1 indicates rows, 2 indicates columns.
-- `FUN`: function, what do you want \texttt{R} to do with the rows or columns of the data frame
-- `...`: optional arguments to \texttt{FUN}.
-
-Translation: Do something (\texttt{FUN}) to every row (or column) (\texttt{MARGIN}) of a data
-frame (\texttt{X}). 
 
 
 # Continous Variables
@@ -481,19 +503,37 @@ mean(combined.df$Age)
 ```
 
 
-# Your turn 
-- `for` loop.
-- `apply` function.
 
-
-
-# Your turn 
+# `for` loop to get column summary statistics
 ```{r}
-apply(combined.df[,c("Age", "Height", "Weight", 
-                     "bmi", "Day1")], 2, mean)
-``` 
+for (i in c("Age", "Height", "Weight", "BMI", "Baseline", "PreTrt", "PostTrt")){
+  print(i)
+  print(mean(combined.df[,i]))
+}
+```
+
+# `for` loop to get column summary statistics
+```{r}
+for (i in c("Age", "Height", "Weight", "BMI", "Baseline", "PreTrt", "PostTrt")){
+  print(i)
+  print(mean(combined.df[,i], na.rm = TRUE))
+}
+```
+
+#Easier way 
+
+```{r}
+summary(combined.df[,-1])
+
+```
 
 
+
+# Summary
+
+- `factor`
+- Joining the data-sets
+- `for` loop
 
 
 

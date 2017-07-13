@@ -2,7 +2,7 @@
 title: "Introduction to $\\mathtt{R}$"
 header-includes: 
    \usepackage{graphicx}
-    \subtitle{Session 2 -- Data manipulation}    
+    \subtitle{Session 2 -- Data subsetting}    
     \author[SCC]{Statistical Consulting Centre}
    \institute[\href{mailto:consulting@stat.auckland.ac.nz}
     {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
@@ -256,6 +256,7 @@ The \texttt{ifelse()} function provides a quick way to convert the `Smoke` varia
 ```{r, tidy = FALSE}
 Patient.df$Smoke.group <- 
   with(Patient.df, ifelse(Smoke == 1, "Yes", "No"))
+
 table(Patient.df$Smoke.group)
 ```
 
@@ -280,6 +281,43 @@ head(Patient.df)
 str(Patient.df)
 ```
 
+# Data Cleaning
+Now we have created new variables, `Smoke.group` and `Race.group`, the next step is to remove the `Smoke` and `Race` variables in the `Patient.df`.
+
+```{r} 
+names(Patient.df)
+```
+
+# Data Cleaning
+Now we have created new variables, `Smoke.group` and `Race.group`, the next step is to remove the `Smoke` and `Race` variables in the `Patient.df`.
+
+```{r} 
+Smoke.index <- which(names(Patient.df) == "Smoke")
+Smoke.index
+
+Race.index <- which(names(Patient.df) == "Race")
+Race.index
+
+names(Patient.df[,- c(Smoke.index, Race.index)])
+```
+
+# Data Cleaning with `%in%` operator
+```{r} 
+names(Patient.df)
+
+names(Patient.df) %in% c("Smoke", "Race")
+
+
+names(Patient.df[, !names(Patient.df) %in% c("Smoke", "Race")])
+
+```
+
+# Data Cleaning with `%in%` operator
+```{r} 
+Patient.df <- Patient.df[, !names(Patient.df) %in% c("Smoke", "Race")]
+
+```
+
 
 # Your turn
 
@@ -289,7 +327,7 @@ First to calculate \texttt{BMI}:
 = \frac{\mathtt{Weight(pounds)}}{\mathtt{Height(inches)}^2} \times 703
 \]
 
-Then, create a `bmi.group` for `normal`, `overweight` and `obese`, where, 
+Then, create a `BMI.group` for `normal`, `overweight` and `obese`, where, 
 
 - overweight is a BMI greater than or equal to 25; and
 - obesity is a BMI greater than or equal to 30.
@@ -303,26 +341,26 @@ To calculate \texttt{BMI}:
 = \frac{\mathtt{Weight(pounds)}}{\mathtt{Height(inches)}^2} \times 703
 \]
 ```{r, tidy=FALSE}
-Patient.df$bmi <- (Patient.df$Weight/Patient.df$Height^2)*703
-mean(Patient.df$bmi, na.rm = TRUE)
+Patient.df$BMI <- (Patient.df$Weight/Patient.df$Height^2)*703
+mean(Patient.df$BMI, na.rm = TRUE)
 ```
 
 Or, 
 ```{r, tidy=FALSE}
-# Calculate bmi using Weight and Height
-Patient.df$bmi <- with(Patient.df, (Weight/Height^2)*703)
-mean(Patient.df$bmi, na.rm = TRUE)
+# Calculate BMI using Weight and Height
+Patient.df$BMI <- with(Patient.df, (Weight/Height^2)*703)
+mean(Patient.df$BMI, na.rm = TRUE)
 ```
 
 # Your turn
 
 ```{r, tidy=FALSE}
-Patient.df$bmi.group <- 
-  ifelse(Patient.df$bmi >= 30, "obese", 
-         ifelse(Patient.df$bmi >= 25, "overweight",
+Patient.df$BMI.group <- 
+  ifelse(Patient.df$BMI >= 30, "obese", 
+         ifelse(Patient.df$BMI >= 25, "overweight",
           "normal"))
-table(Patient.df$bmi.group)
-table(Patient.df$bmi.group, useNA = "always")
+table(Patient.df$BMI.group)
+table(Patient.df$BMI.group, useNA = "always")
 
 ```
 
@@ -330,7 +368,7 @@ table(Patient.df$bmi.group, useNA = "always")
 # Subsetting in calculations
 
 ```{r}
-with(Patient.df, table(Race.group, bmi.group))
+with(Patient.df, table(Race.group, BMI.group))
 ```
 
 # Subsetting in calculations
@@ -339,16 +377,16 @@ Produce the last table with Race groups of `African` and `Caucasian`, and BMI gr
 exclude.rows <-
   with(Patient.df,
      which(Race.group == "Other"  |
-           bmi.group == "Normal"))
+           BMI.group == "Normal"))
 
-head(Patient.df[-exclude.rows, c("Race.group", "bmi.group")])
+head(Patient.df[-exclude.rows, c("Race.group", "BMI.group")])
 ```
 
 # Subsetting in calculations
 
 ```{r, tidy=FALSE}
 R.B.tab <- with(Patient.df[-exclude.rows,], 
-                table(Race.group, bmi.group))
+                table(Race.group, BMI.group))
 R.B.tab
 ```
 
@@ -363,7 +401,7 @@ round(prop.table(R.B.tab)*100, 1)
 # Easier way
 ```{r}
 R.B.tab1 <- with(Patient.df, 
-                 table(Race.group, bmi.group))
+                 table(Race.group, BMI.group))
 dim(R.B.tab1)
 row.names(R.B.tab1)
 colnames(R.B.tab1)
@@ -387,11 +425,11 @@ round(prop.table(R.B.tab1[-3, -1])*100, 1)
 # Subsetting in calculations
 ```{r, tidy = FALSE}
 # Mean BMI level of females
-with(Patient.df, mean(bmi[Sex == "Female"], na.rm = TRUE))
+with(Patient.df, mean(BMI[Sex == "Female"], na.rm = TRUE))
 
 # Mean BMI level of females and Caucasian
 with(Patient.df,
-     mean(bmi[Sex == "Male" & 
+     mean(BMI[Sex == "Male" & 
                    Race.group == "Caucasian"],
           na.rm = TRUE))
 ```

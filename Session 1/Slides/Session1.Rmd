@@ -31,11 +31,11 @@ Each session comprises two parts: lecture and practice.
 |------------- | -------------     | -------------
 |1             | 09:00am - 10:30am | Introduction 
 |              | 10:30am - 10:50am | Break
-|2             | 10:50am - 01:00pm | Data manipulation 
+|2             | 10:50am - 01:00pm | Data subsetting 
 |              | 01:00pm - 02:00pm | Lunch break  
-|3             | 02:00pm - 03:00pm | Data exploration
+|3             | 02:00pm - 03:00pm | Data manipulation 
 |              | 03:00pm - 03:20pm | Break
-|4             | 03:20pm - 04:30pm | Data Wrangling (with dplyr and tidyr)
+|4             | 03:20pm - 04:30pm | Data exploration
              
  
 # Thursday
