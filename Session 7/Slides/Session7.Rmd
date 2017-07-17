@@ -14,7 +14,7 @@ date: "20 July, 2017"
 output:
   beamer_presentation:
     theme: "Madrid"
-    colortheme: "beaver"
+    colortheme: "crane"
     fonttheme: "professionalfonts"
 ---
 
@@ -296,7 +296,9 @@ smoke.age.tab <- with(combined.df, table(Smoke.group, Age.group))
 smoke.age.tab
 ```
 
-Do smoking habit depend on age group? Statistically speaking, is \texttt{Smoke.group} and \texttt{Age.group} independent of one another?
+Do smoking habit depend on age group? 
+
+Statistically speaking, is \texttt{Smoke.group} and \texttt{Age.group} independent of one another?
 
 
 # Pearson's Chi-squared test
@@ -305,6 +307,7 @@ chisq.test(smoke.age.tab)
 ```
 \begin{itemize}
   \item There is extremely strong evidence (\texttt{p}-value $<$ 0.0001) that \texttt{Smoke.group} and \texttt{Age.group} are not independent of one another.
+  
   \item Smoking habit depend on the age group to which patient belong.
 \end{itemize}
 
@@ -312,7 +315,7 @@ chisq.test(smoke.age.tab)
 # Assumptions
 
 - Pearson's Chi-squared tests have certain assumptions. Beyond the scope of this course.
-\item \texttt{chisq.test()} will give you a warning if these assumptions are not met.
+- \texttt{chisq.test()} will give you a warning if these assumptions are not met.
 
 ```{r echo = FALSE, error=TRUE}
 mytest = 1:4
@@ -330,6 +333,109 @@ Assume \texttt{Q5.age.tab} does not meet the underlying assumptions of Pearson's
 fisher.test(smoke.age.tab, simulate.p.value = TRUE)
 ```
 
+# Linear regression
+
+`lm(y~x)` is used for linear regression.
+\begin{itemize}
+  \item \texttt{y}, the response variable.
+  \item \texttt{x}, the explanatory variable.   
+  \item There can be more than one explanatory variable, called {\em multiple} linear regression. 
+  \item Both response variable and explanatory variable(s) should be numeric, it is {\em generalised} linear regression.
+\end{itemize}
+
+
+# Simple linear regression
+When there is only one predictor variable (e.g. Age) in our linear regression, we refer to this as  *simple* linear regression.
+
+```{r, eval = FALSE, tidy = FALSE}
+with(combined.long.df, plot(Age, Cholesterol))
+```
+
+# Simple linear regression
+```{r, echo=FALSE}
+with(combined.long.df, plot(Age, Cholesterol))
+```
+
+# Normality check
+
+```{r}
+qqnorm(combined.long.df$Cholesterol)
+qqline(combined.long.df$Cholesterol, col = 2, lwd = 2)
+```
+
+# Normality check
+
+```{r}
+qqnorm(log(combined.long.df$Cholesterol))
+qqline(log(combined.long.df$Cholesterol), col = 2, lwd = 2)
+```
+
+
+# Simple linear regression
+
+Let's carry out the linear regession of Age on Cholesterol level, i.e.
+
+```{r, eval = FALSE, tidy = FALSE}
+trylm <- with(combined.long.df, lm(log(Cholesterol)~Age))
+summary(trylm)
+```
+
+# Simple linear regression
+
+```{r, echo = FALSE}
+trylm <- with(combined.long.df, lm(log(Cholesterol)~Age))
+summary(trylm)
+```
+
+# Simple linear regression
+
+```{r, echo = FALSE}
+round(summary(trylm)$coef, 4)
+```
+
+
+- The estimated intercept is 5.1339. There is a very strong evidecne that this is not zero ($p$-value < 0.0001). 
+- The estimated slope is 0.0035. There is a vereys strong evidence that this is not zero ($p$-value < 0.0001).
+- The fitted line is:
+
+$$ log(Cholesterol) = 5.1339 + 0.0035 \times Age $$
+$$ Cholesterol = e^{5.1339 + 0.0035 \times Age} $$
+
+- For every one year increase in age, the Cholesterol level increase by 1.003506 times.  
+
+#Check 
+
+```{r}
+plot(residuals(trylm))
+
+```
+
+# Conclusion
+
+- The linear relationship between age and Cholesterol level is statistically significant.
+- Cholesterol level is positive related to age.
+
+# Add the fitted line
+
+```{r}
+with(combined.long.df, plot(Age, log(Cholesterol)))
+abline(trylm, col = 2)
+```
+
+# Quadratic term
+
+```{r, tidy=FALSE}
+tryquad <- with(combined.long.df,
+        lm(log(Cholesterol) ~ Age + I(Age^2)))
+round(summary(tryquad)$coef, 4)
+```
+
+`I(Age^2)` tells R to treat `^` as arithmetical operator, rather than formula operator.
+
+Our fitted curve is:
+
+$$ log(Cholesterol) = 4.8649 + 0.0035 \times Age + -0.0001Age^2 $$
+
 # Summary
 
 \begin{itemize}
@@ -338,6 +444,7 @@ fisher.test(smoke.age.tab, simulate.p.value = TRUE)
   \item Two-way ANOVA
   \item Pearson’s Chi-squared test
   \item Fisher’s exact test
+  \item linear regression
 \end{itemize}
 
 

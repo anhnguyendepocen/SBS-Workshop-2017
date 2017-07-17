@@ -14,7 +14,7 @@ date: "20 July, 2017"
 output:
   beamer_presentation:
     theme: "Madrid"
-    colortheme: "beaver"
+    colortheme: "crane"
     fonttheme: "professionalfonts"
 ---
 

@@ -1,0 +1,214 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+subtitle: "Session 5 -- Advanced Graphics"
+author: "Statistical Consulting Centre"
+date: "20 July, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# knitr::opts_chunk$set(echo = FALSE)
+# knitr::opts_chunk$set(eval = FALSE)
+
+lake.df <- read.csv("..\\..\\data\\Lake.csv", 
+                      stringsAsFactors = FALSE)
+
+lake.df$pHtype <- with(lake.df, ifelse(pH > 7, "alkalinity", ifelse(pH < 7, "acidity", "natural")))
+lake.df$pHtype <- factor(lake.df$pHtype, levels = c( "acidity", "natural", "alkalinity"))
+lake.df$Calcium <- factor(lake.df$Calcium, levels = c("Low", "Medium", "High"))
+
+mercury.df <- read.csv("..\\..\\data\\Mercury.csv", 
+                      stringsAsFactors = FALSE)
+library(dplyr)
+joined.df <- left_join(lake.df, mercury.df, by = "ID")
+
+library(tidyr)
+joined.long.df <- gather(joined.df, "Day1", "Day2", "Day3", key = Time, value= Mercury)
+
+library(ggplot2)
+
+```
+
+
+# 1. T-test
+
+1. Do a two-sample $t$-test (two-sided) to see whether \texttt{Mercury} for acidic lakes is different from other \texttt{pHtype} levels, assuming 
+
+  (a) population variances are equal, and
+
+```{r}
+joined.long.df$pHtypeAcidic <-  with(joined.long.df, ifelse(pH < 7, "acidity", "Others"))
+
+with(joined.long.df, t.test(Mercury~pHtypeAcidic, var.equal = TRUE))
+```
+
+ (b) population variances are not equal
+
+```{r}
+
+with(joined.long.df, t.test(Mercury~pHtypeAcidic, var.equal = FALSE))
+```
+
+Hint: Create a new variable \texttt{pHtypeAcidic} for just acidic group.
+
+2. How do the results from using the following code compare with the results you got in question 1?
+
+````
+acid.mer <- with(joined.long.df, mercury[pHtype == "acidity"])
+not.acid.mer <- with(joined.long.df, mercury[pHtype != "acidity"])
+
+t.test(acid.mer, not.acid.mer)
+
+````
+
+```{r}
+
+acid.mer <- with(joined.long.df, Mercury[pHtype == "acidity"])
+not.acid.mer <- with(joined.long.df, Mercury[pHtype != "acidity"])
+
+t.test(acid.mer, not.acid.mer)
+
+```
+
+
+# 2. One-way ANOVA
+
+1. Perform an ANOVA to test the null hypothesis that the mean mercury concentrations are all equal for all three Calcium levels.
+
+```{r}
+
+myaov <- with(joined.long.df, aov(Mercury ~ Calcium))
+
+```
+
+2. Use `summary()` to check the overall signifcance of `Calcium`.
+
+```{r}
+
+summary(myaov)
+
+```
+
+
+3. Use `model.tables()` to calculate the mean mercury concentrations for each Calcium level.
+
+
+```{r}
+model.tables(myaov, type = "means")
+```
+
+
+4. Carry out pairwise comparisons of mean mercury concentrations between pairs of Calcium levels, adjusting the p-values using Tukey's Honestly Signifcance Difference.
+
+```{r}
+TukeyHSD(myaov)
+
+```
+
+
+# 3. Two-way ANOVA
+
+1. Perform an Two-way ANOVA to test the null hypothesis that the mean mercury concentrations are all equal for all three Calcium levels across all three days.
+
+```{r}
+
+myaov <- with(joined.long.df, aov(Mercury ~ Calcium*Time))
+
+```
+
+2. Use `summary()` to check the overall signifcance.
+
+```{r}
+
+summary(myaov)
+
+```
+
+
+3. Use `model.tables()` to calculate the mean mercury concentrations for each Calcium level.
+
+
+```{r}
+model.tables(myaov, type = "means")
+```
+
+
+4. Carry out pairwise comparisons of mean mercury concentrations, adjusting the p-values using Tukey's Honestly Signifcance Difference.
+
+```{r}
+TukeyHSD(myaov)
+
+```
+
+
+
+
+# 4. Test of independence
+
+1. Perform a Pearson's Chi-squared test to check if the Calcium depend on pHtype level? 
+
+```{r}
+ca.ph.tab <- with(joined.df, table(Calcium, pHtype))
+ca.ph.tab
+
+chisq.test(ca.ph.tab)
+
+```
+
+2. Why there is a warning from the 4.1? What is an altertive test which we can perform?
+
+
+```{r} 
+fisher.test(ca.ph.tab)
+
+```
+
+
+# 5. Linear regression
+
+1. Produce a scatterplot between pH (x-axis) and mercury (y-axis).
+
+```{r}
+with(joined.long.df, plot(pH, Mercury))
+
+```
+
+
+2. Describe the relationship between pH and mercury showing in the scatterplot.
+
+
+3. Fit a linear model between pH and mercury, in which mercury is the dependent (response) variable and pH is the independent (explanatory) variable. Name the linear model as `mylm`.
+
+
+```{r}
+mylm <- with(joined.long.df, lm(Mercury ~ pH))
+```
+
+4. Use `summary()` to obtain the estimates and test the statistical signifcance of the intercept and slope.
+
+```{r}
+summary(mylm)
+```
+
+5 Write down the equation of the fitted line.
+
+
+6. Use the following code to check the residuals, for homogeneity of variance.
+
+````
+plot(predict(mylm), residuals(mylm))
+abline(h = 0, lwd = 2, col = 2)
+````
+
+```{r}
+plot(predict(mylm), residuals(mylm))
+abline(h = 0, lwd = 2, col = 2)
+```
+
+
+
+
+
+
+
+

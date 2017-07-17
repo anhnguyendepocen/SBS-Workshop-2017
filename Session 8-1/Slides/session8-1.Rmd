@@ -73,8 +73,12 @@ combined.long.df <- gather(combined.df, key = Time,  value= Cholesterol,
 
 # R Markdown
 
-- Report
-- Reproducibility
+Combination of Markdown and `knitr` `R` package:   
+-  Markdown another programming language allows you to write report/comments. 
+-  `knitr` R package compiles the `R` code for plots, tables, ouputs.  
+- Reproducibility  
+- Allow you re-do the analysis with a different set of data.
+
 
 # R Markdown
 
@@ -219,9 +223,7 @@ Same format as Hyperlinks, with `!` in the front. You can also use URL of the im
 
 Insert a chunk of R code with 
 
-```{r}
-#some code
-```
+\includegraphics[width = 0.25\textwidth]{comment.png}
 
 When you compile, R markdown will run the code and include its results. 
 
@@ -241,19 +243,8 @@ Today is `r Sys.Date()`
 
 By default, R markdown includes both the code and its results
 
-
-```{r echo=FALSE}
-knitr::opts_chunk$set(eval = FALSE)
-```
-
-## Input (Ignore the `wrapper = TRUE` option):
-```{r, wrapper=TRUE}
-dim(iris)
-```
-
-```{r echo=FALSE}
-knitr::opts_chunk$set(eval = TRUE)
-```
+## Input:
+\includegraphics[width = 0.25\textwidth]{first.png}
 
 ## Output
 ```{r}
@@ -265,18 +256,8 @@ dim(iris)
 
 Add `echo = FALSE` to hide the code. 
 
-```{r echo=FALSE}
-knitr::opts_chunk$set(eval = FALSE)
-```
-
-## Input (Ignore the `wrapper = TRUE` option):
-```{r, wrapper=TRUE}
-dim(iris)
-```
-
-```{r echo=FALSE}
-knitr::opts_chunk$set(eval = TRUE)
-```
+## Input:
+\includegraphics[width = 0.25\textwidth]{echo.png}
 
 ## Output
 ```{r, echo = FALSE}
@@ -288,10 +269,8 @@ dim(iris)
 
 Add `eval = FALSE` to prevent the code to run.
 
-## Input (Ignore the `wrapper = TRUE` option):
-```{r, eval = FALSE, wrapper=TRUE}
-dim(iris)
-```
+## Input:
+\includegraphics[width = 0.25\textwidth]{eval.png}
 
 ## Output
 ```{r, eval = FALSE}
@@ -304,14 +283,12 @@ dim(iris)
 To sepcify the dimentsion of plots (in inches) with `fig.height` and `fig.width`. 
 
 
-## Input (Ignore the `wrapper = TRUE` option):
-```{r, echo = FALSE, fig.width = 3, fig.height = 5, wrapper=TRUE}
-hist(iris$Sepal.Width)
-```
+## Input:
 
-```{r echo=FALSE}
-knitr::opts_chunk$set(eval = TRUE)
-```
+\includegraphics[width = 0.75\textwidth]{fig.png}
+
+
+# `fig.height`, `fig.width`
 
 ## Output
 ```{r, echo = FALSE, fig.width = 3, fig.height = 5}
@@ -321,15 +298,23 @@ hist(iris$Sepal.Width)
 
 # `kable()`
 
-`kable()` in `knitr` R package allows you to present tables.
+`kable()` in `knitr` R package allows you to present tables.  
 
-## Input (Ignore the `wrapper = TRUE` option):
-```{r, wrapper=TRUE}
-knitr::kable(head(iris))
-```
+Note the option `results='asis'`, which will pass through results without reformatting them. 
 
-## Output
-```{r}
+## Input:
+
+\includegraphics[width = 0.5\textwidth]{kable.png}
+
+
+# `kable()`
+
+`kable()` in `knitr` R package allows you to present tables.   
+
+Note the option `results='asis'`, which will pass through results without reformatting them. 
+
+## Output:
+```{r, results='asis'}
 knitr::kable(head(iris))
 ```
 
@@ -355,22 +340,17 @@ output: html_document
 
 ````
 
-# output temp
+# Output Formats
+
+-  html_notebook - Interactive R Notebooks  
+-  html_document - HTML document w/ Bootstrap CSS  
+-  pdf_document - PDF document (via LaTeX template)  
+-  word_document - Microsoft Word document (docx)  
+-  odt_document - OpenDocument Text document  
+-  rtf_document - Rich Text Format document  
+-  md_document - Markdown document (various flavors)  
 
 
-# Slide with R Output
-
-```{r cars, echo = TRUE}
-summary(cars)
-```
-
-
-# Slide with Plot
-
-```{r pressure}
-plot(pressure)
-```
-
-
+# Any question?
 
 

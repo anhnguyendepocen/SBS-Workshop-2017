@@ -1,0 +1,114 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+subtitle: "Session 5 -- Basic Graphics"
+author: "Statistical Consulting Centre"
+date: "20 July, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# knitr::opts_chunk$set(echo = FALSE)
+# knitr::opts_chunk$set(eval = FALSE)
+
+lake.df <- read.csv("..\\..\\data\\Lake.csv", 
+                      stringsAsFactors = FALSE)
+
+lake.df$pHtype <- with(lake.df, ifelse(pH > 7, "alkalinity", ifelse(pH < 7, "acidity", "natural")))
+lake.df$pHtype <- factor(lake.df$pHtype, levels = c( "acidity", "natural", "alkalinity"))
+lake.df$Calcium <- factor(lake.df$Calcium, levels = c("Low", "Medium", "High"))
+
+mercury.df <- read.csv("..\\..\\data\\Mercury.csv", 
+                      stringsAsFactors = FALSE)
+library(dplyr)
+joined.df <- left_join(lake.df, mercury.df, by = "ID")
+
+library(tidyr)
+joined.long.df <- gather(joined.df, "Day1", "Day2", "Day3", key = Time, value= Mercury)
+
+joined.long.df$Calcium <- as.character(joined.long.df$Calcium)
+```
+
+
+# 1. Boxplot
+
+1. Draw boxplots showing the distribution of \texttt{Mercury} for each of the levels of \texttt{Calcium}. The boxplot should look exactly like 
+
+```{r}
+with(joined.long.df, plot(as.factor(Calcium), Mercury,
+                      xlab = "Calcium level", cex.lab = 1.5,
+                      ylab = "Mercury concentration",
+                      main = "Mercury contaminations in Florida lakes"))
+
+```
+
+The boxplot should have:
+\begin{itemize}
+  \item labels on the x-axis,
+  \item an informative label on the y-axis (not \texttt{Mercury}),
+  \item a title, and
+  \item labels that are large enough to read without squinting.
+\end{itemize}
+
+- Now try to produce the boxplot so that \texttt{Calcium} is plotted in a sensible order with respect to \texttt{Calcium} level like
+```{r}
+joined.long.df$Calcium <- factor(joined.long.df$Calcium, level = c("Low", "Medium", "High"))
+with(joined.long.df, plot(Calcium, Mercury,
+                      xlab = "Calcium level", cex.lab = 1.5,
+                      ylab = "Mercury concentration",
+                      main = "Mercury contaminations in Florida lakes"))
+```
+
+Hint: use the following command to convert \texttt{Calcium} variable for plotting.
+
+```
+joined.long.df$Calcium <- factor(joined.long.df$Calcium, level = c("Low", "Medium", "High"))
+```
+
+
+# 2. Scatterplot
+Draw a scatter plot which shows the relationship between \texttt{pH} and \texttt{Mercury} for each of the \texttt{Calcium} levels. The scatter plot should look exactly the same as 
+
+```{r}
+with(joined.long.df, plot(pH, Mercury, 
+     col = c(1,2,4)[Calcium], 
+     pch = c(20, 22,3)[Calcium], 
+     xlab = "pH value", ylab = "Mercury concentration"))
+
+legend("bottomleft", pch = c(20, 22, 3), 
+       col = c(1, 2, 4),
+       bty = "n", cex = 1.5,
+legend = c("Low", "Medium", "High"))
+```
+
+Hint: 
+
+- \texttt{Low} \texttt{Calcium} level: using \texttt{pch = 20} and \texttt{col = 1}.
+- \texttt{Medium} \texttt{Calcium} level: using \texttt{pch = 22} and \texttt{col = 2}.
+- \texttt{High} \texttt{Calcium} level: using \texttt{pch = 3} and \texttt{col = 4}.
+
+
+# 3. Barplot
+
+1. Draw a juxtaposed barplot that shows the average \texttt{Mercury} concentration for the six combinations of \texttt{Calcium} and \texttt{pHtype}. The graph should look exactly the same as
+
+```{r}
+trt.mean <- with(joined.long.df, tapply(Mercury,
+                            list(pHtype, Calcium), mean))
+barplot(trt.mean, beside = TRUE, space = c(0.1, 1),
+legend.text= c("Acidity", "Neutral", "Alkalinity"),
+        ylab = "Mean mercury concentration", 
+        xlab = "Calcium level",
+args.legend = list(bty = "n", cex = 1.5))
+```
+
+Draw the barplot in the following steps:
+
+- Calculate the mean \texttt{mercury} level for each combination of \texttt{pHtype} and \texttt{plot.cal}, using the \texttt{tapply()} function.
+- Save the calculated means in a new object called \texttt{trt.mean}.
+- Produce the barplot using \texttt{beside = TRUE}, putting a  small space  between the bars. (Reminder: the argument that does this is \texttt{space}).
+- Add a legend.
+
+2. Mess up the plot by playing with \texttt{horiz}, \texttt{angle}  \texttt{density} and any arguments that you want. Note: keep this to yourself.
+
+
+

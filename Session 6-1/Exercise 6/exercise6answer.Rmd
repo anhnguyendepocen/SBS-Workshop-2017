@@ -1,0 +1,95 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+subtitle: "Session 5 -- Advanced Graphics"
+author: "Statistical Consulting Centre"
+date: "20 July, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# knitr::opts_chunk$set(echo = FALSE)
+# knitr::opts_chunk$set(eval = FALSE)
+
+lake.df <- read.csv("..\\..\\data\\Lake.csv", 
+                      stringsAsFactors = FALSE)
+
+lake.df$pHtype <- with(lake.df, ifelse(pH > 7, "alkalinity", ifelse(pH < 7, "acidity", "natural")))
+lake.df$pHtype <- factor(lake.df$pHtype, levels = c( "acidity", "natural", "alkalinity"))
+lake.df$Calcium <- factor(lake.df$Calcium, levels = c("Low", "Medium", "High"))
+
+mercury.df <- read.csv("..\\..\\data\\Mercury.csv", 
+                      stringsAsFactors = FALSE)
+library(dplyr)
+joined.df <- left_join(lake.df, mercury.df, by = "ID")
+
+library(tidyr)
+joined.long.df <- gather(joined.df, "Day1", "Day2", "Day3", key = Time, value= Mercury)
+
+library(ggplot2)
+
+```
+
+# 1. Boxplot
+
+1. Draw boxplots showing the distribution of \texttt{Mercury} for each of the levels of \texttt{Calcium}. The boxplot should look exactly like 
+
+```{r}
+
+ggplot(joined.long.df, aes(Calcium, Mercury)) + 
+  geom_boxplot()+
+  labs(title ="Mercury contaminations in Florida lakes",  
+        x = "Calcium level", y = "Mercury concentration") +
+  theme_bw()  +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+# 2. Scatterplot
+Draw a scatter plot which shows the relationship between \texttt{pH} and \texttt{Mercury} for each of the \texttt{Calcium} levels. The scatter plot should look exactly the same as 
+
+```{r}
+
+ggplot(joined.long.df, aes(x = pH, y = Mercury, 
+                           col = Calcium, shape = Calcium)) + 
+  geom_point() +
+  labs(title ="Mercury contaminations in Florida lakes",  
+        x = "pH value", y = "Mercury concentration") +
+  theme_bw()  +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+# 3. Barplot
+
+Draw a juxtaposed barplot that shows the average \texttt{Mercury} concentration for the six combinations of \texttt{Calcium} and \texttt{pHtype}. The graph should look exactly the same as
+
+```{r}
+
+joined.long.df %>% 
+  group_by(Calcium, pHtype) %>% 
+  summarise(Mean = mean(Mercury)) %>% 
+  ggplot(aes(x = Calcium, y = Mean, 
+                           fill = pHtype)) + 
+  geom_col(position = "dodge")  +
+  labs(x = "Calcium level", y = "Mean Mercury concentration")
+
+```
+
+
+
+# 4. Heatmap 
+
+Draw a heatmap that shows the \texttt{Mercury} concentration  for the six combinations of \texttt{Calcium} and \texttt{pHtype}. The graph should look exactly the same as
+```{r}
+
+ggplot(joined.long.df, aes(x = pHtype, y = Calcium)) +  +
+  labs(x = "Calcium level", y = "Mean Mercury concentration")
+  theme_bw()  +
+  labs(y = "Calcium level", y = "pH level")
+
+```
+
+Hint: `geom_tile()` for the heatmap and `scale_fill_gradient` for the colour 
+
+
+
