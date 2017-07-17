@@ -1,0 +1,119 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+subtitle: "Session 3 -- Data manipulation"
+author: "Statistical Consulting Centre"
+date: "19 July, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(eval = FALSE)
+
+lake.df <- read.csv("..\\..\\data\\Lake.csv", 
+                      stringsAsFactors = FALSE)
+
+```
+
+# 1. `ifelse()` function and factor
+
+1. Create a new variable called \texttt{pHtype} which has the value \texttt{acidity} if \texttt{pH} $< 7$, the value \texttt{alkalinity} if \texttt{pH} $> 7$ and the value \texttt{natural} if \texttt{pH} $= 7$
+
+```{r}
+lake.df$pHtype <- with(lake.df, ifelse(pH > 7, "alkalinity", ifelse(pH < 7, "acidity", "natural")))
+
+```
+2. Convert the variable created in 1.1 into factors with appropriate levels:  "acidity", "natural" and "alkalinity".
+
+```{r}
+lake.df$pHtype <- factor(lake.df$pHtype, levels = c( "acidity", "natural", "alkalinity"))
+
+```
+
+3. Convert the `Calcium` in `lake.df` into factors with appropriate levels:  "Low", "Medium " and "High".
+
+```{r}
+lake.df$Calcium <- factor(lake.df$Calcium, levels = c("Low", "Medium", "High"))
+
+```
+
+4. Produce a two-way frequency table of `Calcium` versus `pHtype`.
+
+```{r}
+with(lake.df, table(Calcium, pHtype))
+
+
+```
+
+
+# 2. Join two datasets
+
+1. `mercury.csv` contains data on mercury contamination in 53 different lakes in Florida. The mercury concentration (parts per million) in the muscle tissue of the fish sampled from that lake were taken in 
+    - `Day1`
+    - `Day2`    
+    - `Day3`
+
+2. Read the data into R, saving it in object named mercury.df.
+
+```{r, eval = FALSE}
+mercury.df <- read.csv("location of your folder/Mercury.csv", 
+                      stringsAsFactors = FALSE)
+
+```
+
+```{r, echo = FALSE}
+mercury.df <- read.csv("..\\..\\data\\Mercury.csv", 
+                      stringsAsFactors = FALSE)
+```
+
+
+3. Now combine the two datasets:`lake.df` and `mercury.df` by the `ID`, and call the new dataset `joined.df`. 
+
+```{r}
+library(dplyr)
+joined.df <- left_join(lake.df, mercury.df, by = "ID")
+```
+
+4. Check its dimensions using `dim()`.
+
+```{r}
+dim(joined.df)
+```
+
+5. Print this objects variable names to the console.
+
+```{r}
+names(joined.df)
+```
+
+6. Use `str()` to check all of the variables at once.
+
+```{r}
+str(joined.df)
+```
+
+
+#3. `for` loop
+
+1. Check the one-way frequency tables of pHtype and Calcium.
+
+```{r}
+for (i in c("pHtype", "Calcium")){
+  print(i)
+  print(table(joined.df[,i]))
+}
+```
+
+
+2. Calculate the means and standard deviations of pH, Chlorophyll and mercury measuremnts at Day 1, 2, and 3. 
+
+```{r}
+for (i in c("pH", "Chlorophyll", "Day1", "Day2", "Day3")){
+  print(i)
+  print(mean(joined.df[,i], na.rm = TRUE))
+  print(sd(joined.df[,i], na.rm = TRUE))
+}
+```
+
+
+

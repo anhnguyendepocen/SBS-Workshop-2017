@@ -30,12 +30,12 @@ Each session comprises two parts: lecture and practice.
 |Session       | Time              | Session 
 |------------- | -------------     | -------------
 |1             | 09:00am - 10:30am | Introduction 
-|              | 10:30am - 10:50am | Break
-|2             | 10:50am - 01:00pm | Data subsetting 
-|              | 01:00pm - 02:00pm | Lunch break  
-|3             | 02:00pm - 03:00pm | Data manipulation 
-|              | 03:00pm - 03:20pm | Break
-|4             | 03:20pm - 04:30pm | Data exploration
+|              | 10:30am - 11:00am | Break
+|2             | 11:00am - 12:30pm | Data subsetting 
+|              | 12:30pm - 01:30pm | Lunch break  
+|3             | 01:30pm - 03:00pm | Data manipulation 
+|              | 03:00pm - 03:30pm | Break
+|4             | 03:30pm - 05:00pm | Data exploration
              
  
 # Thursday
@@ -45,12 +45,12 @@ Each session comprises two parts: lecture and practice.
 |Session       | Time              | Session 
 |------------- | -------------     | -------------
 |1             | 09:00am - 10:30am | Graphics 
-|              | 10:30am - 10:50am | Break
-|2             | 10:50am - 01:00pm | Advanced Graphics (ggplot2) 
-|              | 01:00pm - 02:00pm | Lunch break  
-|3             | 02:00pm - 03:00pm | Simple analysis 
-|              | 03:00pm - 03:20pm | Break
-|4             | 03:20pm - 04:30pm | R Markdown
+|              | 10:30am - 11:00am | Break
+|2             | 11:00am - 12:30pm | Advanced Graphics (ggplot2) 
+|              | 12:30pm - 01:30pm | Lunch break  
+|3             | 01:30pm - 03:00pm | Simple analysis 
+|              | 03:00pm - 03:30pm | Break
+|4             | 03:30pm - 05:00pm | Advanced analysis 
 
 
 #  `R` and UoA's Department of Statistics

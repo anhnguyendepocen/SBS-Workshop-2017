@@ -1,0 +1,415 @@
+---
+title: "NZSSN Courses: Introduction to $\\mathtt{R}$"
+header-includes: 
+   \usepackage{graphicx}
+    \subtitle{Session 7 -- Simple analysis}    
+    \author[SCC]{Statistical Consulting Centre}
+   \institute[\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}\\
+  The Department of Statistics\\
+  The University of Auckland}
+   \titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+date: "20 July, 2017"
+output:
+  beamer_presentation:
+    theme: "Madrid"
+    colortheme: "beaver"
+    fonttheme: "professionalfonts"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(tidy = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+
+options(width = 60)
+library(dplyr)
+library(tidyr)
+
+Patient.df <- read.csv("..\\..\\data\\Patient.csv", stringsAsFactors = FALSE)
+Patient.df$Smoke.group <- 
+  with(Patient.df, ifelse(Smoke == 1, "Yes", "No"))
+table(Patient.df$Smoke.group)
+Patient.df$Race.group <- 
+  with(Patient.df,
+       ifelse(Race == 1, "Caucasian",
+              ifelse(Race == 2, "African", "Other")))
+table(Patient.df$Race.group)
+Patient.df$BMI <- with(Patient.df, (Weight/Height^2)*703)
+Patient.df$BMI.group <- 
+  ifelse(Patient.df$BMI >= 30, "obese", 
+         ifelse(Patient.df$BMI >= 25, "overweight",
+          "normal"))
+
+Patient.df <- Patient.df[, !names(Patient.df) %in% c("Smoke", "Race")]
+
+Patient.df$BMI.group <- factor(Patient.df$BMI.group,
+               levels = c("normal", "overweight", "obese"))
+
+Patient.df$Sex <- factor(Patient.df$Sex)
+Patient.df$Race.group <- factor(Patient.df$Race.group)
+Patient.df$Smoke.group <- factor(Patient.df$Smoke.group)
+
+Patient.df$Age.group <- 
+  ifelse(Patient.df$Age<=35, "Under 35", 
+         ifelse(Patient.df$Age <= 60, "36 to 60", "Over 61"))
+Patient.df$Age.group <- factor(Patient.df$Age.group, 
+                           levels = c("Under 35", "36 to 60", "Over 61"))
+Cholesterol.df <- read.csv("..\\..\\data\\CholesterolNA.csv")
+
+library(dplyr)
+
+combined.df <- left_join(Patient.df, Cholesterol.df)
+
+names(combined.df)[c(1,11,12,13)] <- 
+  c("ID", "Baseline", "PreTrt", "PostTrt")
+
+combined.long.df <- gather(combined.df, key = Time,  value= Cholesterol, 
+                           -ID, -Age, -Age.group, -Sex, -Weight, -Height,
+                           -Smoke.group, -Race.group, -BMI,
+                           -BMI.group)
+```
+
+
+# Regression commands
+
+Two of the most commonly used \texttt{R} commands for modeling:
+
+- \texttt{lm()}: fits \textbf{L}inear \textbf{M}odels
+- \texttt{glm()}: fits \textbf{G}eneralised \textbf{L}inear \textbf{M}odels.\\\vspace{0.5cm}
+
+  Note SAS users: \texttt{PROC GLM} is \textbf{not} the same as \texttt{R}'s \texttt{glm()}.
+
+
+There's a lot in these two commands; entire stage 3 statistical courses on linear and generalised linear models.
+
+# Student's $t$-test
+  \begin{center}
+  \texttt{t.test(y $\sim$ x)}
+  \end{center}
+
+- \texttt{y}: values; e.g., \texttt{Cholesterol, BMI, Age}, etc.
+- \texttt{x}: group; e.g., \texttt{Sex, Smoke.group}.
+
+Suppose we want to test whether males and females (\texttt{x = Sex}) have different Cholesterol levels.
+
+Categorical variables should be converted to type \texttt{factor} before analysis, i.e.
+
+```{r, eval=FALSE}
+combined.long.df$Sex <- factor(combined.long.df$Sex)
+with(combined.long.df, t.test(Cholesterol ~ Sex))
+```
+
+# Student's $t$-test
+
+```{r, echo=FALSE}
+combined.long.df$Sex <- factor(combined.long.df$Sex)
+with(combined.long.df, t.test(Cholesterol ~ Sex))
+```
+
+- p-value < 2.2e-16.
+- We have extremely strong evidence that the cholesterol level for male is different from female.
+
+
+# Multiple comparisons
+Let's compare the total score between three age groups, i.e.
+\begin{enumerate}
+\item Do a $t$-test between "Under 35" and "36 to 60".
+\item Do a $t$-test between "Under 35" and "Over 61".
+\item Do a $t$-test between "36 to 60" and "Over 61".
+\end{enumerate}
+
+\begin{center}
+\huge{Really?}
+\end{center}
+
+
+# Error rate
+When we do a $t$-test comparing mean total score between females and males, the null hypothesis is that the mean total score for females is the same as that for males. The $t$-test is performed (with the hope) to reject this null hypothesis.
+
+In order to come up with a p-value, we \emph{assume} that $\alpha$ (typically 5\%) of the time, we will reject the null hypothesis when it's actually true, i.e., we assume 5\% of the time we will make a mistake.
+
+\begin{itemize}
+\item When we do two simultaneous $t$-tests, about 10\% of the time we will make a mistake.
+\item When we do three simultaneous $t$-tests, about 15\% of the time we will make a mistake.
+\item The chance of being shot in Russian Roulette is 16.67\%. Would
+  you risk it then?
+\end{itemize}
+
+
+# \textit{\textbf{An}}alysis \textit{\textbf{o}}f \textit{\textbf{Va}}riance (ANOVA)
+Generalises $t$-test to more than two groups
+
+Null hypothesis: all group means are equal.
+
+**Example.** Mean Cholesterol level is the same for all three age.groups.
+
+```{r}
+tryaov <- with(combined.long.df, aov(Cholesterol~Age.group))
+```
+
+\begin{itemize}
+  \item \texttt{aov()}: \textbf{A}nalysis \textbf{o}f \textbf{V}ariance.
+  \item Response variable (i.e. \texttt{total.lik}) is separated by \texttt{\~} from explanatory variable(s) (i.e. \texttt{age.group}).
+  \item All explanatory variables should be categorical (otherwise it's not ANOVA).
+\end{itemize} 
+
+
+#\texttt{aov()}
+
+```{r}
+summary(tryaov)
+```
+
+We have extremely strong evidence that at least one age group's mean Cholesterol level is different to that of the other age groups.\\\vspace{0.3cm}
+
+Which one(s) is(are) different????
+
+# Which one(s)?
+```{r}
+model.tables(tryaov, "means")
+```
+
+```{r echo = FALSE}
+m <- round(model.tables(tryaov, "means")$tables$'Grand mean', 1)
+gm <- round(model.tables(tryaov, "means")$tables$Age.group, 1)
+```
+
+The mean Cholesterol level...
+\begin{itemize}
+\item over all participants is `r m`.
+\end{itemize}
+
+# Which one(s)?
+```{r}
+model.tables(tryaov, "means")
+```
+
+```{r echo = FALSE}
+m <- round(model.tables(tryaov, "means")$tables$'Grand mean', 1)
+gm <- round(model.tables(tryaov, "means")$tables$Age.group, 1)
+```
+
+The mean Cholesterol level...
+\begin{itemize}
+\item for "Under 35" group is lower than both that of the "36 to 60" and the "Over 61" groups.
+\item for "36 to 60" group is lower than the "Over 61" group.
+\end{itemize}
+
+
+# Which one(s)?
+```{r}
+model.tables(tryaov, "means")
+```
+
+```{r echo = FALSE}
+m <- round(model.tables(tryaov, "means")$tables$'Grand mean', 1)
+gm <- round(model.tables(tryaov, "means")$tables$Age.group, 1)
+```
+
+Are any pairs of these means statistically different from one another?
+
+# Post-hoc multiple comparisons
+\vspace{-4mm}
+```{r}
+TukeyHSD(tryaov)
+```
+\vspace{-6mm}
+\begin{itemize}
+\item \texttt{diff}: estimated difference between two group means.
+\item \texttt{lwr, upr}: lower and upper limit of the 95\% confidence interval of the estimated difference.
+\item \texttt{p adj}: \texttt{p}-values adjusted for multiple comparisons.
+\end{itemize}
+
+# Post-hoc multiple comparisons
+```{r}
+comp <- TukeyHSD(tryaov)
+comp$Age.group
+```
+\begin{itemize}
+  \item Mean Cholesterol level for "36 to 60" is `r abs(round(comp$Age.group[1, 1], 1))` mg/100ml \emph{higher} than "Under 35" (\texttt{p adj} $<$ 0.0001).
+  \item Mean Cholesterol level for "Over 61" is `r abs(round(comp$Age.group[2, 1], 1))` mg/100ml \emph{higher} than "Under 35" (\texttt{p adj} $<$ 0.0001).
+  \item Mean Cholesterol level for "Over 61" is `r abs(round(comp$Age.group[3, 1], 1))` mg/100ml \emph{higher} than "36 to 60" (\texttt{p adj} $<$ 0.0001).
+\end{itemize}
+
+# From Session 6: Mean Cholesterol level vs Age group
+\begin{center}
+  Mean $\pm$ 1.96 $\times$ SEM
+\end{center}
+```{r, echo = FALSE} 
+pp <- data.frame(comp$Age.group)
+pp$Age.group <- factor(rownames(comp$Age.group))
+
+library(ggplot2)
+ggplot(pp, aes(x = Age.group, y = diff)) + geom_point() + geom_errorbar(aes(ymax = upr, ymin = lwr))
+```
+
+
+
+# Two-way ANOVA
+
+- \texttt{tryaov} was fitted using one categorical explanatory variable (\texttt{Age.group}). We therefore refer to its ANOVA table as \emph{one-way}.
+- If we fit a linear model using two categorical explanatory variables, we have a \emph{two-way} ANOVA.
+- Recall: All categorical variables should be converted into factors.
+  
+```{r, tidy = FALSE}
+combined.long.df$Sex <- factor(combined.long.df$Sex)
+try2way <- with(combined.long.df, 
+                aov(Cholesterol~Sex*Age.group))
+```
+  
+ - `Sex*Age.group` is equivalent to `Sex + Age.group + Sex:Age.group`.
+
+
+# Two-way ANOVA
+```{r}
+summary(try2way)
+```
+There is two-way interaction between \texttt{Sex} and \texttt{Age.group} ($p$-value = 0.19), i.e., the magnitude of the difference in mean Cholesterol levels between males and females is not constant across all age groups, and vice versa.
+
+
+# Estimated means
+```{r}
+model.tables(try2way, "means")
+```
+
+# Estimated means
+```{r}
+model.tables(try2way, "means")$table$'Sex:Age.group'
+```
+
+
+# Post-hoc pairwise comparisons
+```{r}
+TukeyHSD(try2way)
+```
+
+# Post-hoc pairwise comparisons
+```{r}
+TukeyHSD(try2way)$`Sex:Age.group`
+```
+
+
+# Test of independence
+```{r}
+smoke.age.tab <- with(combined.df, table(Smoke.group, Age.group))
+smoke.age.tab
+```
+
+Do smoking habit depend on age group? Statistically speaking, is \texttt{Smoke.group} and \texttt{Age.group} independent of one another?
+
+
+# Pearson's Chi-squared test
+```{r}
+chisq.test(smoke.age.tab)
+```
+\begin{itemize}
+  \item There is extremely strong evidence (\texttt{p}-value $<$ 0.0001) that \texttt{Smoke.group} and \texttt{Age.group} are not independent of one another.
+  \item Smoking habit depend on the age group to which patient belong.
+\end{itemize}
+
+
+# Assumptions
+
+- Pearson's Chi-squared tests have certain assumptions. Beyond the scope of this course.
+\item \texttt{chisq.test()} will give you a warning if these assumptions are not met.
+
+```{r echo = FALSE, error=TRUE}
+mytest = 1:4
+chisq.test(mytest)
+```
+
+- These assumptions are more likely to be wrong if the sample size is small.
+- If this happens, the alternative is to use Fisher's exact test.
+
+
+# Fisher's exact test
+Assume \texttt{Q5.age.tab} does not meet the underlying assumptions of Pearson's Chi-squared test.
+
+```{r}
+fisher.test(smoke.age.tab, simulate.p.value = TRUE)
+```
+
+# Summary
+
+\begin{itemize}
+  \item Student's $t$-test
+  \item One-way ANOVA
+  \item Two-way ANOVA
+  \item Pearson’s Chi-squared test
+  \item Fisher’s exact test
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

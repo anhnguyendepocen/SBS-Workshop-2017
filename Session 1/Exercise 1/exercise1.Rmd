@@ -69,29 +69,61 @@ knitr::opts_chunk$set(eval = FALSE)
   
 # 2. Reading data into \texttt{R}
 
-1. \texttt{lake.csv} contains data on mercury contamination in
-  53 different lakes in Florida. The variable names and what has been
-  measured are presented below.
-  \begin{itemize}
-  \item ID: ID number of the lake
-  \item Lake: Name of the lake
-  \item pH: pH value
-  \item Calcium: concentration of Calcium
-  \item Chlorophyll: concentration of Chlorophyll (mg/L)
-  \item Avg\_Mercury: Average mercury concentration (parts per
-    million) in the muscle tissue of the fish sampled from that lake.
-  \end{itemize}
-  
-2. Read the data into \texttt{R}, saving it in object named \texttt{mercury.df}.
+1. \texttt{lake.csv} contains data on 53 different lakes in Florida. The variable names and what has been measured are presented below.
+    + `ID`: ID number of the lake
+    + `Lake`: Name of the lake
+    + `pH`: pH value
+    + `Calcium`: concentration of Calcium
+    + `Chlorophyll`: concentration of Chlorophyll (mg/L)
+
+2. Read the data into \texttt{R}, saving it in object named \texttt{lake.df}.
+
+```{r, eval = FALSE}
+lake.df <- read.csv("location of your folder/Lake.csv", 
+                      stringsAsFactors = FALSE)
+
+```
+
+```{r, echo = FALSE}
+lake.df <- read.csv("..\\..\\data\\Lake.csv", 
+                      stringsAsFactors = FALSE)
+```
 
 3. Use \texttt{dim()} and \texttt{head()} to look at some of the  properties of the dataset you have just read into \texttt{R}. \emph{Always} perform this important step to check that your dataset is as it should be.
 
-4. Calculate the mean and standard deviation of both pH and
-  Chlorophyll.
+```{r}
+dim(lake.df)
+head(lake.df)
+```
 
-5. Check out what \texttt{summary()} does by running  \texttt{summary(mercury.df\$pH)}.
+4. Calculate the mean and standard deviation of both `pH` and `Chlorophyll`.
 
+```{r}
+mean(lake.df$pH, na.rm = TRUE)
+mean(lake.df$Chlorophyll, na.rm = TRUE)
 
+sd(lake.df$pH, na.rm = TRUE)
+sd(lake.df$Chlorophyll, na.rm = TRUE)
 
+```
 
+5. Check out what \texttt{summary()} does by running  \texttt{summary(lake.df\$pH)}.
 
+```{r}
+summary(lake.df$pH)
+
+```
+
+6. Check the ferquency of `Calcium` concentration
+
+```{r}
+table(lake.df$Calcium)
+
+```
+
+7. Turn the freuqency table in 2.6 into proportion, keep only 2 decimal places.
+
+```{r}
+round(prop.table(table(lake.df$Calcium)) * 100, 1)
+
+```

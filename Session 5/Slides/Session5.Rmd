@@ -1,0 +1,617 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+header-includes: 
+   \usepackage{graphicx}
+    \subtitle{Session 5 -- Basic Graphics}    
+    \author[SCC]{Statistical Consulting Centre}
+   \institute[\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}\\
+  The Department of Statistics\\
+  The University of Auckland}
+   \titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+date: "20 July, 2017"
+output:
+  beamer_presentation:
+    theme: "Madrid"
+    colortheme: "crane"
+    fonttheme: "professionalfonts"
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+
+options(width = 50)
+library(dplyr)
+library(tidyr)
+
+Patient.df <- read.csv("..\\..\\data\\Patient.csv", stringsAsFactors = FALSE)
+Patient.df$Smoke.group <- 
+  with(Patient.df, ifelse(Smoke == 1, "Yes", "No"))
+table(Patient.df$Smoke.group)
+Patient.df$Race.group <- 
+  with(Patient.df,
+       ifelse(Race == 1, "Caucasian",
+              ifelse(Race == 2, "African", "Other")))
+table(Patient.df$Race.group)
+Patient.df$BMI <- with(Patient.df, (Weight/Height^2)*703)
+Patient.df$BMI.group <- 
+  ifelse(Patient.df$BMI >= 30, "obese", 
+         ifelse(Patient.df$BMI >= 25, "overweight",
+          "normal"))
+
+Patient.df <- Patient.df[, !names(Patient.df) %in% c("Smoke", "Race")]
+
+Patient.df$BMI.group <- factor(Patient.df$BMI.group,
+               levels = c("normal", "overweight", "obese"))
+
+Patient.df$Sex <- factor(Patient.df$Sex)
+Patient.df$Race.group <- factor(Patient.df$Race.group)
+Patient.df$Smoke.group <- factor(Patient.df$Smoke.group)
+
+Patient.df$Age.group <- 
+  ifelse(Patient.df$Age<=35, "Under 35", 
+         ifelse(Patient.df$Age <= 60, "36 to 60", "Over 61"))
+Patient.df$Age.group <- factor(Patient.df$Age.group, 
+                           levels = c("Under 35", "36 to 60", "Over 61"))
+Cholesterol.df <- read.csv("..\\..\\data\\CholesterolNA.csv")
+
+library(dplyr)
+
+combined.df <- left_join(Patient.df, Cholesterol.df)
+
+names(combined.df)[c(1,11,12,13)] <- 
+  c("ID", "Baseline", "PreTrt", "PostTrt")
+
+combined.long.df <- gather(combined.df, key = Time,  value= Cholesterol, 
+                           -ID, -Age, -Age.group, -Sex, -Weight, -Height,
+                           -Smoke.group, -Race.group, -BMI,
+                           -BMI.group)
+
+```
+
+
+# Exploring your data
+
+- Examine for patterns, relationships, structures, and other features.
+- Do this using graphs, tables and summary statistics.
+- Patterns are more easily seen in graphs.
+- Remember:
+    \begin{center}
+      ``\texttt{R} is a free software environment for statistical computing and \emph{graphics}''
+    \end{center}
+    
+    
+# Designing graphs
+
+Two important considerations when designing a graph:
+
+- It should have something to say.
+    + Decide what information you want your graph to display.
+    + Graphical software is capable of producing any number of different graphs, so generating graphs with meaningless information is quite simple to do!
+
+- It should be easy to interpret.
+    + Simplicity is key!
+    + Sufficiently large fonts, all axes labelled, clearly defined legends, etc.
+
+
+# Some functions for drawing graphs
+
+- Usually, we use \texttt{plot()} to create a graph and then \texttt{lines()}, \texttt{points()}, \texttt{text()}, and other commands to annotate it.
+- \texttt{plot()} does appropriate things for different types of variables (see later examples).
+- Variables of type \texttt{cha}racter are not suitable for plotting (and analysis). Convert such variables to type \texttt{factor}.
+- There are no "erase" or "undo" functions, so store your commands in an \texttt{R} script.
+
+
+# Boxplots
+
+```{r, fig.align='center'}
+with(combined.long.df, plot(Sex, Cholesterol))
+```
+
+
+# Boxplots
+
+```{r, error=TRUE}
+with(combined.long.df, plot(as.character(Sex), Cholesterol))
+```
+
+
+# Boxplots
+
+`Sex` varaible in `combined.long.df` has to be `factor`. 
+
+```{r}
+
+class(combined.long.df$Sex)
+
+```
+
+#Formula interface
+The plot() command can also be used this way:
+
+```{r, fig.height = 5, fig.width = 7, fig.align='center'}
+with(combined.long.df, plot(Cholesterol ~ Sex))
+```
+
+
+# Axes need labels
+
+Label axes with units.
+
+```{r, eval = FALSE, tidy = FALSE}
+with(combined.long.df, 
+     plot(Sex, Cholesterol, xlab = "Gender",
+          ylab = "Cholesterol level (mg/100ml)"))
+```
+
+
+# `xlab` and `ylab`
+
+```{r, echo=FALSE, fig.align='center'}
+with(combined.long.df, 
+     plot(Sex, Cholesterol, xlab = "Gender",
+          ylab = "Cholesterol level (mg/100ml)"))
+```
+
+# Axes labels are too small
+
+Label axes with units, large enough to read.
+
+```{r, eval = FALSE, tidy = FALSE}
+with(combined.long.df, 
+     plot(Sex, Cholesterol, xlab = "Gender",
+          ylab = "Cholesterol level (mg/100ml)",
+          cex.lab = 1.5))
+```
+
+# `cex.lab = 1.5`
+
+```{r, echo=FALSE, fig.align='center'}
+with(combined.long.df, 
+     plot(Sex, Cholesterol, xlab = "Gender",
+          ylab = "Cholesterol level (mg/100ml)",
+          cex.lab = 1.5))
+```
+
+# Title
+
+Sometimes you need a title.
+
+```{r, eval = FALSE, tidy = FALSE}
+with(combined.long.df, 
+     plot(Sex, Cholesterol, xlab = "Gender",
+          ylab = "Cholesterol level (mg/100ml)",
+          cex.lab = 1.5, 
+          main = "Cholesterol level for male and female"))
+```
+
+
+# `main`
+```{r, echo=FALSE, fig.align='center'}
+with(combined.long.df, 
+     plot(Sex, Cholesterol, xlab = "Gender",
+          ylab = "Cholesterol level (mg/100ml)",
+          cex.lab = 1.5, 
+          main = "Cholesterol level for male and female"))
+```
+
+
+# `boxplot()`
+`boxplot()` is probably more fexible than `plot()`, if you are drawing boxplots. Check the help document for more details.
+
+```{r, echo=FALSE, fig.align='center'}
+with(combined.long.df, boxplot(Cholesterol~Sex))
+```
+
+
+# Smoking group by Age group
+
+Examine the data via twp=way freqency table. 
+
+```{r} 
+with(combined.df, table(Smoke.group, Age.group))
+
+
+```
+
+# Smoking group by Age group
+
+Then, convert the counts to percentages.
+
+```{r, tidy = FALSE}
+smoke.age <- with(combined.df, 100* 
+                    prop.table(table(Smoke.group, 
+                                     Age.group), 2))
+
+round(smoke.age, 2)
+
+```
+
+# `barplot`
+    
+```{r, eval = FALSE, tidy = FALSE}
+barplot(smoke.age, xlab = "Age group by years", 
+        ylab = "Percentage")
+
+```
+    
+# `barplot`
+    
+```{r, echo=FALSE, fig.align='center'}
+barplot(smoke.age, xlab = "Age group by years", ylab = "Percentage")
+
+```   
+    
+# Side-by-side `barplot`
+    
+```{r, eval = FALSE, tidy = FALSE}
+barplot(smoke.age, beside = TRUE,
+        xlab = "Age group by years", 
+        ylab = "Percentage")
+
+```
+    
+# `beside = TRUE`
+    
+```{r, echo=FALSE, fig.align='center'}
+barplot(smoke.age, beside = TRUE, xlab = "Age group by years", ylab = "Percentage")
+
+```      
+    
+# Line along horizontal axis?
+    
+```{r, eval = FALSE, tidy = FALSE}
+barplot(smoke.age, beside = TRUE,
+        xlab = "Age group by years", 
+        ylab = "Percentage")
+abline(h = 0)
+```
+    
+# `abline(h = 0)`
+    
+```{r, echo=FALSE, fig.align='center'}
+barplot(smoke.age, beside = TRUE, xlab = "Age group by years", ylab = "Percentage")
+abline(h = 0)
+```  
+
+# Vertical axis higher than bars?
+
+```{r, eval = FALSE, tidy = FALSE}
+barplot(smoke.age, beside = TRUE,
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100))
+abline(h = 0)
+```
+
+# `ylim = c(0, 100)`
+    
+```{r, echo=FALSE, fig.align='center'}
+barplot(smoke.age, beside = TRUE, xlab = "Age group by years", ylab = "Percentage", ylim = c(0, 100))
+abline(h = 0)
+```  
+
+# Adding space between bars 
+
+```{r, eval = FALSE, tidy = FALSE}
+barplot(smoke.age, beside = TRUE,
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100),
+        space = c(0.2, 1.5))
+abline(h = 0)
+```
+
+# `space = c(0.2, 1.5)`
+    
+```{r, echo=FALSE, fig.align='center'}
+barplot(smoke.age, beside = TRUE, 
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100),
+        space = c(0.2, 1.5))
+abline(h = 0)
+```  
+
+# Shading with lines
+
+```{r, eval = FALSE, tidy = FALSE}
+barplot(smoke.age, beside = TRUE,
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100),
+        space = c(0.2, 1.5), 
+        density = c(0, 100))
+abline(h = 0)
+```
+
+# `density = c(0, 100)`
+    
+```{r, echo=FALSE, fig.align='center'}
+barplot(smoke.age, beside = TRUE, 
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100),
+        space = c(0.2, 1.5), 
+        density = c(0, 100))
+abline(h = 0)
+```  
+
+# Shading with lines
+The defualt colour for shading lines is pale while! Change to black using the `col` argument. 
+
+```{r, echo=FALSE, fig.align='center'}
+barplot(smoke.age, beside = TRUE, 
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100),
+        space = c(0.2, 1.5), 
+        density = c(0, 100), 
+        col = "black")
+abline(h = 0)
+```  
+
+# `col = "black"`
+```{r, echo=FALSE, fig.align='center'}
+barplot(smoke.age, beside = TRUE, 
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100),
+        space = c(0.2, 1.5), 
+        density = c(0, 100), 
+        col = "black")
+abline(h = 0)
+```  
+
+# Color-filled bars? 
+
+```{r, eval = FALSE, tidy = FALSE}
+barplot(smoke.age, beside = TRUE,
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100),
+        space = c(0.2, 1.5), 
+        col = c("blue", "green"))
+abline(h = 0)
+```
+
+# `col = c("blue", "green")`
+    
+```{r, echo=FALSE, fig.align='center'}
+barplot(smoke.age, beside = TRUE, 
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100),
+        space = c(0.2, 1.5), 
+        col = c("blue", "green"))
+abline(h = 0)
+```  
+
+# Legend? 
+
+```{r, eval = FALSE, tidy = FALSE}
+barplot(smoke.age, beside = TRUE,
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100),
+        space = c(0.2, 1.5), 
+        legend.text = TRUE)
+abline(h = 0)
+```
+
+# `legend.text = TRUE`
+    
+```{r, echo=FALSE, fig.align='center'}
+barplot(smoke.age, beside = TRUE, 
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100),
+        space = c(0.2, 1.5), 
+        legend.text = TRUE)
+abline(h = 0)
+``` 
+
+# Further improvements
+
+- Larger title for axes
+- Get rid of the box drawn outide the legend
+- Larger legend
+
+```{r, eval = FALSE, tidy = FALSE}
+barplot(smoke.age, beside = TRUE,
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100),
+        space = c(0.2, 1.5), 
+        legend.text = TRUE, 
+        args.legend = list(bty = "n", cex = 1.3))
+abline(h = 0)
+```
+
+# ` args.legend = list(bty = "n", cex = 1.3)`
+    
+```{r, echo=FALSE, fig.align='center'}
+barplot(smoke.age, beside = TRUE, 
+        xlab = "Age group by years", 
+        ylab = "Percentage", 
+        ylim = c(0, 100),
+        space = c(0.2, 1.5), 
+        legend.text = TRUE, 
+        args.legend = list(bty = "n", cex = 1.3))
+abline(h = 0)
+``` 
+
+# Histgrams 
+```{r, tidy = FALSE, fig.height = 5, fig.width = 7, fig.align='center'}
+hist(combined.long.df$Cholesterol)
+```
+
+# Fewer bins?  
+```{r, tidy = FALSE, fig.height = 5, fig.width = 7, fig.align='center'}
+hist(combined.long.df$Cholesterol, breaks = 10)
+```
+
+# More bins?  
+```{r, tidy = FALSE, fig.height = 5, fig.width = 7, fig.align='center'}
+hist(combined.long.df$Cholesterol, breaks = 40)
+```
+
+# Always use meaningful axis labels
+```{r, tidy = FALSE, fig.height = 3, fig.width = 6, fig.align='center', tidy = FALSE}
+hist(combined.long.df$Cholesterol, main = NULL, 
+     xlab = "Cholesterol level (mg/100ml)")
+```
+
+# Scatter plots
+
+- Used to dsplay paired quantiative (numeric) data, e.g. age and Cholesterol level. 
+- Make sure they are numeirc. 
+- Use `plot()` function. 
+
+```{r, eval = FALSE, tidy = FALSE}
+with(combined.long.df, plot(Age, Cholesterol))
+
+```
+
+# Scatter plots
+
+```{r, echo=FALSE, fig.align='center'}
+with(combined.long.df, plot(Age, Cholesterol))
+
+```
+
+# `type =` 
+
+type = controls how data are plotted.
+
+- `type = "p"`: points, this is the default,
+- `type = "l"`: lines,
+- `type = "b"`: both lines and points,
+- `type = "n"`: no plotting, which can set up a plot for latter additions.
+
+# Plotting character
+
+We will usually use different plotting character for different groups.
+Argument pch = in plot() or points() is used to change the plotting character:
+
+- `pch = 19`: solid circle,
+- `pch = 20`: smaller solid circle,
+- `pch = 21`: filled circle,
+- `pch = 22`: filled square,
+- `pch = 23`: filled diamond,
+- `pch = 24`: filled triangle point up,
+- `pch = 25`: filled triangle point down.
+
+# Scatter plots
+
+```{r, eval = FALSE, tidy = FALSE}
+with(combined.long.df, plot(Age, Cholesterol, 
+     col = c("black", "red")[Sex], 
+     pch = c(19, 24)[Smoke.group]))
+legend("topright", pch = c(19, 19, 24, 24),
+      col = c("black", "red", "black", "red"),
+      pt.bg = c("black", "red", NA, NA),
+      legend = c("Non-Smokers:Female", "Non-Smokers:Male",
+                "Smokers:Female", "Smokers:Male"))
+```
+
+# Scatter plots
+
+```{r, echo=FALSE, fig.align='center'}
+with(combined.long.df, plot(Age, Cholesterol, 
+     col = c("black", "red")[Sex], 
+     pch = c(19, 24)[Smoke.group]))
+legend("topright", pch = c(19, 19, 24, 24),
+      col = c("black", "red", "black", "red"),
+      pt.bg = c("black", "red", NA, NA),
+      legend = c("Non-Smokers:Female", "Non-Smokers:Male",
+                "Smokers:Female", "Smokers:Male"))
+```
+
+
+# Graphical Parameters
+
+```{r, eval = FALSE, tidy = FALSE}
+?par
+op <- par(mfrow = c(2, 2))       
+  with(combined.long.df, boxplot(Cholesterol~Age.group,
+      xlab = "Age Group", ylab = "Total score"))
+  barplot(smoke.age, beside = TRUE, ylab = "Percentage",
+      xlab = "Age group in years", ylim = c(0, 100),
+      space = c(0.2, 1.5), legend.text = TRUE)
+      abline(h = 0)
+  hist(combined.long.df$Age)
+  with(combined.long.df, plot(Age, Cholesterol))
+## At end of plotting, reset to previous settings:
+par(op)
+
+```
+
+# Graphical Parameters
+
+```{r, echo=FALSE, fig.align='center'}
+op <- par(mfrow = c(2, 2))       
+  with(combined.long.df, boxplot(Cholesterol~Age.group,
+      xlab = "Age Group", ylab = "Total score"))
+  barplot(smoke.age, beside = TRUE, ylab = "Percentage",
+      xlab = "Age group in years", ylim = c(0, 100),
+      space = c(0.2, 1.5), legend.text = TRUE)
+      abline(h = 0)
+  hist(combined.long.df$Age)
+  with(combined.long.df, plot(Age, Cholesterol))
+## At end of plotting, reset to previous settings:
+par(op)
+
+```
+
+# Save your graph
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    

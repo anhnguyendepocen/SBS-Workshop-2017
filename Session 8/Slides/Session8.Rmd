@@ -1,0 +1,468 @@
+---
+title: "NZSSN Courses: Introduction to $\\mathtt{R}$"
+header-includes: 
+   \usepackage{graphicx}
+    \subtitle{Session 8 -- Advance analysis}    
+    \author[SCC]{Statistical Consulting Centre}
+   \institute[\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}\\
+  The Department of Statistics\\
+  The University of Auckland}
+   \titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+date: "20 July, 2017"
+output:
+  beamer_presentation:
+    theme: "Madrid"
+    colortheme: "beaver"
+    fonttheme: "professionalfonts"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(tidy = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+
+options(width = 60)
+library(dplyr)
+library(tidyr)
+
+Patient.df <- read.csv("..\\..\\data\\Patient.csv", stringsAsFactors = FALSE)
+Patient.df$Smoke.group <- 
+  with(Patient.df, ifelse(Smoke == 1, "Yes", "No"))
+table(Patient.df$Smoke.group)
+Patient.df$Race.group <- 
+  with(Patient.df,
+       ifelse(Race == 1, "Caucasian",
+              ifelse(Race == 2, "African", "Other")))
+table(Patient.df$Race.group)
+Patient.df$BMI <- with(Patient.df, (Weight/Height^2)*703)
+Patient.df$BMI.group <- 
+  ifelse(Patient.df$BMI >= 30, "obese", 
+         ifelse(Patient.df$BMI >= 25, "overweight",
+          "normal"))
+
+Patient.df <- Patient.df[, !names(Patient.df) %in% c("Smoke", "Race")]
+
+Patient.df$BMI.group <- factor(Patient.df$BMI.group,
+               levels = c("normal", "overweight", "obese"))
+
+Patient.df$Sex <- factor(Patient.df$Sex)
+Patient.df$Race.group <- factor(Patient.df$Race.group)
+Patient.df$Smoke.group <- factor(Patient.df$Smoke.group)
+
+Patient.df$Age.group <- 
+  ifelse(Patient.df$Age<=35, "Under 35", 
+         ifelse(Patient.df$Age <= 60, "36 to 60", "Over 61"))
+Patient.df$Age.group <- factor(Patient.df$Age.group, 
+                           levels = c("Under 35", "36 to 60", "Over 61"))
+Cholesterol.df <- read.csv("..\\..\\data\\CholesterolNA.csv")
+
+library(dplyr)
+
+combined.df <- left_join(Patient.df, Cholesterol.df)
+
+names(combined.df)[c(1,11,12,13)] <- 
+  c("ID", "Baseline", "PreTrt", "PostTrt")
+
+combined.long.df <- gather(combined.df, key = Time,  value= Cholesterol, 
+                           -ID, -Age, -Age.group, -Sex, -Weight, -Height,
+                           -Smoke.group, -Race.group, -BMI,
+                           -BMI.group)
+```
+
+
+# Linear regression
+
+`lm(y~x)` is used for linear regression.
+\begin{itemize}
+  \item \texttt{y}, the response variable.
+  \item \texttt{x}, the explanatory variable.   
+  \item There can be more than one explanatory variable, called {\em multiple} linear regression. 
+  \item Both response variable and explanatory variable(s) should be numeric, it is {\em generalised} linear regression.
+\end{itemize}
+
+
+# Simple linear regression
+When there is only one predictor variable (e.g. Age) in our linear regression, we refer to this as  *simple* linear regression.
+
+```{r, eval = FALSE, tidy = FALSE}
+with(combined.long.df, plot(Age, Cholesterol))
+```
+
+# Simple linear regression
+```{r, echo=FALSE}
+with(combined.long.df, plot(Age, Cholesterol))
+```
+
+# Normality check
+
+```{r}
+qqnorm(combined.long.df$Cholesterol)
+qqline(combined.long.df$Cholesterol, col = 2, lwd = 2)
+```
+
+# Normality check
+
+```{r}
+qqnorm(log(combined.long.df$Cholesterol))
+qqline(log(combined.long.df$Cholesterol), col = 2, lwd = 2)
+```
+
+
+# Simple linear regression
+
+Let's carry out the linear regession of Age on Cholesterol level, i.e.
+
+```{r, eval = FALSE, tidy = FALSE}
+trylm <- with(combined.long.df, lm(log(Cholesterol)~Age))
+summary(trylm)
+```
+
+# Simple linear regression
+
+```{r, echo = FALSE}
+trylm <- with(combined.long.df, lm(log(Cholesterol)~Age))
+summary(trylm)
+```
+
+# Simple linear regression
+
+```{r, echo = FALSE}
+round(summary(trylm)$coef, 4)
+```
+
+
+- The estimated intercept is 5.1339. There is a very strong evidecne that this is not zero ($p$-value < 0.0001). 
+- The estimated slope is 0.0035. There is a vereys strong evidence that this is not zero ($p$-value < 0.0001).
+- The fitted line is:
+
+$$ log(Cholesterol) = 5.1339 + 0.0035 \times Age $$
+$$ Cholesterol = e^{5.1339 + 0.0035 \times Age} $$
+
+- For every one year increase in age, the Cholesterol level increase by 1.003506 times.  
+
+#Check 
+
+```{r}
+plot(residuals(trylm))
+
+```
+
+# Conclusion
+
+- The linear relationship between age and Cholesterol level is statistically significant.
+- Cholesterol level is positive related to age.
+
+# Add the fitted line
+
+```{r}
+with(combined.long.df, plot(Age, log(Cholesterol)))
+abline(trylm, col = 2)
+```
+
+# Quadratic term
+
+```{r, tidy=FALSE}
+tryquad <- with(combined.long.df,
+        lm(log(Cholesterol) ~ Age + I(Age^2)))
+round(summary(tryquad)$coef, 4)
+```
+
+`I(Age^2)` tells R to treat `^` as arithmetical operator, rather than
+formula operator.
+Our fitted curve is:
+
+$$ log(Cholesterol) = 4.8649 + 0.0035 \times Age + -0.0001Age^2 $$
+
+# What if the response variable is \emph{not} continuous?
+So far, we have considered methods for analysing response variables
+measured on a continuous scale.
+Often, measurements are:
+\begin{itemize}
+  \item \emph{Counts} per unit time, e.g. number of hours worked in a working week.
+  \item \emph{Binary} responses, e.g. Gender.
+  \item \emph{Generalised} linear models: \emph{Poisson} (counts) and \emph{Logistic} (binary) regression
+  \item \emph{Today} logistic regression \emph{only}
+\end{itemize}
+
+
+# Logistic regression
+
+- Relates a \textcolor{blue}{\emph{binary}} \emph{response variable}
+to a continuous and/or categorical variable.
+
+- Let's illustrate by example using \texttt{combine.df}.
+    + Does smoking habit depend on cholesterol level, height or weight?
+    + Does the probability of smoking increase with age?
+    + What characteristics do smoking patients have, i.e. how do smoking patients different from non smoking patients.
+
+Speaking in statistical language, we have a binary response. A patient is either smoking or non-smoking, there is only two possible outcomes.
+
+Logistic regression is typically used in case control studies. In this case, we can treat smoking as case and non-smoking as control.
+
+
+
+
+
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Logistic regression} -->
+<!-- \begin{center} -->
+<!-- \textbf{Question} \\ -->
+<!-- Is \texttt{Age} a useful indicator of choosing `\texttt{being obedient}' as important in preparing for children for life? \\[0.2cm] -->
+<!-- \textbf{How do we answer this?} \\ -->
+<!-- By relating the \emph{probability} of \texttt{being obedient}  -->
+<!-- to \texttt{Age}. -->
+<!-- \end{center}   -->
+<!-- \begin{itemize} -->
+<!-- \item Linear regression is \emph{not} suitable here because: -->
+<!-- \begin{itemize} -->
+<!-- \item It assumes the response variable (\texttt{Q5}) takes values from $-\infty$ to $+\infty$.\\ -->
+<!-- \item But \texttt{Q5} takes only two values, namely \texttt{being obedient} or \texttt{think themselves}! -->
+<!-- \end{itemize} -->
+<!-- \end{itemize} -->
+<!-- \end{frame} -->
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Relating a probability to an explanatory variable} -->
+<!-- Let: -->
+<!-- \begin{itemize} -->
+<!--   \item $p = \Pr\left(\mathtt{Q5} = \mathtt{being}\mbox{ }\mathtt{obedient} \right)$ -->
+<!--   \item $1-p = \Pr\left(\mathtt{Q5} = \mathtt{think}\mbox{ }\mathtt{themselves} \right)$ -->
+<!-- \end{itemize} -->
+<!-- \vspace{0.2cm} -->
+<!-- \textbf{Definition:} The \emph{odds} that a respondent of \texttt{Q5} chooses \texttt{being\mbox{ }obedient} is -->
+<!-- \[ \text{odds} = \frac{p}{1-p}. \] -->
+<!-- \begin{itemize} -->
+<!-- \item The \emph{odds} of an event (i.e.  $\mathtt{Q5} = \mathtt{being}\mbox{ } \mathtt{obedient}$)  -->
+<!-- tells us how likely that event is to occur relative to it not -->
+<!-- occurring. -->
+<!-- \item To relate $p$ to an explanatory variable, we need the \textbf{\emph{log-odds}}, i.e. -->
+<!-- \end{itemize} -->
+<!-- \[ \log\left(\frac{p}{1-p}\right) = \mathtt{Intercept} + \mathtt{Slope} \times \mathtt{Age}. \] -->
+<!-- \begin{itemize} -->
+<!-- \item $\log\left(\frac{p}{1-p}\right)$ is known as the \emph{logit} transformation -->
+<!-- \end{itemize} -->
+<!-- \end{frame} -->
+
+
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{GLMs in \texttt{R}: \texttt{glm()}} -->
+<!-- \texttt{glm(formula, family, ...)} -->
+<!-- \begin{itemize} -->
+<!-- \item \texttt{formula:} Similar format as \texttt{lm()}; response -->
+<!-- variable and explanatory variable(s) separated by \verb|~|. -->
+<!-- \item \texttt{family:} Use \texttt{family = binomial} for logistic -->
+<!-- regression. -->
+<!-- \item \texttt{...} See the help file of \texttt{glm} (\texttt{?glm}) -->
+<!-- for other arguments. -->
+<!-- \end{itemize} -->
+<!-- %By default, \texttt{R} chooses the highest level as the response -->
+<!-- \end{frame} -->
+
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Logistic regression: Example} -->
+<!-- Suppose we want to find out whether older people are more likely to consider {\em being obedient} as more important in preparing children for life than is {\em thinking for themselves}.\\\vspace{0.5cm} -->
+
+<!-- Statisically speaking, we want to test whether the probability of choosing ``\texttt{be obedient}'' in \texttt{Q5} increases/decreases/does not change with \texttt{Age}. -->
+<!-- \end{frame} -->
+
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Logistic regression: Example} -->
+<!-- \begin{itemize} -->
+<!--   \item Declare the response variable \texttt{Q5} as a integer/numeric. -->
+<!--   \item \texttt{be obedient} is assigned the numeric value 1 and  -->
+<!--         \texttt{think themselves} is assigned numeric value 0. -->
+<!--   \item It follows, therefore, that: -->
+<!--   \begin{enumerate}     -->
+<!--     \item $p=\Pr(\mathtt{be\mbox{ }obedient})$ -->
+<!--     \item $p/(1-p)$ is the odds of participants selecting  -->
+<!--           ``being obedient'' relative to selecting  -->
+<!--           ``thinking for themselves'' as being important in preparing -->
+<!--           children for life. -->
+<!--   \end{enumerate} -->
+<!-- \end{itemize} -->
+<!-- Note: Here, the explanatory variable Age is integer/numeric. -->
+<!-- \end{frame} -->
+
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{GLMs in \texttt{R}: \texttt{glm()}} -->
+<!-- <<>>= -->
+<!-- ## class of Q5? -->
+<!-- class(issp.df$Q5) -->
+
+<!-- ## Convert Q5 to a variable of type 'numeric' -->
+<!-- issp.df$Q5 <- ifelse(issp.df$Q5 == "be obedient", 1, 0) -->
+
+<!-- ## Numeric values of Q5? -->
+<!-- class(issp.df$Q5) -->
+<!-- @ -->
+<!-- \end{frame} -->
+
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Logistic regression: Example} -->
+<!-- Fit the model with \texttt{glm()} -->
+<!-- \vspace{-2mm} -->
+<!-- <<tidy = F>>= -->
+<!-- try.glm <- with(issp.df, glm(Q5~Age,  -->
+<!--                              family = binomial)) -->
+<!-- @ -->
+<!-- \begin{itemize} -->
+<!-- \item \texttt{family = binomial}, logistic regression. -->
+<!-- \end{itemize} -->
+<!-- \vspace{-2mm} -->
+<!-- \begin{scriptsize} -->
+<!-- <<results='hide'>>= -->
+<!-- summary(try.glm) -->
+<!-- @ -->
+<!-- \end{scriptsize} -->
+<!-- \vspace{-5mm} -->
+<!-- \begin{scriptsize} -->
+<!-- <<echo=FALSE>>= -->
+<!-- summary(try.glm) -->
+<!-- @ -->
+<!-- \end{scriptsize} -->
+<!-- \end{frame} -->
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Logistic regression: Example} -->
+<!-- <<echo = F>>= -->
+<!-- summary(try.glm)$coef -->
+<!-- @ -->
+<!-- \begin{eqnarray*} -->
+<!-- \text{logit}(\text{be obedient}) & = & \Sexpr{round(coef(try.glm)[1], 2)} + \Sexpr{round(coef(try.glm)[2], 2)} \times \text{Age}.\\ -->
+<!-- \text{Odds}(\text{be obedient}) & = & e^{\Sexpr{round(coef(try.glm)[1], 2)} + \Sexpr{round(coef(try.glm)[2], 2)} \times \text{Age}}\\ -->
+<!-- \text{Probability}(\text{be obedient}) & = & \frac{e^{\Sexpr{round(coef(try.glm)[1], 2)} + \Sexpr{round(coef(try.glm)[2], 2)} \times \text{Age}}}{1 + e^{\Sexpr{round(coef(try.glm)[1], 2)} + \Sexpr{round(coef(try.glm)[2], 2)} \times \text{Age}}} -->
+<!-- \end{eqnarray*} -->
+<!-- \end{frame} -->
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Prediction from the model} -->
+<!-- <<tidy=FALSE>>= -->
+<!-- # Logit scale, usually referred to as the  -->
+<!-- # 'linear predictor' scale -->
+<!-- lp <- predict(try.glm, data.frame(Age = 50)) -->
+<!-- lp -->
+
+<!-- # Calculate the odds -->
+<!-- exp(lp) -->
+<!-- @ -->
+<!-- Interpretation: A 50-year old is \textbf{\Sexpr{round(exp(lp),1)} times} likely to consider {\em being obedient} important preparation for life than {\em thinking for oneself}. Or, a 50-year old is \textbf{\Sexpr{round(1/exp(lp),1)} times more} likely to {\em thinking for oneself} than {\em being obedient}. -->
+<!-- \end{frame} -->
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Prediction from the model} -->
+<!-- <<>>= -->
+<!-- #Probability scale -->
+<!-- predict(try.glm, data.frame(Age = 50), type = "response") -->
+<!-- @ -->
+<!-- Interpretation: The probability that a 50-year old considers {\em being obedient} important preparation for life is \Sexpr{predict(try.glm, data.frame(Age = 50), type = "response")}. -->
+<!-- \end{frame} -->
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Putting prediction into context} -->
+<!-- <<tidy = F>>=  -->
+<!-- #Probability with standard error -->
+<!-- predict(try.glm, data.frame(Age = 50),  -->
+<!-- type = "response", se.fit = TRUE) -->
+<!-- @ -->
+<!-- \end{frame} -->
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Categorical explanatory variables} -->
+<!-- \begin{scriptsize} -->
+<!-- <<tidy = F>>=  -->
+<!-- try.glm2 <- with(issp.df, glm(Q5~age.group, family = binomial)) -->
+<!-- anova(try.glm2, test = "Chisq") -->
+<!-- @ -->
+<!-- \end{scriptsize} -->
+<!-- Analysis of deviance table for a \texttt{glm()} object (generated using \texttt{anova()}) is analogous to ANOVA table for an \texttt{lm()} object. -->
+<!-- \end{frame} -->
+
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Categorical explanatory variables} -->
+<!-- \begin{scriptsize} -->
+<!-- <<tidy = F>>=  -->
+<!-- anova(try.glm2, test = "Chisq") -->
+<!-- @ -->
+<!-- \end{scriptsize} -->
+<!-- We have extremely strong evidence that at least one age group has different log-odds of choosing "be obedient" from the other age groups. -->
+<!-- \end{frame} -->
+
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Categorical explanatory variables} -->
+<!-- \begin{scriptsize} -->
+<!-- <<>>=  -->
+<!-- summary(try.glm2) -->
+<!-- @ -->
+<!-- \end{scriptsize} -->
+<!-- \end{frame} -->
+
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Categorical explanatory variables} -->
+<!-- <<echo = F, size = "small">>=  -->
+<!-- summary(try.glm2)$coef -->
+<!-- @ -->
+<!-- \begin{itemize} -->
+<!--   \item \texttt{(Intercept)} corresponds to the reference age group, namely -->
+<!--   ``Under 35'' which is the one that is {\em not} listed! -->
+<!--   \item So, all subsequent rows of this table are hypothesis tests of the -->
+<!--   log-odds of the named age group relative to the reference group being -->
+<!--   zero, i.e. -->
+<!--   \begin{enumerate} -->
+<!--     \item There is extremely strong evidence ($p$-value $<<$ 0.0001) that -->
+<!--     the log-odds of choosing {\em being obedient} for the ``Over 61'' age -->
+<!--     group is higher than ``Under 35'' ($p$-value $<$ 0.0001). -->
+<!--     \item There is no evidence ($p$-value = 0.098) that the log-odds of -->
+<!--     choosing {\em being obedient} for ``36 to 60'' is different from -->
+<!--     ``Under 35'' . -->
+<!--   \end{enumerate} -->
+<!-- \end{itemize} -->
+<!-- \end{frame} -->
+
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Compare "Over 61" with "36 to 60"} -->
+<!-- \begin{itemize} -->
+<!-- \item Create another factor for age group with different reference level. -->
+<!-- <<tidy = F>>=  -->
+<!-- age.refac <- factor(as.character(issp.df$age.group),  -->
+<!--    levels = c("Over 61", "36 to 60", "Under 35")) -->
+<!-- @ -->
+<!-- \item Re-fit the model. -->
+<!-- <<tidy = F>>= -->
+<!-- try.glm3 <- glm(Q5~age.refac, family = binomial, -->
+<!--                 data=issp.df) -->
+<!-- @ -->
+<!-- \end{itemize} -->
+<!-- \end{frame} -->
+
+<!-- \begin{frame}[fragile] -->
+<!-- \frametitle{Compare "Over 61" with "36 to 60"} -->
+<!-- <<eval = F>>= -->
+<!-- summary(try.glm3) -->
+<!-- @ -->
+<!-- <<echo = F, size = "small" >>= -->
+<!-- summary(try.glm3)$coef -->
+<!-- @ -->
+<!-- There is extremely strong evidence that the log-odds of choosing {\em being obedient} for the ``36 to 60'' age group is \emph{lower} than the ``Over 61'' age group. -->
+<!-- \end{frame} -->
+
+# Summary
+\begin{itemize}
+  \item Linear regression
+  \item Logistic Regression
+\end{itemize}
+
+
+
+
+

@@ -1,0 +1,150 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+subtitle: "Session 2 -- Data subsetting"
+author: "Statistical Consulting Centre"
+date: "19 July, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# knitr::opts_chunk$set(echo = FALSE)
+# knitr::opts_chunk$set(eval = FALSE)
+
+lake.df <- read.csv("..\\..\\data\\Lake.csv", 
+                      stringsAsFactors = FALSE)
+
+```
+
+# 1. Installing an \texttt{R} package
+\texttt{R} packages are collections of user-defined functions. The function \texttt{std.error}, for example, is contained in the \texttt{plotrix} package.
+
+1. Let's look at what happens when we try to use a function  before actually installing on our computer the package in which it is contained. E.g. Calculate the SEM of age using \texttt{std.error}.  
+
+```{r, error = TRUE}
+std.error(lake.df$pH)
+```
+
+
+2. Install the package \texttt{plotrix} while in your \texttt{R}  session by following the instructions below: 
+  
+    (a) Select \texttt{Packages} from the bottom right panel of your Rstudio interface.
+    
+    (b) Click on the \texttt{Install Packages} icon just below \texttt{Packages}.
+    
+    (c) Type \texttt{plotrix} in the blank space provided below
+    ``\texttt{Packages (separate multiple with space or comma):}''
+    
+    (d) Click on \texttt{No} if you are asked you to restart \texttt{R}.
+    
+    (e) Submit the code \texttt{library(plotrix)} to the \texttt{R} console to make the functions contained in \texttt{plotrix} available in the current \texttt{R} session.
+
+```{r}
+library(plotrix)
+```
+
+3. Now, use \texttt{std.error} to calculate the standard error of the pH. 
+```{r}
+std.error(lake.df$pH)
+```
+
+4. Try writing your own code to calculate the standard error of the pH. Hint: This only requires one line of code. Use online resources if you cannot remember how the SEM is calculated.
+```{r}
+with(lake.df, sd(pH, na.rm = TRUE)/sqrt(length(pH)))
+```
+
+
+# 2. Write your own function
+1.  In Session 2 you were shown a simple function to calculate the standard error of the mean (SEM), i.e.
+
+```
+  mystder <- function(x){
+       mysd <- sd(x, na.rm = TRUE)
+       n <- length(x)
+       mysd/sqrt(n)
+  }
+```
+
+ Type the above code into your \texttt{R} script and submit it to the \texttt{R} console. 
+
+2. Modify the function in 2.1 so that the output will have only 2 decimal places.
+
+```{r}
+mystder <- function(x){
+       mysd <- sd(x, na.rm = TRUE)
+       n <- length(x)
+       round(mysd/sqrt(n), 2)
+}
+```
+
+3. Calculate the SEM of \texttt{pH} using the function you created in 2.2.
+```{r}
+mystder(lake.df$pH)
+```
+
+
+# 2. Subsetting datasets
+
+1. Print the following to the console:
+    
+  - The pH of the first lake.
+    
+```{r}
+lake.df$pH[1]
+```
+
+  - The pH of the last lake.
+    
+```{r}
+lake.df$pH[53]
+#or:
+lake.df$pH[nrow(lake.df)]
+```
+
+  - The pH values of the first and last lakes.
+    
+```{r}
+lake.df$pH[c(1, 53)]
+```
+
+  - All measurements made on the third lake.
+    
+```{r}
+lake.df[3, ]
+```
+
+  - All pH values.
+    
+```{r}
+lake.df[, "pH"]
+```
+
+2. Calculate:
+
+  - The average pH of lakes with low Calcium concentrations.
+    
+```{r}
+with(lake.df, mean(pH[Calcium == "Low"]))
+```
+
+  - The average pH of lakes with low Calcium concentrations and  Chlorophyll concentrations lower than 10.
+    
+```{r}
+with(lake.df, mean(pH[Calcium == "Low" & Chlorophyll < 10]))
+```
+
+# 4. Challenge 
+
+Modify the function given in 2., so that the function will return a 95\% confidence interval (with 2 decimal places). Hint: A 95\% confidence interval of a variable \texttt{x} is given by the mean of \texttt{x} $\pm$ 1.96 $\times$ SEM of \texttt{x}. You might find the \texttt{paste()} function useful.
+
+```{r}
+mystder <- function(x){
+       mymean <- mean(x, na.rm = TRUE)
+       mysd <- sd(x, na.rm = TRUE)
+       n <- length(x)
+       mystder = mysd/sqrt(n)
+       upperCI = round(mymean + 1.96*mystder, 2)
+       lowerCI = round(mymean - 1.96*mystder, 2)
+       paste("(", lowerCI, " , ", upperCI, ")", sep = "")
+}
+mystder(lake.df$pH)
+```

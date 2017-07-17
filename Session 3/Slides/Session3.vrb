@@ -1,7 +1,0 @@
-\frametitle{Summary}
-  \begin{itemize}
-  \item Missing values
-  \item Factor
-  \item Subsetting vectors and datasets
-  \item \texttt{ifelse()}
-  \end{itemize}

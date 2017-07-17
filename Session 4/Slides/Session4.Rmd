@@ -365,7 +365,7 @@ combine.wide.df <- Patient.df %>% mutate(
     levels = c("normal", "overweight", "obese")
   )) %>%
  
-  ```
+```
 
 # Piping operator `%>%` 
 

@@ -1,0 +1,376 @@
+---
+title: "NZSSN Courses: Introduction to $\\mathtt{R}$"
+header-includes: 
+   \usepackage{graphicx}
+    \subtitle{Session 8 -- R markdown}    
+    \author[SCC]{Statistical Consulting Centre}
+   \institute[\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+    {consulting@stat.auckland.ac.nz}\\
+  The Department of Statistics\\
+  The University of Auckland}
+   \titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+date: "20 July, 2017"
+output:
+  beamer_presentation:
+    theme: "Madrid"
+    colortheme: "beaver"
+    fonttheme: "professionalfonts"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(tidy = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+
+options(width = 60)
+library(dplyr)
+library(tidyr)
+
+Patient.df <- read.csv("..\\..\\data\\Patient.csv", stringsAsFactors = FALSE)
+Patient.df$Smoke.group <- 
+  with(Patient.df, ifelse(Smoke == 1, "Yes", "No"))
+table(Patient.df$Smoke.group)
+Patient.df$Race.group <- 
+  with(Patient.df,
+       ifelse(Race == 1, "Caucasian",
+              ifelse(Race == 2, "African", "Other")))
+table(Patient.df$Race.group)
+Patient.df$BMI <- with(Patient.df, (Weight/Height^2)*703)
+Patient.df$BMI.group <- 
+  ifelse(Patient.df$BMI >= 30, "obese", 
+         ifelse(Patient.df$BMI >= 25, "overweight",
+          "normal"))
+
+Patient.df <- Patient.df[, !names(Patient.df) %in% c("Smoke", "Race")]
+
+Patient.df$BMI.group <- factor(Patient.df$BMI.group,
+               levels = c("normal", "overweight", "obese"))
+
+Patient.df$Sex <- factor(Patient.df$Sex)
+Patient.df$Race.group <- factor(Patient.df$Race.group)
+Patient.df$Smoke.group <- factor(Patient.df$Smoke.group)
+
+Patient.df$Age.group <- 
+  ifelse(Patient.df$Age<=35, "Under 35", 
+         ifelse(Patient.df$Age <= 60, "36 to 60", "Over 61"))
+Patient.df$Age.group <- factor(Patient.df$Age.group, 
+                           levels = c("Under 35", "36 to 60", "Over 61"))
+Cholesterol.df <- read.csv("..\\..\\data\\CholesterolNA.csv")
+
+library(dplyr)
+
+combined.df <- left_join(Patient.df, Cholesterol.df)
+
+names(combined.df)[c(1,11,12,13)] <- 
+  c("ID", "Baseline", "PreTrt", "PostTrt")
+
+combined.long.df <- gather(combined.df, key = Time,  value= Cholesterol, 
+                           -ID, -Age, -Age.group, -Sex, -Weight, -Height,
+                           -Smoke.group, -Race.group, -BMI,
+                           -BMI.group)
+
+```
+
+# R Markdown
+
+- Report
+- Reproducibility
+
+# R Markdown
+
+Types of output:
+
+- HTML
+- Word document (MS Word to view)
+- PDF (require LaTex to be installed)
+
+# Markdown
+
+A simple way to write HTML. Almost like a plain English. 
+
+##Input: 
+```
+Markdown is  
+- *easy* to use
+- **simple** 
+- fun?
+
+```
+## Output:  
+Markdown is  
+- *easy* to use  
+- **simple**  
+- fun?
+
+# Header
+
+Use `#` to create headers.  
+Multiple `#`'s create lower level headers.
+
+```
+# Header
+## Header
+### Header
+#### Header
+```
+
+# Text 
+Text is rendered as plain text. Use undersores (`_`) or asterisk `*` to make italics, two undersores (`__`) or asterisk `**` to make bold. 
+
+
+##Input: 
+```
+*italic*   **bold**
+
+_italic_   __bold__
+```
+## Output:  
+*italic*   **bold**
+
+_italic_   __bold__
+
+
+# Lists 
+
+Use asterisks (`*`), hyphen (`-`) or plus (`+`)  to make bullet points.  
+Use numbers to make numbeered lists. 
+
+##Input: 
+```
+* Item 1
+* Item 2
+    + Item 2a
+    + Item 2b
+```
+
+## Output:  
+* Item 1  
+* Item 2  
+    + Item 2a  
+    + Item 2b  
+
+# Lists 
+
+Use numbers to make numbeered lists.  
+
+##Input: 
+```
+1. Item 1
+2. Item 2
+3. Item 3
+    (a) Item 3a
+    (b) Item 3b
+```
+
+## Output:  
+1. Item 1
+2. Item 2
+3. Item 3
+    (1) Item 3a
+    (2) Item 3b
+
+# Hyperlinks 
+Use square brackets to denote a link. Place the URL in the parentheses. 
+
+##Input: 
+```
+This is a [link](https://cran.r-project.org/)
+```
+
+## Output: 
+This is a [link](https://cran.r-project.org/)
+
+# Equations
+Equations can be presented using latex command and surround them in `$`'s
+
+##Input:  
+```
+Accoring to Einstein, $E = mc^2$
+```
+
+## Output:  
+Accoring to Einstein, $E = mc^2$
+
+# Equation blocks
+Use two `$`'s to make a centered equation block.
+
+##Input:  
+```
+Accoring to Einstein, $$E = mc^2$$
+```
+
+## Output:  
+Accoring to Einstein, $$E = mc^2$$
+
+
+# External Images 
+
+Same format as Hyperlinks, with `!` in the front. You can also use URL of the image, provding that you have internet connection. 
+
+##Input: 
+```
+![](https://www.r-project.org/Rlogo.png)
+```
+
+## Output: 
+![](https://www.r-project.org/Rlogo.png)
+
+# Code 
+
+Insert a chunk of R code with 
+
+```{r}
+#some code
+```
+
+When you compile, R markdown will run the code and include its results. 
+
+
+# inline code
+
+Place code in a sentence with `` `r '\x60r #code\x60'` ``. R markdown will replace the code with its results. 
+
+## Input:
+Today is `` `r '\x60r Sys.Date()\x60'` ``
+
+## Output
+Today is `r Sys.Date()`
+
+
+# Chuck options 
+
+By default, R markdown includes both the code and its results
+
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+## Input (Ignore the `wrapper = TRUE` option):
+```{r, wrapper=TRUE}
+dim(iris)
+```
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(eval = TRUE)
+```
+
+## Output
+```{r}
+dim(iris)
+```
+
+
+# `echo`
+
+Add `echo = FALSE` to hide the code. 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+## Input (Ignore the `wrapper = TRUE` option):
+```{r, wrapper=TRUE}
+dim(iris)
+```
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(eval = TRUE)
+```
+
+## Output
+```{r, echo = FALSE}
+dim(iris)
+```
+
+
+# `eval`
+
+Add `eval = FALSE` to prevent the code to run.
+
+## Input (Ignore the `wrapper = TRUE` option):
+```{r, eval = FALSE, wrapper=TRUE}
+dim(iris)
+```
+
+## Output
+```{r, eval = FALSE}
+dim(iris)
+```
+
+
+# `fig.height`, `fig.width`
+
+To sepcify the dimentsion of plots (in inches) with `fig.height` and `fig.width`. 
+
+
+## Input (Ignore the `wrapper = TRUE` option):
+```{r, echo = FALSE, fig.width = 3, fig.height = 5, wrapper=TRUE}
+hist(iris$Sepal.Width)
+```
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(eval = TRUE)
+```
+
+## Output
+```{r, echo = FALSE, fig.width = 3, fig.height = 5}
+hist(iris$Sepal.Width)
+```
+
+
+# `kable()`
+
+`kable()` in `knitr` R package allows you to present tables.
+
+## Input (Ignore the `wrapper = TRUE` option):
+```{r, wrapper=TRUE}
+knitr::kable(head(iris))
+```
+
+## Output
+```{r}
+knitr::kable(head(iris))
+```
+
+
+# `Knitr` R package 
+
+- The working directory is the where the document is placed.   
+- For each document, Knitr complie the R code as a new R session. Thus, you need to load the required libraries for that document.   
+-  Any object made in one code chunk will be availbale to code in the later code chunk. 
+
+
+# YAML
+
+A section of key:value pairs seperated by dash lines `---`
+
+````
+---
+title: "title"
+author: "You"
+date: "20 July, 2017"
+output: html_document
+---
+
+````
+
+# output temp
+
+
+# Slide with R Output
+
+```{r cars, echo = TRUE}
+summary(cars)
+```
+
+
+# Slide with Plot
+
+```{r pressure}
+plot(pressure)
+```
+
+
+
+
